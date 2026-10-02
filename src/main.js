@@ -16,6 +16,15 @@ let mode = 'render';
 let viewer;
 let viewerPromise;
 let changeId = 0;
+let walking = false;
+$('#canvas-host').addEventListener('navigationchange',({detail})=>{
+  walking=detail.walking;stage.classList.toggle('is-walking',walking);
+  $('#walk-help').textContent=matchMedia('(pointer:coarse)').matches?'Use the arrow buttons to walk · drag the scene to look around':'WASD / arrows to move · click or drag to look · Shift to walk faster · Esc to release mouse';
+  for(const id of ['walk-help','walk-pad','walk-crosshair'])$('#'+id).hidden=!walking;
+  document.querySelector('[data-view="walk"]').setAttribute('aria-pressed',String(walking));
+  $('#interaction-hint').textContent=walking?'Walk at eye level · use the arrows below on touchscreens · drag the scene to look around':'Drag to orbit · scroll or pinch to zoom · right-drag to pan';
+  $('#view-eyebrow').textContent=walking?'FIRST-PERSON WALK':'INTERACTIVE 3D SCENE';
+});
 
 function showImage(key) {
   currentImage = key;
@@ -28,6 +37,7 @@ function showImage(key) {
   });
 }
 function setModeUI(next) {
+  if(next!=='3d')viewer?.exitWalk();
   mode = next;
   const is3d = mode === '3d';
   stage.classList.toggle('is-3d', is3d);
@@ -40,6 +50,7 @@ function setModeUI(next) {
   if (viewer) viewer.setActive(is3d);
 }
 async function enter3D() {
+  viewer?.exitWalk();
   const requestId = ++changeId;
   setModeUI('3d');
   $('#loading').hidden = false;$('#loading-progress').textContent = 'Loading 3D viewer';
@@ -81,8 +92,15 @@ document.querySelectorAll('[data-view]').forEach(button => button.addEventListen
   document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b === button));
 }));
 $('#reset-view').addEventListener('click', () => {
-  viewer?.preset('orbit');document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active',b.dataset.view==='orbit'));
+  viewer?.reset();document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active',b.dataset.view===(walking?'walk':'orbit')));
 });
+document.querySelectorAll('[data-walk]').forEach(button=>{
+  button.addEventListener('pointerdown',e=>{e.preventDefault();try{button.setPointerCapture(e.pointerId);}catch{}viewer?.walkInput(button.dataset.walk,true);});
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,()=>viewer?.walkInput(button.dataset.walk,false));
+  button.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();viewer?.walkInput(button.dataset.walk,true);}});
+  button.addEventListener('keyup',()=>viewer?.walkInput(button.dataset.walk,false));
+});
+window.addEventListener('pointerup',()=>{for(const direction of ['forward','back','left','right'])viewer?.walkInput(direction,false);});
 $('#fullscreen').addEventListener('click', async () => {
   try {if(document.fullscreenElement) await document.exitFullscreen();else if(stage.requestFullscreen) await stage.requestFullscreen();} catch { $('#interaction-hint').textContent='Fullscreen is unavailable in this browser.'; }
 });

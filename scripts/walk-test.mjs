@@ -1,0 +1,74 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+const url=process.env.BASE_URL||'http://127.0.0.1:4173';
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+await mkdir('test-results',{recursive:true});
+const page=await browser.newPage({viewport:{width:1440,height:1100}});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const position=()=>page.locator('#canvas-host').getAttribute('data-camera-position').then(s=>s.split(',').map(Number));
+const waitForTravel=async(start,min)=>page.waitForFunction(({start,min})=>{
+  const p=document.querySelector('#canvas-host').dataset.cameraPosition.split(',').map(Number);return Math.hypot(p[0]-start[0],p[2]-start[2])>min;
+},{start,min},{timeout:15000});
+try{
+  await page.goto(url,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('body').innerText().then(s=>s.includes('闫老寨')),false);
+  await page.locator('#three-mode').click();
+  await page.locator('#loading').waitFor({state:'hidden',timeout:120000});
+  await page.locator('[data-view="walk"]').click();
+  await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.navigationMode==='walk');
+  const start=await position();assert.ok(Math.abs(start[1]-1.85)<.01);
+  await page.keyboard.down('KeyW');await waitForTravel(start,.55);await page.keyboard.up('KeyW');
+  const after=await position();assert.ok(after[2]<start[2]-.5);assert.equal(after[1],start[1]);
+  const canvas=page.locator('#canvas-host canvas');const canvasRect=await canvas.boundingBox();
+  await canvas.click();await page.waitForFunction(()=>Boolean(document.pointerLockElement));
+  const look=await page.locator('#canvas-host').getAttribute('data-camera-look');
+  await page.mouse.move(canvasRect.x+canvasRect.width/2+120,canvasRect.y+canvasRect.height/2+20);
+  await page.waitForFunction(previous=>document.querySelector('#canvas-host').dataset.cameraLook!==previous,look);
+  await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.pointerLockElement);
+  await page.locator('#reset-view').click();
+  await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.cameraPosition==='0.000,1.850,3.250');
+  // Walk into the south wall: no tunneling even with the faster walking speed.
+  await page.keyboard.down('ShiftLeft');await page.keyboard.down('KeyS');
+  await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[2])>5.8,{},{timeout:15000});
+  await page.waitForTimeout(700);await page.keyboard.up('KeyS');await page.keyboard.up('ShiftLeft');
+  const wall=await position();assert.ok(wall[2]<6.0,'Walked through south wall');
+  await page.locator('#reset-view').click();
+  await page.screenshot({path:'test-results/walk-house.png',fullPage:false});
+  // Exit through the actual side passage, rather than colliding with its overhead lintel.
+  await page.keyboard.down('KeyS');await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[2])>3.60);await page.keyboard.up('KeyS');
+  await page.keyboard.down('ShiftLeft');await page.keyboard.down('KeyA');
+  await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[0])<-5.6,{},{timeout:60000});
+  await page.keyboard.up('KeyA');await page.keyboard.up('ShiftLeft');
+  await page.locator('[data-view="orbit"]').click();
+  assert.equal(await page.locator('#walk-pad').isVisible(),false);
+  await page.locator('[data-model="village"]').click();await page.locator('#loading').waitFor({state:'hidden',timeout:120000});
+  await page.locator('[data-view="walk"]').click();
+  const village=await position();
+  await page.keyboard.down('ArrowUp');await waitForTravel(village,.5);await page.keyboard.up('ArrowUp');
+  assert.ok((await position())[2]<village[2]-.45);
+  await page.screenshot({path:'test-results/walk-village.png',fullPage:false});
+  // Switching to images clears held movement and all walking overlays.
+  await page.locator('#render-mode').click();assert.equal(await page.locator('#walk-help').isVisible(),false);
+  const mobile=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  mobile.on('pageerror',e=>errors.push(e.message));await mobile.goto(url,{waitUntil:'networkidle'});
+  await mobile.locator('#three-mode').tap();await mobile.locator('#loading').waitFor({state:'hidden',timeout:120000});
+  await mobile.locator('[data-view="walk"]').tap();
+  const button=mobile.locator('[data-walk="forward"]');await button.scrollIntoViewIfNeeded();
+  const startZ=Number((await mobile.locator('#canvas-host').getAttribute('data-camera-position')).split(',')[2]);
+  const touchSession=await mobile.context().newCDPSession(mobile);const rect=await button.boundingBox();
+  await touchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:rect.x+rect.width/2,y:rect.y+rect.height/2}]});
+  await mobile.waitForFunction(z=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[2])<z-.4,startZ,{timeout:15000});
+  await touchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  const mobileCanvas=await mobile.locator('canvas').boundingBox();const touchX=mobileCanvas.x+mobileCanvas.width*.65,touchY=mobileCanvas.y+mobileCanvas.height*.45;
+  const oldLook=await mobile.locator('#canvas-host').getAttribute('data-camera-look');
+  await touchSession.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:touchX,y:touchY}]});
+  await touchSession.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:touchX-45,y:touchY+10}]});
+  await touchSession.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await mobile.waitForFunction(previous=>document.querySelector('#canvas-host').dataset.cameraLook!==previous,oldLook);
+  assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await mobile.screenshot({path:'test-results/walk-mobile.png',fullPage:true});
+  assert.deepEqual(errors,[]);
+  const result={passed:true,url,checks:['Chinese village name removed','House keyboard movement','Grounded eye height','Mouse look and Escape release','Reset walking position','Wall collision','Passage to alley is walkable','Orbit exit','Village arrow-key movement','Render exit clears walk UI','Mobile walking controls','Touch look','Mobile layout','No page errors']};
+  await writeFile('test-results/walk.json',JSON.stringify(result,null,2));console.log(result);
+}catch(error){console.log('Camera at failure:',await position().catch(()=>null));await page.screenshot({path:'test-results/walk-failure.png',fullPage:false});throw error;}finally{await browser.close();}

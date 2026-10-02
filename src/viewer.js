@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {createWalkController} from './walk.js';
 
 export function createViewer(host) {
   const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
@@ -13,7 +14,14 @@ export function createViewer(host) {
   renderer.domElement.setAttribute('tabindex','0');
   const scene = new THREE.Scene();scene.background=new THREE.Color('#e3e8dc');
   const camera=new THREE.PerspectiveCamera(42,1,.1,3000);
+  function syncCameraState(){host.dataset.cameraPosition=camera.position.toArray().map(v=>v.toFixed(3)).join(',');host.dataset.cameraLook=[camera.rotation.x,camera.rotation.y].map(v=>v.toFixed(3)).join(',');}
   const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.495;
+  const walk=createWalkController(camera,renderer.domElement,(walking)=>{
+    controls.enabled=!walking;host.dataset.navigationMode=walking?'walk':'orbit';syncCameraState();
+    host.dispatchEvent(new CustomEvent('navigationchange',{detail:{walking}}));
+  });
+  const navigation=fetch('/models/navigation.json').then(response=>{if(!response.ok)throw new Error('Navigation data unavailable');return response.json();});
+  let navigationData;
   const sky=new THREE.HemisphereLight(0xf6f9ef,0x7d8963,2.8);scene.add(sky);
   const sun=new THREE.DirectionalLight(0xfff7df,2.6);sun.position.set(-30,70,40);scene.add(sun);
   const fill=new THREE.DirectionalLight(0xe6f0ff,1.4);fill.position.set(40,25,-30);scene.add(fill);
@@ -23,10 +31,12 @@ export function createViewer(host) {
   function resize(){const {width,height}=host.getBoundingClientRect();if(!width||!height)return;renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();}
   new ResizeObserver(resize).observe(host);
   function preset(name) {
+    if(name==='walk'){if(navigationData)walk.enter(navigationData[modelName]);return;}
+    walk.exit();camera.fov=42;
     const village=modelName==='village';
     const target=village?new THREE.Vector3(0,0,0):new THREE.Vector3(0,2,0);
     const positions=village?{orbit:[250,240,290],top:[0,410,.01],close:[48,55,98]}:{orbit:[27,23,30],top:[0,48,.01],close:[4,5,13]};
-    camera.position.set(...positions[name]);controls.target.copy(target);controls.minDistance=village?12:2;controls.maxDistance=village?800:100;camera.near=village?.5:.08;camera.far=3000;camera.updateProjectionMatrix();controls.update();resize();
+    camera.position.set(...positions[name]);controls.target.copy(target);controls.minDistance=village?12:2;controls.maxDistance=village?800:100;camera.near=village?.5:.08;camera.far=3000;camera.updateProjectionMatrix();controls.update();resize();syncCameraState();
   }
   async function load(name,onProgress) {
     const version=++loadVersion;
@@ -34,12 +44,13 @@ export function createViewer(host) {
       const promise=loader.loadAsync(`/models/${name}.glb`,(e)=>onProgress(e.total?`Loading model · ${Math.round(e.loaded/e.total*100)}%`:`Loading model · ${(e.loaded/1048576).toFixed(1)} MB`)).then(g=>g.scene);
       cache.set(name,promise);promise.catch(()=>cache.delete(name));
     }
-    const model=await cache.get(name);
+    const [model,data]=await Promise.all([cache.get(name),navigation]);navigationData=data;
     if(version!==loadVersion)return;
     if(current)scene.remove(current);
     current=model;modelName=name;scene.add(model);preset('orbit');
     host.dataset.loadedModel=name;
   }
-  function frame(){if(active){controls.update();renderer.render(scene,camera);}requestAnimationFrame(frame);}frame();
-  return {load,preset,setActive(value){active=value;if(value)resize();}};
+  let previous=performance.now();
+  function frame(now){const dt=(now-previous)/1000;previous=now;if(active){if(walk.enabled)walk.update(dt);else controls.update();renderer.render(scene,camera);syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
+  return {load,preset,walkInput:(direction,pressed)=>walk.input(direction,pressed),reset(){if(walk.enabled)walk.reset();else preset('orbit');},setActive(value){active=value;walk.pause(!value);if(value)resize();},exitWalk(){if(walk.enabled)preset('orbit');}};
 }
