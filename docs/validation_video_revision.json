@@ -1,0 +1,64 @@
+{
+  "opens_successfully": true,
+  "total_objects": 6093,
+  "new_editable_objects": 1366,
+  "new_collections": [
+    "VIDEO 00 | Filmed house - architecture",
+    "VIDEO 01 | Brick alley and neighboring walls",
+    "VIDEO 02 | Courtyard and domestic details",
+    "VIDEO 03 | Ivy weeds and cut branches",
+    "VIDEO 04 | Reference reconstruction cameras"
+  ],
+  "dedicated_cameras": [
+    "VIDEO A | Courtyard balcony and blue shed",
+    "VIDEO B | Damp brick alley and ivy",
+    "VIDEO C | Entrance and courtyard passage",
+    "VIDEO D | House within village"
+  ],
+  "active_camera": "VIDEO A | Courtyard balcony and blue shed",
+  "missing_external_images": [],
+  "invalid_transforms": [],
+  "packed_fonts": [
+    "Microsoft YaHei Regular"
+  ],
+  "original_parcels_kept_hidden": [
+    "BACKUP hidden | 宅院 002",
+    "BACKUP hidden | 宅院 003"
+  ],
+  "units": "METRIC",
+  "reference_scope": "Visible courtyard facades, entrance and alley recreated from video. Dimensions, cardinal orientation, hidden rooms and placement in village are estimates.",
+  "renders": [
+    {
+      "file": "01_video_courtyard.png",
+      "size": [
+        1400,
+        1138
+      ],
+      "bytes": 2225551
+    },
+    {
+      "file": "02_video_alley.png",
+      "size": [
+        1100,
+        1400
+      ],
+      "bytes": 2376623
+    },
+    {
+      "file": "03_video_entrance.png",
+      "size": [
+        1300,
+        1114
+      ],
+      "bytes": 1927419
+    },
+    {
+      "file": "04_video_context.png",
+      "size": [
+        1400,
+        1138
+      ],
+      "bytes": 2258038
+    }
+  ]
+}

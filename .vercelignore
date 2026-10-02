@@ -1,0 +1,9 @@
+.git
+.vercel
+.env*
+node_modules
+blender
+scripts
+docs
+test-results
+*.log
