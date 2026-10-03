@@ -50,7 +50,7 @@ $('#canvas-host').addEventListener('navigationchange',({detail})=>{
 
 function showImage(key) {
   currentImage = key;
-  image.src = `/images/${key}.webp?v=roof-weather-20261003`;
+  image.src = `/images/${key}.webp?v=house-details-20261003`;
   image.alt = imageInfo[key][1];
   $('#view-title').textContent = imageInfo[key][0];
   document.querySelectorAll('[data-image]').forEach((b) => {
