@@ -7,6 +7,7 @@ dist/
 *.log
 __pycache__/
 test-results/
+artifacts/
 .DS_Store
 
 .vercel

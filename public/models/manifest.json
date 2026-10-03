@@ -3,12 +3,12 @@
     "name": "house",
     "meshes": 59,
     "triangles": 97569,
-    "bytes": 827196
+    "bytes": 1213460
   },
   {
     "name": "village",
-    "meshes": 83,
-    "triangles": 400708,
-    "bytes": 2861832
+    "meshes": 93,
+    "triangles": 417724,
+    "bytes": 4128476
   }
 ]

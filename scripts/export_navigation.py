@@ -38,8 +38,8 @@ for mode in ['house','village']:
     shelters=[]
     if mode=='village':
         for o in bpy.context.scene.objects:
-            if o.type!='MESH' or o.hide_render or not o.name.startswith('MAP '):continue
-            if not any(key in o.name for key in ['flat house roof','pitched tile roof','school flat roof','blue courtyard shed']):continue
+            if o.type!='MESH' or o.hide_render or not o.name.startswith(('MAP ','WORLD ')):continue
+            if not any(key in o.name for key in ['flat house roof','pitched tile roof','school flat roof','blue courtyard shed','gable roof','near terrace','tiled flat roof']):continue
             pts=[o.matrix_world@Vector(v) for v in o.bound_box]
             shelters.append({'rect':[min(p.x for p in pts),-max(p.y for p in pts),max(p.x for p in pts),-min(p.y for p in pts)],'roof':max(p.z for p in pts)})
     for s in json.loads(bpy.context.scene.get('walk_shelters','[]')):

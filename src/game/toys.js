@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {buildCreature} from './creatures.js';
 
 // Playful, non-lethal toys: a slingshot, a water pistol, firecrackers and (when there is snow) snowballs.
 // Things to aim at: tin cans on crates, bottles on the terrace parapet, straw targets and sparrows that
@@ -35,18 +37,19 @@ const LAYOUT={
 
 export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   let tool='hands',projectiles=[],cans=[],boards=[],birds=[],sparks=[],cooldown=0,holding=false,shake=0,sceneName,recoil=0;
+  let draw=0;
   const flashLight=new THREE.PointLight('#ffcf80',0,14,1.6);flashLight.visible=false;scene.add(flashLight);
   const props=new THREE.Group();scene.add(props);
   const view=new THREE.Group();camera.add(view);view.position.set(.26,-.24,-.5);view.scale.setScalar(.8);
   const models={
-    slingshot(){const g=new THREE.Group(),wood=mat('#7b5532');const h=new THREE.Mesh(new THREE.BoxGeometry(.03,.16,.03),wood);h.position.y=-.08;g.add(h);
-      for(const s of [-1,1]){const arm=new THREE.Mesh(new THREE.BoxGeometry(.025,.1,.025),wood);arm.position.set(s*.035,.03,0);arm.rotation.z=-s*.45;g.add(arm);}
-      const band=new THREE.Mesh(new THREE.BoxGeometry(.1,.012,.012),mat('#b54b2c'));band.position.set(0,.075,.04);g.add(band);return g;},
-    water(){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(.05,.07,.2),mat('#f08a24',{roughness:.35}));g.add(body);
+    slingshot(){const g=new THREE.Group(),wood=mat('#81603c');const fork=new THREE.CatmullRomCurve3([new THREE.Vector3(-.07,.12,0),new THREE.Vector3(-.042,.04,.01),new THREE.Vector3(0,-.015,.015),new THREE.Vector3(.042,.04,.01),new THREE.Vector3(.07,.12,0)]);g.add(new THREE.Mesh(new THREE.TubeGeometry(fork,20,.015,10,false),wood));const handle=new THREE.Mesh(new THREE.CapsuleGeometry(.020,.13,6,10),wood);handle.position.y=-.09;g.add(handle);
+      for(let j=0;j<10;j++){const wrap=new THREE.Mesh(new THREE.TorusGeometry(.022,.003,5,12),mat('#493d2c'));wrap.rotation.x=Math.PI/2;wrap.position.y=-.045-j*.012;g.add(wrap);}
+      g.userData.bands=[];for(const s of [-1,1]){const band=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,1,8),mat('#caac62',{roughness:.85}));g.add(band);g.userData.bands.push({band,from:new THREE.Vector3(s*.07,.12,0)});}const pouch=new THREE.Mesh(new RoundedBoxGeometry(.04,.024,.018,2,.003),mat('#4b3524'));g.add(pouch);g.userData.pouch=pouch;return g;},
+    water(){const g=new THREE.Group();const body=new THREE.Mesh(new RoundedBoxGeometry(.06,.085,.22,3,.012),mat('#e99c39',{roughness:.35}));g.add(body);
       const tank=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.09,12),mat('#58c1d6',{transparent:true,opacity:.7,roughness:.1}));tank.position.set(0,.07,.02);g.add(tank);
       const grip=new THREE.Mesh(new THREE.BoxGeometry(.04,.1,.04),mat('#1f8fa3'));grip.position.set(0,-.07,.06);grip.rotation.x=.3;g.add(grip);
       const nozzle=new THREE.Mesh(new THREE.CylinderGeometry(.01,.01,.06,8),mat('#ffd34a'));nozzle.rotation.x=Math.PI/2;nozzle.position.z=-.12;g.add(nozzle);return g;},
-    firecracker(){const g=new THREE.Group();for(const [x,y] of [[0,0],[.03,.01],[-.03,.01]]){const c=new THREE.Mesh(G.cracker,M.cracker);c.position.set(x,y,0);c.rotation.x=.4;g.add(c);}return g;},
+    firecracker(){const g=new THREE.Group();for(const [x,y] of [[0,0],[.04,.01],[-.04,.01]]){const c=new THREE.Group();const body=new THREE.Mesh(G.cracker,M.cracker);c.add(body);for(const h of [-.055,.055]){const ring=new THREE.Mesh(new THREE.CylinderGeometry(.026,.026,.013,12),mat('#e2b961'));ring.position.y=h;c.add(ring);}const wick=new THREE.Mesh(new THREE.CylinderGeometry(.003,.003,.045,6),mat('#524b30'));wick.position.set(0,.096,0);wick.rotation.z=.2;c.add(wick);c.position.set(x,y,0);c.rotation.x=.4;g.add(c);}return g;},
     snowball(){return new THREE.Mesh(G.snow,M.snow);},
     hands(){return new THREE.Group();},
   };
@@ -56,7 +59,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   function select(id){
     if(!TOOLS.some(t=>t.id===id))return;
     if(!available(id)){onEvent('notice','Snowballs need snow on the ground. Try winter or snowfall.');return;}
-    tool=id;for(const [k,m] of Object.entries(viewModels))m.visible=k===id;audio.play('pickup');onEvent('tool',id);
+    holding=false;draw=0;tool=id;for(const [k,m] of Object.entries(viewModels))m.visible=k===id;audio.play('pickup');onEvent('tool',id);
   }
   function groundBelow(x,z,y){
     const nav=walk.nav;let h=nav.ground??.2;
@@ -93,8 +96,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   }
   function addFlock(x,z,n){
     for(let i=0;i<n;i++){
-      const g=new THREE.Group(),body=new THREE.Mesh(G.bird,M.bird);body.rotation.x=Math.PI/2;g.add(body);
-      const wings=[-1,1].map(s=>{const w=new THREE.Mesh(G.wing,M.wing);w.position.x=s*.07;w.rotation.x=-Math.PI/2;g.add(w);return w;});
+      const creature=buildCreature('bird',i),g=creature.g,wings=creature.wings;
       const home=new THREE.Vector3(x+(Math.random()-.5)*4,0,z+(Math.random()-.5)*4);
       const y=walk.floorAt(home.x,home.z,walk.nav.ground??.2,.6);if(y===undefined||walk.solidAt(home.x,home.z,y+.02,y+.3,.1))continue;
       home.y=y;g.position.copy(home);props.add(g);
@@ -129,7 +131,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
     const dir=new THREE.Vector3();camera.getWorldDirection(dir);
     const origin=camera.position.clone().addScaledVector(dir,.35).add(new THREE.Vector3(0,-.08,0));
     const spec={slingshot:{speed:30,up:.02,geo:G.pebble,m:M.pebble,life:5},water:{speed:13,up:.05,geo:G.drop,m:M.drop,life:2},firecracker:{speed:11,up:.22,geo:G.cracker,m:M.cracker,life:6,fuse:1.6},snowball:{speed:17,up:.08,geo:G.snow,m:M.snow,life:5}}[kind];
-    const v=dir.clone().add(new THREE.Vector3(0,spec.up,0)).normalize().multiplyScalar(spec.speed);
+    const v=dir.clone().add(new THREE.Vector3(0,spec.up,0)).normalize().multiplyScalar(kind==='slingshot'&&holding?18+draw*18:spec.speed);
     if(kind==='water')v.add(new THREE.Vector3((Math.random()-.5)*.6,(Math.random()-.5)*.4,(Math.random()-.5)*.6));
     const mesh=new THREE.Mesh(spec.geo,spec.m);mesh.position.copy(origin);scene.add(mesh);
     projectiles.push({kind,mesh,vel:v,life:spec.life,fuse:spec.fuse,bounces:0,still:false});
@@ -237,16 +239,18 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
     if(b.t<0){b.heading+=(Math.random()-.5)*2;const nx=p.x-Math.sin(b.heading)*.25,nz=p.z-Math.cos(b.heading)*.25;
       if(nx-b.home.x<2.5&&nx-b.home.x>-2.5&&nz-b.home.z<2.5&&nz-b.home.z>-2.5&&!walk.solidAt(nx,nz,p.y+.02,p.y+.3,.08)){p.x=nx;p.z=nz;}
       b.g.rotation.y=b.heading;b.t=.4+Math.random()*1.8;if(near<14&&Math.random()<.2)audio.play('chirp');}
-    b.g.children[0].rotation.x=Math.PI/2+(b.t%1<.15?.5:0);
+    b.g.rotation.x=b.t%1<.15?.12:0;
   }
   function resetTargets(){for(const c of cans){c.m.position.copy(c.home);c.m.rotation.set(0,0,0);c.vel.set(0,0,0);c.rest=true;c.down=false;}onEvent('can',{down:0,total:cans.length});}
   return {
     TOOLS,get tool(){return tool;},select,fire,spawn,resetTargets,available,
-    hold(value){holding=value;if(value)fire();},
+    hold(value){if(tool==='slingshot'){if(value){holding=true;draw=0;}else if(holding){fire();holding=false;draw=0;}}else{holding=value;if(value)fire();}},
     get stats(){return {cans:cans.length,down:cans.filter(c=>c.down).length,birds:birds.length,flying:birds.filter(b=>b.state==='fly').length,projectiles:projectiles.length};},
     setVisible(value){view.visible=value;},get shake(){return shake;},get projectiles(){return projectiles;},
     update(dt,time){
       cooldown=Math.max(0,cooldown-dt);if(holding&&tool==='water')fire();
+      if(holding&&tool==='slingshot')draw=Math.min(1,draw+dt*1.6);
+      const sling=viewModels.slingshot,to=new THREE.Vector3(0,.115,.025+draw*.12);sling.userData.pouch.position.copy(to);for(const {band,from} of sling.userData.bands){const d=to.clone().sub(from);band.position.copy(from).addScaledVector(d,.5);band.scale.y=d.length();band.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());}
       recoil=Math.max(0,recoil-dt*6);view.position.set(.26,-.24+Math.sin(time*2)*.004,-.5+recoil*.05);view.rotation.x=recoil*.25;
       for(const p of projectiles){
         stepProjectile(p,dt);

@@ -5,14 +5,16 @@ import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {createWalkController} from './walk.js';
 import {createEnvironment} from './environment.js';
 import {createGame} from './game/game.js';
+import {createWorldDetails} from './world.js';
 
 export function createViewer(host) {
   const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.75));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;renderer.toneMappingExposure = 1.15;
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   host.replaceChildren(renderer.domElement);
-  renderer.domElement.setAttribute('aria-label','Interactive 3D reconstruction. Drag to orbit, scroll to zoom.');
+  renderer.domElement.setAttribute('aria-label','Village world. WASD to walk, click or drag to look.');
   renderer.domElement.setAttribute('tabindex','0');
   const scene = new THREE.Scene();scene.background=new THREE.Color('#e3e8dc');
   const camera=new THREE.PerspectiveCamera(42,1,.1,3000);scene.add(camera);
@@ -24,16 +26,18 @@ export function createViewer(host) {
     if(walking)game.start(modelName);else game.stop();
     host.dispatchEvent(new CustomEvent('navigationchange',{detail:{walking}}));
   });
-  const sceneVersion='house-details-20261003';
+  const sceneVersion='connected-world-20261003-1';
   const navigation=fetch(`/models/navigation.json?v=${sceneVersion}`).then(response=>{if(!response.ok)throw new Error('Navigation data unavailable');return response.json();});
   let navigationData;
   const sky=new THREE.HemisphereLight(0xe8eef1,0x858988,2.8);scene.add(sky);
   const sun=new THREE.DirectionalLight(0xfff7df,2.6);sun.position.set(-30,70,40);scene.add(sun);
+  sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-35,right:35,top:35,bottom:-35,near:.5,far:220});sun.shadow.bias=-.0003;sun.shadow.normalBias=.03;scene.add(sun.target);
   const fill=new THREE.DirectionalLight(0xe6f0ff,1.4);fill.position.set(40,25,-30);scene.add(fill);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(1600,1600),new THREE.MeshStandardMaterial({color:'#b5bf9d',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.35;scene.add(floor);
   const environment=createEnvironment(scene,camera,sun,sky,fill,floor,host);
-  function setWeather(value){environment.setWeather(value);host.dispatchEvent(new CustomEvent('environmentchange',{detail:{weather:environment.weather}}));}
-  const game=createGame({host,scene,camera,canvas:renderer.domElement,walk,environment,onWeather:setWeather});
+  const details=createWorldDetails({scene,camera,host,environment});
+  function setWeather(value){environment.setWeather(value);game.refreshTools();host.dispatchEvent(new CustomEvent('environmentchange',{detail:{weather:environment.weather}}));}
+  const game=createGame({host,scene,camera,canvas:renderer.domElement,walk,environment,onWeather:setWeather,onSeason:setSeason});
   const marker=new THREE.Group();scene.add(marker);
   const ring=new THREE.Mesh(new THREE.RingGeometry(12.5,13,64),new THREE.MeshBasicMaterial({color:'#d4b362',side:THREE.DoubleSide,transparent:true,opacity:.8}));ring.rotation.x=-Math.PI/2;ring.position.set(-31,.30,108);marker.add(ring);
   const labelCanvas=document.createElement('canvas');labelCanvas.width=384;labelCanvas.height=96;
@@ -45,6 +49,7 @@ export function createViewer(host) {
     season=value;
     current?.traverse(o=>{
       const tag=o.userData.season;if(!tag)return;
+      if(o.userData.replacedVegetation){o.visible=false;return;}
       o.visible=tag==='leaves'?season!=='winter':tag===(season==='summer'?'corn':season);
       if(tag==='corn'&&o.material){
         const m=o.material;m.userData.autumnColor??=m.color.clone();
@@ -53,7 +58,10 @@ export function createViewer(host) {
       }
     });
     environment.setSeason(season);
+    game.refreshTools();
+    details.setSeason(season);
     host.dataset.season=season;
+    host.dispatchEvent(new CustomEvent('environmentchange',{detail:{season}}));
     host.dataset.seasonMeshes=String([...current?.children||[]].filter(o=>o.userData.season&&o.visible).length);
   }
   function walkAt(place){
@@ -75,19 +83,20 @@ export function createViewer(host) {
     camera.position.set(...positions[name]);controls.target.copy(target);controls.minDistance=village?6:2;controls.maxDistance=village?1500:100;camera.near=village?.5:.08;camera.far=3000;camera.updateProjectionMatrix();controls.update();resize();syncCameraState();
   }
   async function load(name,onProgress) {
+    if(current&&modelName===name){preset('orbit');return;}
     const version=++loadVersion;
     if(!cache.has(name)) {
       const promise=loader.loadAsync(`/models/${name}.glb?v=${sceneVersion}`,(e)=>onProgress(e.total?`Loading model · ${Math.round(e.loaded/e.total*100)}%`:`Loading model · ${(e.loaded/1048576).toFixed(1)} MB`)).then(g=>g.scene);
       cache.set(name,promise);promise.catch(()=>cache.delete(name));
     }
-    const [model,data]=await Promise.all([cache.get(name),navigation]);navigationData=data;
+    const [model,data,metadata]=await Promise.all([cache.get(name),navigation,fetch(`/models/world-details.json?v=${sceneVersion}`).then(r=>r.json())]);navigationData=data;
     if(version!==loadVersion)return;
     if(current)scene.remove(current);
-    current=model;modelName=name;scene.add(model);environment.setModel(model,data[name]);setSeason(season);preset('orbit');
+    current=model;modelName=name;scene.add(model);environment.setModel(model,data[name]);details.install(model,metadata,data[name]);setSeason(season);preset('orbit');
     host.dataset.loadedModel=name;
   }
-  if(import.meta.env.DEV)window.__viewer={THREE,scene,camera,renderer,walk,environment,game,get model(){return current;}};
+  if(import.meta.env.DEV)window.__viewer={THREE,scene,camera,renderer,walk,environment,game,details,get model(){return current;}};
   let previous=performance.now();
-  function frame(now){const dt=Math.min(.1,(now-previous)/1000);previous=now;if(active){if(walk.enabled){walk.update(dt);game.update(dt,now/1000);}else controls.update();environment.update(dt,now/1000);marker.visible=modelName==='village'&&!walk.enabled;host.dataset.houseHighlighted=String(marker.visible);renderer.render(scene,camera);syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
+  function frame(now){const dt=Math.min(.1,(now-previous)/1000);previous=now;if(active){if(walk.enabled){walk.update(dt);game.update(dt,now/1000);}else controls.update();environment.update(dt,now/1000);details.update(dt,now/1000);marker.visible=modelName==='village'&&(!walk.enabled||camera.position.distanceTo(pin.position)>45);host.dataset.houseHighlighted=String(marker.visible);renderer.render(scene,camera);syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
   return {load,preset,setSeason,setWeather,walkAt,setHour:environment.setHour,setDaySpeed:environment.setDaySpeed,get hour(){return environment.hour;},setSound(value){game.audio.enabled=value;},gameAction:(name)=>game.action(name),pauseWalk(value){walk.pause(value);if(!value&&walk.enabled)renderer.domElement.focus({preventScroll:true});},walkInput:(direction,pressed)=>walk.input(direction,pressed),reset(){if(walk.enabled)walk.reset();else preset('orbit');},setActive(value){active=value;walk.pause(!value);if(value)resize();},exitWalk(){if(walk.enabled)preset('orbit');}};
 }

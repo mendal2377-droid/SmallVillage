@@ -58,9 +58,10 @@ export function createWalkController(camera, canvas, onChange) {
       forward:Number(keys.has('KeyW')||keys.has('ArrowUp')||touches.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||touches.has('back')),
       strafe:Number(keys.has('KeyD')||keys.has('ArrowRight')||touches.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||touches.has('left')),
       fast:keys.has('ShiftLeft')||keys.has('ShiftRight'),brake:keys.has('Space')||touches.has('brake'),
+      descend:keys.has('ControlLeft')||keys.has('ControlRight')||touches.has('descend'),
     };
   }
-  const codes=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space'];
+  const codes=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space','ControlLeft','ControlRight'];
   window.addEventListener('keydown',e=>{
     if(!enabled||paused||e.target.closest?.('input,textarea,select'))return;
     if(codes.includes(e.code)){e.preventDefault();keys.add(e.code);}

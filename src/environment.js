@@ -12,7 +12,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
     storm:{top:'#5d6c7a',horizon:'#929ea4',light:.25,ambient:1.9,fill:.5,color:'#cfd9e2',fog:420,near:40,stars:0,drops:'rain',wind:.32,rate:15},
     snow:{top:'#a1b3c0',horizon:'#e3e8eb',light:.65,ambient:3,fill:.8,color:'#eff7ff',fog:900,near:350,stars:.1,drops:'snow',rate:1.3},
     fog:{top:'#b9c0c2',horizon:'#cfd4d2',light:.35,ambient:2.6,fill:.6,color:'#e8ecee',fog:150,near:6,stars:0},
-    sunset:{top:'#536e91',horizon:'#edb57b',light:1.6,ambient:1.8,fill:.7,color:'#ffb36a',fog:1500,near:350,stars:.4},
+    sunset:{top:'#7594b1',horizon:'#edb57b',light:1.6,ambient:1.8,fill:.7,color:'#ffb36a',fog:1500,near:350,stars:.4},
   };
   // The dome shader writes colours unconverted, so night tones are lighter here than they display.
   const night={top:new THREE.Color('#2a3a5c'),horizon:new THREE.Color('#44567a'),color:new THREE.Color('#9db2ff')};
@@ -20,6 +20,12 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
   const lightningSky=new THREE.Color('#dfe6ff');
   const dome=new THREE.Mesh(new THREE.SphereGeometry(1400,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{top:{value:new THREE.Color()},horizon:{value:new THREE.Color()}},vertexShader:'varying vec3 v;void main(){v=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform vec3 top;uniform vec3 horizon;varying vec3 v;void main(){float h=clamp(normalize(v).y,0.,1.);gl_FragColor=vec4(mix(horizon,top,pow(h,.55)),1.);}'}));
   dome.renderOrder=-10;scene.add(dome);
+  dome.material.uniforms.time={value:0};dome.material.uniforms.cloud={value:.35};dome.material.uniforms.day={value:1};
+  dome.material.fragmentShader=`uniform vec3 top;uniform vec3 horizon;uniform float time;uniform float cloud;uniform float day;varying vec3 v;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1)),f.x),f.y);}float fbm(vec2 p){return noise(p)*.5+noise(p*2.)*.25+noise(p*4.)*.125+noise(p*8.)*.0625;}
+void main(){vec3 n=normalize(v);float h=clamp(n.y,0.,1.);vec3 c=mix(horizon,top,smoothstep(0.,.45,h));vec2 p=n.xz/(max(n.y,.09))*3.+vec2(time*.002,0);float f=fbm(p);float clouds=smoothstep(.58-cloud*.28,.78-cloud*.25,f)*smoothstep(.015,.18,h);c=mix(c,mix(horizon*.8,vec3(.86,.89,.89),h)*(.25+.75*day),clouds*.65);gl_FragColor=vec4(c,1.);
+#include <colorspace_fragment>
+}`;
   const starPositions=new Float32Array(900*3);
   for(let i=0;i<900;i++){const a=Math.random()*Math.PI*2,y=.08+Math.random()*.92,r=Math.sqrt(1-y*y);starPositions.set([Math.cos(a)*r*1300,y*1300,Math.sin(a)*r*1300],i*3);}
   const starGeo=new THREE.BufferGeometry();starGeo.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
@@ -38,10 +44,10 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
   // A fixed golden-hour sun stands in for the original sunset preset.
   const effectiveHour=()=>weather==='sunset'?18.15:hour;
   function lighting(){
-    const s=settings[weather],a=(effectiveHour()-6)/12*Math.PI,elevation=Math.sin(a);
+    const s=settings[weather],a=(effectiveHour()-6)/12*Math.PI,elevation=Math.sin(a)+(weather==='sunset'?.14:0);
     sunDir.set(Math.cos(a),Math.max(elevation,-.2),.38).normalize();
     // Twilight lingers until the sun is well below the horizon (about 19:00).
-    daylight=THREE.MathUtils.smoothstep(elevation,-.26,.2);
+    daylight=THREE.MathUtils.smoothstep(elevation,-.42,.1);
     const glow=weather==='sunset'?1:Math.max(0,1-Math.abs(elevation-.04)/.24)*(s.stars>.5?1:.45);
     top.set(s.top).lerp(dusk.top,glow*.5).lerp(night.top,1-daylight);
     horizon.set(s.horizon).lerp(dusk.horizon,glow*.65).lerp(night.horizon,1-daylight);
@@ -49,6 +55,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
     // Below the horizon the key light becomes moonlight from the opposite side of the sky.
     if(daylight<.5){light.lerp(night.color,1-daylight*2);sun.position.copy(sunDir).multiplyScalar(-100).setY(Math.abs(sunDir.y)*100+30);}
     else sun.position.copy(sunDir).multiplyScalar(100);
+    sun.position.x+=camera.position.x;sun.position.z+=camera.position.z;sun.target.position.set(camera.position.x,0,camera.position.z);
     sun.color.copy(light);
     sun.intensity=Math.max(s.light*daylight*(season==='winter'?.7:1),(1-daylight)*.22);
     sky.intensity=s.ambient*(.16+.84*daylight)+flash*7;
@@ -57,7 +64,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
     if(flash)dome.material.uniforms.top.value.lerp(lightningSky,Math.min(1,flash*2));
     scene.fog??=new THREE.Fog(horizon,s.near,s.fog);
     scene.fog.color.copy(horizon);scene.fog.near=s.near;scene.fog.far=s.fog*(.55+.45*daylight);
-    stars.material.opacity=(1-daylight)*s.stars;
+    stars.material.opacity=Math.pow(1-daylight,3)*s.stars;
     sunDisc.material.opacity=s.stars>.5?daylight:0;moonDisc.material.opacity=(1-daylight)*Math.max(s.stars,.05);
     host.dataset.hour=effectiveHour().toFixed(2);host.dataset.daylight=daylight.toFixed(2);
   }
@@ -79,6 +86,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
     flash=Math.max(0,flash-dt*3.2);
     lighting();
     dome.position.copy(camera.position);stars.position.copy(camera.position);
+    dome.material.uniforms.time.value=time;dome.material.uniforms.cloud.value=['overcast','rain','storm','snow'].includes(weather)?.95:.45;dome.material.uniforms.day.value=daylight;
     sunDisc.position.copy(camera.position).addScaledVector(sunDir,1250);sunDisc.lookAt(camera.position);
     moonDisc.position.copy(camera.position).addScaledVector(sunDir,-1250).setY(camera.position.y+Math.abs(sunDir.y)*1250+180);moonDisc.lookAt(camera.position);
     sheltered=(nav?.shelters||[]).some(({rect:[x0,z0,x1,z1],roof})=>camera.position.x>x0&&camera.position.x<x1&&camera.position.z>z0&&camera.position.z<z1&&camera.position.y<roof);

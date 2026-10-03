@@ -38,6 +38,13 @@ for mode in ['house','village']:
     bpy.data.batch_remove(ids=originals)
     for name,b in batches.items():
         me=bpy.data.meshes.new(name);me.from_pydata(b['v'],[],b['f']);me.update()
+        # Metre-scaled UVs survive material batching and let the browser use real surface detail.
+        uv=me.uv_layers.new(name='World metres')
+        for p in me.polygons:
+            axis=max(range(3),key=lambda a:abs(p.normal[a]))
+            for li in p.loop_indices:
+                v=me.vertices[me.loops[li].vertex_index].co
+                uv.data[li].uv=(v.y,v.z) if axis==0 else (v.x,v.z) if axis==1 else (v.x,v.y)
         if b['m']:
             old=b['m'];mat=bpy.data.materials.new('Web '+name);mat.diffuse_color=old.diffuse_color;mat.use_nodes=True
             p=mat.node_tree.nodes.get('Principled BSDF');p.inputs['Base Color'].default_value=old.diffuse_color

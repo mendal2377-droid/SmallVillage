@@ -1,15 +1,20 @@
 import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 // Drivable village vehicles: the family's covered electric tricycle and a small farm tractor.
 // Arcade bicycle-model steering over the exported floors, colliders, water and bridges.
-const box=(w,h,d,color,opts={})=>new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.6,...opts}));
+const box=(w,h,d,color,opts={})=>new THREE.Mesh(new RoundedBoxGeometry(w,h,d,2,Math.min(w,h,d)*.14),new THREE.MeshStandardMaterial({color,roughness:.6,...opts}));
 const cylinder=(r,h,color,opts={},segments=18)=>new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,segments),new THREE.MeshStandardMaterial({color,roughness:.7,...opts}));
+function batch(group,skip=[]){group.updateMatrixWorld(true);const bins=new Map();for(const m of [...group.children]){if(!m.isMesh||skip.includes(m))continue;const mat=m.material,key=[mat.color.getHexString(),mat.roughness,mat.metalness,mat.opacity,mat.transparent].join(':');const geo=m.geometry.clone().applyMatrix4(m.matrix);if(!bins.has(key))bins.set(key,{material:mat,parts:[]});bins.get(key).parts.push(geo.index?geo.toNonIndexed():geo);group.remove(m);}for(const {material,parts} of bins.values()){group.add(new THREE.Mesh(mergeGeometries(parts),material));parts.forEach(g=>g.dispose());}}
 function wheel(r,w,rim){
-  const g=new THREE.Group(),tyre=cylinder(r,w,'#1d1f1e',{roughness:.95},20);tyre.rotation.z=Math.PI/2;g.add(tyre);
+  const g=new THREE.Group(),tyre=new THREE.Mesh(new THREE.TorusGeometry(r-w*.48,w*.48,10,32),new THREE.MeshStandardMaterial({color:'#242521',roughness:.95}));tyre.rotation.y=Math.PI/2;g.add(tyre);
   const hub=cylinder(r*.55,w+.02,rim,{metalness:.4,roughness:.4},12);hub.rotation.z=Math.PI/2;g.add(hub);
   // Spokes make rolling visible.
-  for(let i=0;i<3;i++){const s=box(w+.03,r*1.5,.04,rim);s.rotation.x=i*Math.PI/3;g.add(s);}
-  return g;
+  for(let i=0;i<12;i++){const s=box(w+.01,r*.9,.016,rim);s.rotation.x=i*Math.PI/6;g.add(s);}
+  for(let i=0;i<24;i++)for(const side of [-1,1]){const a=i*Math.PI/12;const tread=box(w*.55,.04,r*.23,'#242521');tread.position.set(side*w*.20,Math.cos(a)*(r-.015),Math.sin(a)*(r-.015));tread.rotation.x=a;tread.rotation.y=side*.38;g.add(tread);}
+  for(const side of [-1,1])for(let i=0;i<6;i++){const a=i*Math.PI/3;const bolt=new THREE.Mesh(new THREE.SphereGeometry(.014,6,4),new THREE.MeshStandardMaterial({color:'#9d9f97',metalness:.7,roughness:.3}));bolt.position.set(side*(w*.52),Math.cos(a)*r*.23,Math.sin(a)*r*.23);g.add(bolt);}
+  batch(g);return g;
 }
 function lamp(){const m=new THREE.Mesh(new THREE.CircleGeometry(.08,16),new THREE.MeshStandardMaterial({color:'#fffbe6',emissive:'#fff1c0',emissiveIntensity:0}));return m;}
 function buildTrike(){
@@ -25,6 +30,9 @@ function buildTrike(){
   const rear=box(1.18,.9,.04,canvas,{roughness:.9});rear.position.set(0,1.3,1.1);g.add(rear);
   for(const [x,z] of [[-.56,-.78],[.56,-.78],[-.56,1.08],[.56,1.08]]){const post=box(.04,1.4,.04,'#c9cdc9',{metalness:.6});post.position.set(x,1.1,z);g.add(post);}
   const windscreen=box(.9,.55,.03,'#cfe3e4',{transparent:true,opacity:.35,metalness:.2,roughness:.1});windscreen.position.set(0,1.5,-.78);windscreen.rotation.x=-.18;g.add(windscreen);
+  const wiper=box(.012,.35,.015,'#303330');wiper.position.set(0,1.39,-.80);wiper.rotation.z=.45;g.add(wiper);
+  for(const s of [-1,1]){const stalk=box(.025,.25,.025,'#8d9691',{metalness:.7});stalk.position.set(s*.32,1.20,-.86);stalk.rotation.z=-s*.35;g.add(stalk);const mirror=box(.13,.09,.035,'#bdc8cb',{metalness:.9,roughness:.15});mirror.position.set(s*.37,1.32,-.86);g.add(mirror);const grip=box(.12,.045,.045,'#282b27');grip.position.set(s*.25,1.06,-.95);g.add(grip);}
+  for(let i=0;i<7;i++){const rib=box(.035,.17,1.3,'#438271',{metalness:.4});rib.position.set(-.45+i*.15,.50,.35);g.add(rib);}
   steer.position.set(0,0,-1.05);g.add(steer);
   const fork=box(.06,.75,.06,'#a9b0ad',{metalness:.6});fork.position.set(0,.6,0);fork.rotation.x=.25;steer.add(fork);
   const bar=box(.62,.04,.04,'#222');bar.position.set(0,1.05,.1);steer.add(bar);
@@ -32,13 +40,15 @@ function buildTrike(){
   for(const x of [-.5,.5]){const w=wheel(.27,.14,'#9aa3a0');w.position.set(x,.27,.75);g.add(w);wheels.push([w,.27]);}
   const head=lamp();head.position.set(0,1.0,-1.03);head.rotation.y=Math.PI;g.add(head);lamps.push(head);
   for(const x of [-.45,.45]){const t=new THREE.Mesh(new THREE.PlaneGeometry(.12,.06),new THREE.MeshStandardMaterial({color:'#7a1612',emissive:'#ff2a1a',emissiveIntensity:.2}));t.position.set(x,.6,1.13);g.add(t);}
-  return {group:g,wheels,steer,lamps,spec:{name:'e-trike',label:'the e-trike',maxSpeed:9,reverse:3,accel:3.2,brake:8,wheelbase:1.8,maxSteer:.55,half:[.6,1.15],height:1.85,seat:[0,1.55,-.35],chase:[6,2.4]}};
+  batch(g,lamps);batch(steer);return {group:g,wheels,steer,lamps,spec:{name:'e-trike',label:'the e-trike',maxSpeed:9,reverse:3,accel:3.2,brake:8,wheelbase:1.8,maxSteer:.55,half:[.6,1.15],height:1.85,seat:[0,1.55,-.35],chase:[6,2.4]}};
 }
 function buildTractor(){
   const g=new THREE.Group(),red='#b3362b',wheels=[],steer=new THREE.Group(),lamps=[];
   const chassis=box(.7,.4,2.3,'#2a2c2b',{metalness:.4});chassis.position.set(0,.75,-.1);g.add(chassis);
   const hood=box(.8,.62,1.35,red,{metalness:.25,roughness:.45});hood.position.set(0,1.18,-.6);g.add(hood);
   const grille=box(.7,.5,.04,'#2c2e2d');grille.position.set(0,1.15,-1.29);g.add(grille);
+  for(let i=0;i<11;i++){const slat=box(.022,.46,.03,'#9c9f92',{metalness:.65});slat.position.set(-.30+i*.06,1.15,-1.32);g.add(slat);}
+  for(const s of [-1,1]){for(let i=0;i<8;i++){const vent=box(.015,.10,.025,'#272d28');vent.position.set(s*.407,1.27,-1.02+i*.08);g.add(vent);}const axle=cylinder(.07,.95,'#51564d',{metalness:.55});axle.rotation.z=Math.PI/2;axle.position.set(s*.25,.67,.62);g.add(axle);const step=box(.26,.05,.35,'#5c6056',{metalness:.5});step.position.set(s*.46,.65,.25);g.add(step);const pedal=box(.10,.05,.14,'#262b25');pedal.position.set(s*.18,.95,.04);g.add(pedal);}
   const tank=box(.82,.12,1.37,'#e2e4df');tank.position.set(0,1.5,-.6);g.add(tank);
   const exhaust=cylinder(.05,.9,'#3a3633',{metalness:.5},10);exhaust.position.set(.28,1.95,-.85);g.add(exhaust);
   const cap=cylinder(.07,.06,'#3a3633',{metalness:.5},10);cap.position.set(.28,2.42,-.85);g.add(cap);
@@ -53,7 +63,7 @@ function buildTractor(){
   for(const x of [-.62,.62]){const w=wheel(.36,.2,'#e5c33a');w.rotation.order='YXZ';w.position.set(x,.36,0);frontAxle.add(w);wheels.push([w,.36]);}
   for(const x of [-.75,.75]){const w=wheel(.62,.34,'#e5c33a');w.position.set(x,.62,.62);g.add(w);wheels.push([w,.62]);}
   for(const x of [-.28,.28]){const l=lamp();l.position.set(x,1.2,-1.32);l.rotation.y=Math.PI;g.add(l);lamps.push(l);}
-  return {group:g,wheels,steer,frontAxle,lamps,exhaust:cap,spec:{name:'tractor',label:'the tractor',maxSpeed:6,reverse:2.2,accel:2,brake:6,wheelbase:1.7,maxSteer:.6,half:[.95,1.4],height:2.2,seat:[0,2.05,.5],chase:[7.5,3.2]}};
+  batch(g,[...lamps,cap]);return {group:g,wheels,steer,frontAxle,lamps,exhaust:cap,spec:{name:'tractor',label:'the tractor',maxSpeed:6,reverse:2.2,accel:2,brake:6,wheelbase:1.7,maxSteer:.6,half:[.95,1.4],height:2.2,seat:[0,2.05,.5],chase:[7.5,3.2]}};
 }
 const builders={trike:buildTrike,tractor:buildTractor};
 // Preferred parking per scene; a nearby clear spot is searched if this one is blocked.
@@ -86,6 +96,7 @@ export function createVehicles({scene,camera,walk,audio}){
     const nav=walk.nav;if(!nav)return;
     for(const [i,p] of (parking[sceneName]||[]).entries()){
       const built=builders[p.kind]();const v={...built,id:'vehicle-'+i,kind:p.kind,x:p.at[0],z:p.at[1],y:nav.ground??.2,yaw:p.yaw,speed:0,steerAngle:0,roll:0};
+      v.group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
       v.y=walk.floorAt(v.x,v.z,v.y,.6)??v.y;
       search:for(let r=0;r<14;r+=1.5)for(let a=0;a<Math.PI*2;a+=Math.PI/6){
         const x=p.at[0]+Math.cos(a)*r,z=p.at[1]+Math.sin(a)*r,y=walk.floorAt(x,z,nav.ground??.2,.6);
