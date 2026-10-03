@@ -4,7 +4,13 @@ const $ = (selector) => document.querySelector(selector);
 const stage = $('#stage');
 const image = $('#scene-image');
 const imageInfo = {
-  courtyard: ['Life around the courtyard', 'Reconstructed courtyard with a glazed balcony, blue shed and hanging laundry'],
+  courtyard: ['Life around the courtyard', 'Clean reconstructed courtyard with a glazed upper corridor and blue shed'],
+  kitchen: ['The family kitchen', 'Clean tiled masonry stove with two wok lids and an L-shaped preparation counter'],
+  meeting: ['A room to gather', 'Facing timber sofas with red cushions, a tea table and a back console'],
+  bedroom: ['A quiet place to rest', 'Neatly made red bed, golden wooden desk and pale sliding wardrobe'],
+  storage: ['Everything in its place', 'Tidy storage shelves, a closed cabinet and a red round dining table'],
+  upstairs: ['The view from upstairs', 'The enclosed second-floor corridor looking down into the courtyard'],
+  stairs: ['Up the red staircase', 'Two flights of red concrete stairs with stainless steel handrails'],
   alley: ['The familiar way home', 'Narrow brick alley with ivy, puddles, overhead wires and a red entrance gate'],
   entrance: ['Through the red gate', 'Burgundy double entrance gate with an open pedestrian door into the courtyard'],
   context: ['A home in its surroundings', 'Elevated view of the courtyard house in the interpretive village'],
@@ -22,13 +28,13 @@ $('#canvas-host').addEventListener('navigationchange',({detail})=>{
   $('#walk-help').textContent=matchMedia('(pointer:coarse)').matches?'Use the arrow buttons to walk · drag the scene to look around':'WASD / arrows to move · click or drag to look · Shift to walk faster · Esc to release mouse';
   for(const id of ['walk-help','walk-pad','walk-crosshair'])$('#'+id).hidden=!walking;
   document.querySelector('[data-view="walk"]').setAttribute('aria-pressed',String(walking));
-  $('#interaction-hint').textContent=walking?'Walk at eye level · use the arrows below on touchscreens · drag the scene to look around':'Drag to orbit · scroll or pinch to zoom · right-drag to pan';
+  $('#interaction-hint').textContent=walking?'Stairs: enter the corner left of the sitting room, climb, turn left on the landing, and continue upstairs.':'Drag to orbit · scroll or pinch to zoom · right-drag to pan';
   $('#view-eyebrow').textContent=walking?'FIRST-PERSON WALK':'INTERACTIVE 3D SCENE';
 });
 
 function showImage(key) {
   currentImage = key;
-  image.src = `/images/${key}.webp`;
+  image.src = `/images/${key}.webp?v=interiors-20261003`;
   image.alt = imageInfo[key][1];
   $('#view-title').textContent = imageInfo[key][0];
   document.querySelectorAll('[data-image]').forEach((b) => {
@@ -44,7 +50,7 @@ function setModeUI(next) {
   image.hidden = is3d;$('#canvas-host').hidden = !is3d;$('#viewer-controls').hidden = !is3d;
   $('#render-mode').classList.toggle('selected', !is3d);$('#three-mode').classList.toggle('selected', is3d);
   $('#render-mode').setAttribute('aria-pressed', String(!is3d));$('#three-mode').setAttribute('aria-pressed', String(is3d));
-  $('#interaction-hint').textContent = is3d ? 'Drag to orbit · scroll or pinch to zoom · right-drag to pan' : 'Four views of the reconstructed house and its adjoining lane.';
+  $('#interaction-hint').textContent = is3d ? 'Drag to orbit · scroll or pinch to zoom · right-drag to pan' : 'Explore the courtyard, clean interiors, staircase and upstairs view.';
   $('#view-eyebrow').textContent = is3d ? 'INTERACTIVE 3D SCENE' : 'A CLOSER LOOK';
   if (!is3d) {$('#loading').hidden = true;showImage(currentImage);}
   if (viewer) viewer.setActive(is3d);

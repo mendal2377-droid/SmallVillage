@@ -48,6 +48,9 @@ for mode in ['house','village']:
                         p.inputs[prop].default_value=op.inputs[prop].default_value
             if 'aged white courtyard plaster' in name:p.inputs['Base Color'].default_value=(.78,.79,.76,1)
             if 'mottled grey exterior' in name:p.inputs['Base Color'].default_value=(.53,.57,.55,1)
+            if 'clear balcony glazing' in name:
+                p.inputs['Alpha'].default_value=.13
+                mat.surface_render_method='DITHERED'
             mat.use_backface_culling=False;me.materials.append(mat)
         ob=bpy.data.objects.new(name,me);S.collection.objects.link(ob)
     bpy.ops.export_scene.gltf(filepath=str(OUT/(mode+'.glb')),export_format='GLB',export_cameras=False,export_lights=False,export_extras=False,export_animations=False,export_materials='EXPORT',export_draco_mesh_compression_enable=True,export_draco_mesh_compression_level=6)

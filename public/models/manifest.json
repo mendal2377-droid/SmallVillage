@@ -1,18 +1,14 @@
 [
   {
     "name": "house",
-    "meshes": 36,
-    "triangles": 149118,
-    "bytes": 1314072,
-    "uncompressed_bytes": 10781048,
-    "compression": "Draco"
+    "meshes": 49,
+    "triangles": 93985,
+    "bytes": 796152
   },
   {
     "name": "village",
-    "meshes": 68,
-    "triangles": 985218,
-    "bytes": 6921456,
-    "uncompressed_bytes": 70384100,
-    "compression": "Draco"
+    "meshes": 81,
+    "triangles": 930085,
+    "bytes": 6384988
   }
 ]

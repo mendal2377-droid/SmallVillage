@@ -14,3 +14,6 @@
 .is-walking .stage-caption>div{display:none}.is-walking .stage-caption{justify-content:flex-end}
 .is-walking canvas{cursor:grab}.is-walking canvas:active{cursor:grabbing}
 @media(max-width:700px){.sidebar h2{font-size:30px;margin-top:15px}.viewer-controls button{padding:8px 7px}.walk-pad{bottom:115px;left:14px}.walk-help{top:64px;left:14px;font-size:9px;max-width:calc(100% - 28px)}.stage.is-walking .stage-caption{bottom:115px}}
+
+/* Extra room views scroll within the gallery on every screen size. */
+.filmstrip{display:flex;overflow-x:auto;scroll-snap-type:x proximity}.filmstrip button{flex:0 0 calc((100% - 36px)/4);min-width:105px;scroll-snap-align:start}.stage-note{gap:16px;line-height:1.6}

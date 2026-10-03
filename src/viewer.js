@@ -20,7 +20,8 @@ export function createViewer(host) {
     controls.enabled=!walking;host.dataset.navigationMode=walking?'walk':'orbit';syncCameraState();
     host.dispatchEvent(new CustomEvent('navigationchange',{detail:{walking}}));
   });
-  const navigation=fetch('/models/navigation.json').then(response=>{if(!response.ok)throw new Error('Navigation data unavailable');return response.json();});
+  const sceneVersion='interiors-20261003';
+  const navigation=fetch(`/models/navigation.json?v=${sceneVersion}`).then(response=>{if(!response.ok)throw new Error('Navigation data unavailable');return response.json();});
   let navigationData;
   const sky=new THREE.HemisphereLight(0xf6f9ef,0x7d8963,2.8);scene.add(sky);
   const sun=new THREE.DirectionalLight(0xfff7df,2.6);sun.position.set(-30,70,40);scene.add(sun);
@@ -41,7 +42,7 @@ export function createViewer(host) {
   async function load(name,onProgress) {
     const version=++loadVersion;
     if(!cache.has(name)) {
-      const promise=loader.loadAsync(`/models/${name}.glb`,(e)=>onProgress(e.total?`Loading model · ${Math.round(e.loaded/e.total*100)}%`:`Loading model · ${(e.loaded/1048576).toFixed(1)} MB`)).then(g=>g.scene);
+      const promise=loader.loadAsync(`/models/${name}.glb?v=${sceneVersion}`,(e)=>onProgress(e.total?`Loading model · ${Math.round(e.loaded/e.total*100)}%`:`Loading model · ${(e.loaded/1048576).toFixed(1)} MB`)).then(g=>g.scene);
       cache.set(name,promise);promise.catch(()=>cache.delete(name));
     }
     const [model,data]=await Promise.all([cache.get(name),navigation]);navigationData=data;

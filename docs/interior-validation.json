@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-03",
+  "reference_video": "20261003085305.mp4",
+  "source_duration_seconds": 116.537,
+  "checks": {
+    "smoke": {
+      "url": "http://127.0.0.1:4173",
+      "passed": true,
+      "checks": [
+        "Desktop rendering",
+        "Gallery views",
+        "Scene selection consistency",
+        "House GLB load",
+        "Camera preset",
+        "Village GLB load",
+        "Return to renders",
+        "Mobile no horizontal overflow",
+        "WebGL failure fallback",
+        "No unexpected page errors"
+      ]
+    },
+    "walk": {
+      "passed": true,
+      "url": "http://127.0.0.1:4173",
+      "checks": [
+        "Chinese village name removed",
+        "House keyboard movement",
+        "Grounded eye height",
+        "Mouse look and Escape release",
+        "Reset walking position",
+        "Wall collision",
+        "Passage to alley is walkable",
+        "Orbit exit",
+        "Village arrow-key movement",
+        "Render exit clears walk UI",
+        "Mobile walking controls",
+        "Touch look",
+        "Mobile layout",
+        "No page errors"
+      ]
+    },
+    "stairs-browser": {
+      "passed": true,
+      "position": [
+        1.5,
+        5.39,
+        -2.217
+      ],
+      "checks": [
+        "Ten gallery images decode",
+        "Keyboard entry",
+        "First flight",
+        "Turning landing",
+        "Second flight",
+        "Upper corridor",
+        "Mouse look from upstairs",
+        "No page errors"
+      ]
+    }
+  },
+  "stairs_route": "Passed deterministic room entry, both flights, turning landing, upper corridor, balcony barrier, descent and full village coordinates.",
+  "upper_floor_eye_height_m": 5.39,
+  "eye_height_above_floor_m": 1.65,
+  "transparent_balcony_alpha": 0.13,
+  "assets": {
+    "house.glb": {
+      "bytes": 796152,
+      "sha256": "82ae65f4e27ea7a583fa28cbfef274a32857ce1210212e99c94fbd985f5d8775"
+    },
+    "village.glb": {
+      "bytes": 6384988,
+      "sha256": "964b18dc7a958a69940160a5ae39c5312d387b7170632d891dd02d463a6a664d"
+    },
+    "navigation.json": {
+      "bytes": 87136,
+      "sha256": "e855130b8c9487bf4b18478c9758019c9a4b81fbff12447c2fb77c8753669d2e"
+    }
+  }
+}
