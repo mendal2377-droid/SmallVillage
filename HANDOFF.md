@@ -1,6 +1,6 @@
 # SmallVillage — developer handoff
 
-Prepared 3 October 2026. Application baseline: **`7854f60`** on `main`.
+Updated 3 October 2026. Application baseline: **`065ea71`** on `main` (photo corrections `755da55`, play layer `82c3a78`, refreshed renders `065ea71`; the previous baseline was `7854f60`).
 
 - Repository: <https://github.com/mendal2377-droid/SmallVillage>
 - Production: <https://small-village-eta.vercel.app/>
@@ -29,6 +29,8 @@ The supplied sketch controls roads, waterways, two ponds, fields and the school.
 
 ### Preserve these user decisions
 
+- The game is playful and non-lethal: slingshot, water pistol, firecrackers and snowballs act on tins, bottles, straw targets and scatter-and-return sparrows. Vehicles are the e-trike (from the courtyard photos) and a farm tractor.
+- Production deploys from `main` (the owner asked for direct pushes to `main`).
 - Keep the Chinese village name removed from the page's village heading. The English location remains.
 - Follow the supplied house photos/videos; clear temporary clutter from the house reconstruction.
 - Preserve the quiet, focused walking interface and usable mobile controls.
@@ -48,7 +50,7 @@ npm ci
 npm run dev -- --port 4173 --strictPort
 ```
 
-Open <http://127.0.0.1:4173/>. Most browser tests assume this port. To inspect the application baseline exactly, use `git show 7854f60` or create a development branch from that commit. For ongoing work, branch from current `main`, which also contains this handoff.
+Open <http://127.0.0.1:4173/>. Most browser tests assume this port. To inspect the application baseline exactly, use `git show 065ea71` or create a development branch from that commit. For ongoing work, branch from current `main`, which also contains this handoff.
 
 ```sh
 npm run build
@@ -72,6 +74,8 @@ flowchart LR
   G --> V[viewer.js]
   J --> W[walk.js and environment.js]
   V --> W
+  W --> P[game/: vehicles, toys, audio, HUD]
+  P --> V
   I --> M[main.js and index.html]
   M --> V
 ```
@@ -247,17 +251,17 @@ Remove-Item Env:BASE_URL
 
 The browser suites write screenshots and JSON into ignored `test-results/`. The village suite checks all 17 gallery images, seasonal geometry, highlight, the continuous keyboard route to the roof, indoor precipitation, rain/snow, sunset, paused menu, exit and real touch input.
 
-Evidence saved for the application baseline:
+Evidence for baseline `065ea71` (run locally on 3 Oct 2026):
 
-- Build, controller/stair and environment checks passed.
-- Local browser smoke and walking suites passed.
-- Production village browser suite passed, including mobile movement/look and village-to-terrace access.
-- Model sizes: house **821,668 bytes / 96,369 triangles / 59 meshes**; village **2,856,232 bytes / 399,508 triangles / 83 meshes**.
-- Navigation: house 223 obstacles / 10 surfaces / 3 shelters; village 1,394 obstacles / 10 surfaces / 234 shelters.
+- `npm run test:stairs`, `test:environment` (now includes day/night, storm and fog) and `test:game` passed; `npm run build` succeeded (three.js chunk-size warning only).
+- Local `npm test` and `npm run test:walk` passed. `test:village` passed on the local server for the play-layer commit; it was **not** re-run against production after the final push. Production was checked by hand: page served the new build, the house loaded, walking started the play layer (1 vehicle, 11 targets, HUD visible, no console errors).
+- Model sizes: house **827,196 bytes / 97,569 triangles / 59 meshes**; village **2,861,832 bytes / 400,708 triangles / 83 meshes**.
+- Navigation: house 224 obstacles / 10 surfaces / 3 shelters; village 1,395 obstacles / 10 surfaces / 234 shelters.
+- `docs/photo-validation.json` still records the earlier `7854f60` run and was not regenerated.
 
 `docs/photo-validation.json` records the prior run; it is not a new test run whenever you open the file. `scripts/save_photo_validation.py` aggregates existing successful JSON files, has a fixed revision/date, and does not run tests. Update those fields and record new controller/environment results explicitly for a new release.
 
-Software WebGL can be slow at a large viewport. A production keyboard test originally timed out while progressing down the lane; the navigation data matched and there was no obstacle at that position. The village suite now uses a 1024×700 desktop viewport and 120-second movement waits. Distinguish slow rendering from a reproducible collision failure. Avoid editing assets during a browser run: Vite reloads can abort navigation or reset the camera.
+Software WebGL can be slow at a large viewport. A production keyboard test originally timed out while progressing down the lane; the navigation data matched and there was no obstacle at that position. The village suite now uses a 1024×700 desktop viewport and 120-second movement waits. Distinguish slow rendering from a reproducible collision failure. The walk suite once timed out after the play layer was added; the cause was always-on zero-intensity lights, fixed by `visible=false` (see game contracts). If a browser test starts timing out again, first look for new per-frame GPU work. Avoid editing assets during a browser run: Vite reloads can abort navigation or reset the camera.
 
 ## 7. Deployment and access
 
@@ -309,6 +313,9 @@ These scripts create a backup from the current source when their expected backup
 
 All requested features in the application baseline are implemented. These are development opportunities, not unfulfilled promises:
 
+- **Open items from the 3 Oct photo review.** Photo-faithful geometry was corrected only where it was clearly wrong. Still approximate: the stove front (arches are flat dark panels), wardrobe/furniture proportions in the rooms, and the village-side neighbouring walls seen from the courtyard. Check new work against `D:/blender/hometown/house/*.jpg` next to the matching browser screenshot.
+- Gameplay ideas not built: more vehicles (bicycle, car), a quest or collection goal, persistent settings/progress, animals beyond sparrows, wind that moves trees, footstep and indoor/outdoor sound changes.
+
 - Village distances and parcels are estimated; orientation is assumed. A measured/georeferenced plan would improve accuracy.
 - Most neighboring houses are procedural exterior blocks; they do not have the detailed, enterable interior of the owner's house. Upper rooms in the detailed house remain sparsely furnished because footage is incomplete.
 - Weather is visual. Roof shelter uses camera/footprint tests, not per-particle roof collision; there is no physical accumulation, automatic season progression, weather API or wind simulation beyond slanted rain.
@@ -330,4 +337,4 @@ All requested features in the application baseline are implemented. These are de
 
 ## 10. Copyable brief for the next developer or coding agent
 
-> Continue SmallVillage from current `main`; application baseline is `7854f60`. Read `HANDOFF.md`, `docs/PHOTO_RECONSTRUCTION.md` and `docs/photo-validation.json`. The authoritative geometry is `blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend`, which already includes the detailed house and MAP village. Preserve the user's starred house position, clean interiors, immersive walking, mobile controls and continuous village → gate → rooms → stairs → terrace access. Raw references are now in `D:/blender/hometown/house` and `D:/blender/hometown/village photos` on the owner's machine. Treat dimensions/neighboring plots as estimates. Do not blindly rerun historical rebuild scripts; they open local stage backups. After geometry changes, export GLBs and navigation together, refresh cache versions and run the relevant tests/build. Vercel production is linked to GitHub main. Obtain collaborator access from the owner. Implement the new task: [describe the requested change here].
+> Continue SmallVillage from current `main`; application baseline is `065ea71` (it now includes a play layer: day/night, storms, e-trike and tractor, playful toys; see section 5 "Game layer contracts"). Read `HANDOFF.md`, `docs/PHOTO_RECONSTRUCTION.md` and `docs/photo-validation.json`. The authoritative geometry is `blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend`, which already includes the detailed house and MAP village. Preserve the user's starred house position, clean interiors, immersive walking, mobile controls and continuous village → gate → rooms → stairs → terrace access. Keep play non-violent (tins, birds scatter, water; no damage to people or animals) unless the owner changes that decision. Raw references are now in `D:/blender/hometown/house` and `D:/blender/hometown/village photos` on the owner's machine. Treat dimensions/neighboring plots as estimates. Do not blindly rerun historical rebuild scripts; they open local stage backups. After geometry changes, export GLBs and navigation together, refresh cache versions and run the relevant tests/build. Vercel production is linked to GitHub main. Obtain collaborator access from the owner. Implement the new task: [describe the requested change here].
