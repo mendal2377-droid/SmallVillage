@@ -2,6 +2,8 @@
 
 A browser-based presentation of a Blender village reconstruction in Henan, China. The house follows the courtyard, interior and roof videos plus new photographs. Village topology follows the supplied sketch, satellite reference and seventeen field and lane photographs.
 
+**New developers:** start with [the project handoff](HANDOFF.md) for setup, the authoritative Blender source, coordinate/navigation contracts, export steps, validation, deployment access and current reference-media paths.
+
 ## Explore
 
 - Seventeen rendered views, including the roof terrace, village plan, poplar avenue, field path, autumn corn and winter road.
