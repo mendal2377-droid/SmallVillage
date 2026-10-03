@@ -27,7 +27,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
     model?.traverse(o=>{if(!o.isMesh)return;for(const m of Array.isArray(o.material)?o.material:[o.material]){
       if(m.roughness===undefined)continue;m.userData.dryRoughness??=m.roughness;
       // Wet concrete and roofs catch light; indoor furniture keeps its own finish.
-      const outdoor=/road|concrete|roof|paving|mud|brick/i.test(m.name)&&!/Interior|Roof kitchen/i.test(m.name);
+      const outdoor=/concrete roads|flat concrete roof|grey roof tiles|terrace concrete|damp worn courtyard concrete|paving brick|wet mud|red brick/i.test(m.name);
       m.roughness=outdoor&&weather==='rain'?Math.max(.18,m.userData.dryRoughness*.45):m.userData.dryRoughness;
     }});
     host.dataset.weather=weather;

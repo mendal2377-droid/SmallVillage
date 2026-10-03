@@ -39,7 +39,7 @@
       ]
     },
     "village-browser": {
-      "url": "http://127.0.0.1:4173",
+      "url": "https://small-village-eta.vercel.app",
       "passed": true,
       "checks": [
         "17 gallery images",

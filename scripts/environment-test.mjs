@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import {createEnvironment} from '../src/environment.js';
+const scene=new THREE.Scene();scene.background=new THREE.Color();
+const camera=new THREE.PerspectiveCamera();camera.position.set(0,2,0);
+const sun=new THREE.DirectionalLight(),sky=new THREE.HemisphereLight(),fill=new THREE.DirectionalLight();
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(),new THREE.MeshStandardMaterial());
+const host={dataset:{}};
+const model=new THREE.Group();
+function surface(name){const m=new THREE.MeshStandardMaterial({roughness:.8});m.name=name;model.add(new THREE.Mesh(new THREE.BoxGeometry(),m));return m;}
+const road=surface('Web ::MAP | concrete roads'),ceiling=surface('Web ::V | Roof clean white ceiling'),furniture=surface('Web ::V | Interior golden desk timber');
+const environment=createEnvironment(scene,camera,sun,sky,fill,floor,host);
+environment.setModel(model,{shelters:[{rect:[-1,-1,1,1],roof:3.7}]});
+environment.setWalking(true);environment.setWeather('rain');environment.update(.1,1);
+assert.equal(host.dataset.precipitation,'none','No rain below a roof');
+assert.equal(ceiling.roughness,.8,'Ceiling stays dry');assert.equal(furniture.roughness,.8,'Indoor furniture stays dry');
+assert.ok(road.roughness<.4,'Road catches wet reflections');
+camera.position.y=5.39;environment.update(.1,2);assert.equal(host.dataset.precipitation,'rain','Rain above low roof on terrace');
+environment.setWeather('snow');environment.update(.1,3);assert.equal(host.dataset.precipitation,'snow');
+environment.setWeather('clear');environment.update(.1,4);assert.equal(host.dataset.precipitation,'none');assert.equal(road.roughness,.8,'Clear weather restores road finish');
+console.log('PASS: indoor shelter, terrace precipitation, wet exterior surfaces, dry interiors and restoration.');

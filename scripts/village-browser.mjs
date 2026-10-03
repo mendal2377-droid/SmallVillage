@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 const url=process.env.BASE_URL||'http://127.0.0.1:4173';
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const page=await browser.newPage({viewport:{width:1280,height:900}});page.setDefaultTimeout(90000);
+// Software WebGL in CI is slower than a desktop GPU; keep pixel cost bounded.
+const page=await browser.newPage({viewport:{width:1024,height:700}});page.setDefaultTimeout(120000);
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const pos=()=>page.locator('#canvas-host').getAttribute('data-camera-position').then(s=>s.split(',').map(Number));
 async function axis(i,target){
   const p=await pos(),sign=Math.sign(target-p[i]);if(Math.abs(target-p[i])<.1)return;
   const key=i===0?(sign>0?'KeyD':'KeyA'):(sign>0?'KeyS':'KeyW');await page.keyboard.down(key);
-  try{await page.waitForFunction(({i,target,sign})=>sign*(Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[i])-target)>=-.04,{i,target,sign},{timeout:90000});}finally{await page.keyboard.up(key);}
+  try{await page.waitForFunction(({i,target,sign})=>sign*(Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[i])-target)>=-.04,{i,target,sign},{timeout:120000});}finally{await page.keyboard.up(key);}
 }
 await mkdir('test-results',{recursive:true});
 try{
@@ -32,7 +33,7 @@ try{
   assert.equal(await page.locator('.stage-top').isVisible(),false);
   assert.equal(await page.locator('#viewer-controls').isVisible(),false);
   assert.equal(await page.locator('#walk-pad').isVisible(),false,'Desktop has no touch pad');
-  const rect=await page.locator('#stage').boundingBox();assert.deepEqual([rect.x,rect.y,rect.width,rect.height],[0,0,1280,900]);
+  const rect=await page.locator('#stage').boundingBox();assert.deepEqual([rect.x,rect.y,rect.width,rect.height],[0,0,1024,700]);
   await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.precipitation==='rain');
   // Use physical key events for the complete village-to-house route.
   await axis(2,112.65);await axis(0,-33.3);await axis(2,106.8);await axis(0,-34.87);
