@@ -4,7 +4,7 @@ Walk from the fields into the courtyard house, upstairs and onto its roof terrac
 
 **Live:** https://small-village-eta.vercel.app/
 
-**Developers:** read [HANDOFF.md](HANDOFF.md), [wandering systems](docs/WANDERING.md), and [the connected-world notes](docs/CONNECTED_WORLD.md).
+**Developers:** read [HANDOFF.md](HANDOFF.md), [level roads and living banks](docs/ROAD_REPAIR.md), [wandering systems](docs/WANDERING.md), and [the connected-world notes](docs/CONNECTED_WORLD.md).
 
 ## Enter and play
 
@@ -31,7 +31,7 @@ The small navigation map shows the player, home, waterways and destinations. Cli
 
 The two vehicles have detailed tyres, controls, mirrors/vents and working driving, steering and lights. Tools interact with targets; birds scatter and return. Chickens, dogs, cats, snakes, cows, sheep and rabbits roam with varied size, pace and movement. Holding a chicken gives the player a deliberately fantastical flight ability, with collision checks and a controlled landing.
 
-The close roofscape follows the supplied balcony photographs. Fields use uneven seasonal wheat/maize stands, vegetable beds and an orchard. Curved leaves, stems, vines, trellises and solid produce give the nearby plants depth; far grain fields use cheaper textured stands. Big spreading trees supplement the poplar avenues. Light green water has swimming regional fish types, irregular banks, stones, reeds and summer lotus flowers. Summer nights have individually twinkling stars and waterside fireflies. These are procedural game assets, not photogrammetry or a surveyed reconstruction.
+The close roofscape follows the supplied balcony photographs. Roads and bridges have continuous level paving, with planting kept clear of their approaches. Fields use dense, uneven seasonal wheat/maize stands, mixed vegetables and fruit-tree groves. Curved leaves, stems, vines, trellises and solid produce give the nearby plants depth; far grain fields use cheaper textured stands. Thirty-seven spreading/fruit trees supplement the poplar avenues. Light green water has swimming fish, hopping pond frogs and landing ripples, water grass, cattails, duckweed, dragonflies and summer lotus flowers. Summer nights have individually twinkling stars and waterside fireflies. These are procedural game assets, not photogrammetry or a surveyed reconstruction.
 
 ## Develop
 
@@ -54,6 +54,8 @@ npm run test:game         # Vehicles, collisions, targets, toys and snow rules
 npm run test:adventure    # Energy, all activities, cooldowns, seasonal rules and pause/recovery
 npm run test:touch        # Mobile arrows, real touch drag, live settings and snow tools
 npm run test:activities   # Dev server: garden/orchard views, fishing, kite and night fireworks
+npm run test:planting     # Exported road masks, every mapped poplar and all bridge routes
+npm run test:ecology      # Dev server: level roads, clear bridge, orchard and seasonal frogs
 ```
 
 Browser tests use installed Microsoft Edge and write ignored evidence to `artifacts/world/`. `BASE_URL` can point the same browser suite at production. Browser rendering on software WebGL is slower than normal GPU rendering.
@@ -65,10 +67,12 @@ Browser tests use installed Microsoft Edge and write ignored evidence to `artifa
 - `src/viewer.js`, `src/walk.js`, `src/environment.js`: world loading, navigation and weather/time.
 - `src/world.js`: surface textures, instanced vegetation, wind, water and distance-based crop detail.
 - `src/gardens.js`, `src/organic.js`: vegetable/fruit models, mature trees, banks, flowers, fish and fireflies.
+- `src/planting.js`, `src/wetland.js`: placement exclusions, frogs, ripples and wetland life.
 - `src/game/adventure.js`: energy, location encounters, minigames and rewards.
 - `src/game/`: vehicles, toys, animated creatures, chicken flight, sound and HUD.
 - `blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend`: authoritative editable architecture and map.
 - `blender/upgrade_connected_world.py`: repeatable close-roofscape refinement and vegetation metadata export.
+- `blender/repair_roads_and_planting.py`: saved-source level paving, poplar relocation and road-footprint export.
 - `scripts/export_web_models.py`, `scripts/export_navigation.py`: paired mesh/navigation exports.
 - `public/models/world-details.json`: tree positions and field rectangles from the Blender source.
 

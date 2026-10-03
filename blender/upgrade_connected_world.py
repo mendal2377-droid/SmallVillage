@@ -75,7 +75,7 @@ fields=[]
 for o in S.objects:
     if o.name.startswith('MAP field soil '):
         x,y,z=o.location;w,d,h=o.dimensions;fields.append([x-w/2,-y-d/2,x+w/2,-y+d/2])
-meta={'trees':trees,'fields':fields,'roofscape':'Near roofs follow supplied photos; exact positions estimated.'}
+meta={'trees':trees,'fields':fields,'roads':json.loads(S['village_navigation']).get('roads',[]),'roofscape':'Near roofs follow supplied photos; exact positions estimated.'}
 (R/'public/models/world-details.json').write_text(json.dumps(meta,separators=(',',':')),encoding='utf-8')
 nav=json.loads(S['village_navigation']);nav['places']['courtyard']={'spawn':[-32,1.85,109],'yaw':0};S['village_navigation']=json.dumps(nav)
 S['world_upgrade']='Connected map; photo-based close roofscape. Browser uses world-details.json for dynamic vegetation and water.'

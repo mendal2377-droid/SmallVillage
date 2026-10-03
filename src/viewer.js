@@ -27,7 +27,7 @@ export function createViewer(host,{onEnter=()=>{}}={}) {
     if(walking)game.start(modelName);else game.stop();
     host.dispatchEvent(new CustomEvent('navigationchange',{detail:{walking}}));
   });
-  const sceneVersion='wandering-world-20261004-1';
+  const sceneVersion='roads-and-wetlands-20261004-2';
   const navigation=fetch(`/models/navigation.json?v=${sceneVersion}`).then(response=>{if(!response.ok)throw new Error('Navigation data unavailable');return response.json();});
   let navigationData;
   const sky=new THREE.HemisphereLight(0xe8eef1,0x858988,2.8);scene.add(sky);

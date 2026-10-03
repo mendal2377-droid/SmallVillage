@@ -1,0 +1,44 @@
+{
+  "removedRaisedJoints": 637,
+  "levelPavingFootprints": 67,
+  "pavingTop": 0.1,
+  "relocatedPoplars": [
+    {
+      "tree": "MAP seasonal poplar crown.019",
+      "from": [
+        -425.0,
+        236.9499969482422
+      ],
+      "to": [
+        -421.0,
+        236.9499969482422
+      ],
+      "parts": 27
+    },
+    {
+      "tree": "MAP seasonal poplar crown.079",
+      "from": [
+        -155.0,
+        236.9499969482422
+      ],
+      "to": [
+        -157.0,
+        236.9499969482422
+      ],
+      "parts": 27
+    },
+    {
+      "tree": "MAP seasonal poplar crown.113",
+      "from": [
+        -2.0,
+        236.9499969482422
+      ],
+      "to": [
+        -4.0,
+        236.9499969482422
+      ],
+      "parts": 27
+    }
+  ],
+  "remainingTreeRoadConflicts": 0
+}

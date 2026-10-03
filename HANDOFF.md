@@ -1,6 +1,6 @@
 # SmallVillage — developer handoff
 
-Updated 4 October 2026. **Current application: wandering systems on `main`.** Read [docs/WANDERING.md](docs/WANDERING.md) first for 3D map entry, navigation map, energy, six outdoor activities, mixed gardens/ecology and summer nights. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
+Updated 4 October 2026. **Current application: wandering systems with level roads and living wetlands on `main`.** Read [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) for the latest source repair, planting guards, denser groves and pond life, then [docs/WANDERING.md](docs/WANDERING.md) for map entry, energy, activities and summer nights. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
 
 - Repository: <https://github.com/mendal2377-droid/SmallVillage>
 - Production: <https://small-village-eta.vercel.app/>
@@ -22,12 +22,12 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 | Seasons | Uneven wheat/maize, curved mixed vegetable beds, melon vines, fruit trees, mature spreading trees, winter seedlings/resting beds/bare crowns |
 | Weather and time | Clear, overcast, rain, thunderstorm (lightning and thunder), snowfall, fog and sunset; a day/night cycle with sun, moon and stars, optional time progression |
 | Play | Vehicles/toys/chicken flight retained; fishing, potato roasting, watermelon picking, rabbit chasing, kite flying, night fireworks |
-| Water / sky | Light green flowing water, five swimming fish types, soft banks/stones/reeds/lotus; twinkling stars and summer fireflies |
+| Water / sky | Light green flowing water, five swimming fish types, 17 hopping pond frogs, water grass/cattails/duckweed/dragonflies, soft banks/lotus; twinkling stars and summer fireflies |
 | Immersion | Quiet HUD; score appears after target hits; weather/season controls in walk mode; hints fade |
 | Wayfinding | Expandable north-up minimap, player/home/destination and direction/distance; house beacon when farther than 45 m |
 | Energy | Time-based drain, 25% warning, physical home recovery, activity pause/rewards; no forced immobilisation |
 
-The supplied sketch controls roads, waterways, two ponds, fields and the school. The house is at the user's **star**, in the lower-right housing strip, below the east-west stream and just west of the east perimeter road. The former 184-parcel inventory is historical: the immediate neighbors were replaced with photo-based roof silhouettes. There are still 237 mapped poplars.
+The supplied sketch controls roads, waterways, two ponds, fields and the school. The house is at the user's **star**, in the lower-right housing strip, below the east-west stream and just west of the east perimeter road. The former 184-parcel inventory is historical: the immediate neighbors were replaced with photo-based roof silhouettes. There are still 237 mapped poplars; three were relocated away from bridge approaches. The browser adds 37 spreading/fruit trees, including 20 orchard trees. Ground-level roads and bridge decks have continuous level paving, with the former 637 raised joint bars removed.
 
 ### Preserve these user decisions
 
@@ -90,9 +90,12 @@ flowchart LR
 | `src/entry.js` | Startup overview loading, map-pin entry spawn, settings, menu, keyboard/touch UI |
 | `src/world.css` | Full-viewport layout, quiet HUD and mobile controls |
 | `src/world.js` | Surface textures, crop/leaf instancing, wind and water shader |
+| `src/planting.js` | Shared road/bridge/water/building exclusion rules and safe tree relocation |
+| `src/wetland.js` | Pond frogs and hop ripples, submerged grass, cattails, duckweed and dragonflies |
 | `src/game/creatures.js` | Animal anatomy/gaits, roaming, chicken holding/flight/landing |
 | `public/models/world-details.json` | Blender tree positions and field rectangles for dynamic vegetation |
 | `blender/upgrade_connected_world.py` | Current-source near roofscape refinement and metadata export |
+| `blender/repair_roads_and_planting.py` | Current-source paving repair, complete poplar relocation, road-footprint metadata and audit |
 | `src/viewer.js` | Renderer, camera presets, cached GLB loading, season visibility, highlight marker, animation loop |
 | `src/walk.js` | Grounded camera, movement, mouse/touch look, collisions, stair height selection and water/bridge rules |
 | `src/environment.js` | Time of day, sky gradient/stars/sun/moon, lighting/fog, rain/snow particles, lightning, roof shelter and wet exterior materials |
@@ -208,6 +211,7 @@ The narrow gate's **pedestrian opening** is the usable entrance, beside the fixe
 - `shelters`: `{rect: [x0,z0,x1,z1], roof}`; precipitation stops when the camera is inside the footprint and below its roof.
 - Village `waterZones`: rectangles or ellipses, plus `bridges` that allow crossing.
 - Village `places`: `home`, `fields`, `avenue`, `pond`, `school`; each supplies a spawn and yaw.
+- Village `roads`: `[centreX, centreZ, halfX, halfZ, rotationRadians]` paving footprints; mirrored in `world-details.json` for planting exclusion. Refresh with the current-source road repair before exporting changed road geometry.
 
 The `.blend` scene stores JSON in `walk_surfaces`, `walk_shelters` and `village_navigation`. House surfaces/shelters are stored relative to the construction origin in Blender X/Y; the exporter converts them. Update these properties when moving floors, doors, stairs, roofs, waterways or starting points.
 
@@ -239,6 +243,7 @@ Browser scripts use installed Microsoft Edge (`channel: 'msedge'`) and software 
 
 ```sh
 # Without a server
+npm run test:planting
 npm run test:stairs
 npm run test:environment
 npm run test:game
@@ -250,6 +255,7 @@ npm run test:walk
 npm run test:village
 npm run test:touch
 npm run test:activities   # Development server, uses development-only scene inspection
+npm run test:ecology      # Development server: repaired roads/bridge, orchard, frog hop and seasons
 ```
 
 To check a deployment from PowerShell:
@@ -263,6 +269,8 @@ Remove-Item Env:BASE_URL
 **Current test commands supersede the historical gallery suites:** `npm test` / `test:village` run `world-browser.mjs`; `test:walk` runs `connected-test.mjs`; `test:adventure` covers energy and six activities; `test:touch` covers mobile entry/input. Stairs/environment/game checks remain current. New browser evidence is in ignored `artifacts/world/`. See README and WANDERING.md for exact coverage. Old gallery scripts do not match the new interface.
 
 Wandering release checks, 4 Oct 2026: build, connected walking/chicken flight, stairs, environment, vehicle/toy controllers and all six adventure controllers passed. Desktop browser checks passed for 3D pins, minimap/energy, fishing, home recovery, live settings and renderer reuse. Phone touch checks passed for map expansion, arrows/look, winter tools and the walking Summer night preset. The additional activity browser check passed fishing, kite and night fireworks, plus garden/orchard/fish captures, with no JavaScript or shader errors. These are functional and visual checks of a procedural scene, not a claim of photo fidelity.
+
+Road/wetland update: Blender repair and paired exports passed. Planting validation checked all 237 source poplars and eight bridge routes; connected walking and stairs passed again. The local ecology browser passed level roads, clear bridge, denser trees, actual frog movement and winter/summer visibility with no JavaScript or shader errors. Latest model counts: house 59 meshes / 97,569 triangles / 1,218,860 bytes; village 92 meshes / 410,080 triangles / 4,099,156 bytes. Navigation has 224 house and 1,397 village obstacles. See ROAD_REPAIR.md for scope and evidence.
 
 Historical evidence for baseline `065ea71` (run locally on 3 Oct 2026; sizes below precede UV/roofscape exports):
 

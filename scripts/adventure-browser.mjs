@@ -6,7 +6,7 @@ const page=await browser.newPage({viewport:{width:760,height:500}});page.setDefa
 const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});mkdirSync('artifacts/world',{recursive:true});
 try{
   await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');await page.locator('[data-entry=fields]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');
-  assert.equal(await page.evaluate(()=>window.__viewer.details.gardens.trees.filter(t=>['peach','pear','apple'].includes(t.kind)).length),5);
+  assert.ok(await page.evaluate(()=>window.__viewer.details.gardens.trees.filter(t=>['peach','pear','apple','jujube'].includes(t.kind)).length>=18));
   await page.evaluate(()=>{const v=window.__viewer;v.environment.setWeather('clear');v.environment.setSeason('summer');v.details.setSeason('summer');v.environment.setHour(14);v.environment.setDaySpeed(0);v.walk.place(-169,1.75,202,Math.PI/2,-.55);});
   await page.waitForFunction(()=>window.__viewer.details.gardens.melons.some(m=>m.ripe&&m.mesh.visible));await page.screenshot({path:'artifacts/world/summer-garden.png'});
   await page.evaluate(()=>window.__viewer.walk.place(-191,1.75,203,Math.PI/2,-.3));await page.screenshot({path:'artifacts/world/vegetables.png'});

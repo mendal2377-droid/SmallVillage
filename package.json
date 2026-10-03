@@ -15,7 +15,9 @@
     "test:environment": "node scripts/environment-test.mjs",
     "test:game": "node scripts/game-test.mjs",
     "test:adventure": "node scripts/adventure-test.mjs",
-    "test:activities": "node scripts/adventure-browser.mjs"
+    "test:activities": "node scripts/adventure-browser.mjs",
+    "test:planting": "node scripts/planting-test.mjs",
+    "test:ecology": "node scripts/road-ecology-browser.mjs"
   },
   "dependencies": {
     "three": "^0.186.1",
