@@ -13,7 +13,9 @@
     "test:stairs": "node scripts/stairs-test.mjs",
     "test:village": "node scripts/world-browser.mjs",
     "test:environment": "node scripts/environment-test.mjs",
-    "test:game": "node scripts/game-test.mjs"
+    "test:game": "node scripts/game-test.mjs",
+    "test:adventure": "node scripts/adventure-test.mjs",
+    "test:activities": "node scripts/adventure-browser.mjs"
   },
   "dependencies": {
     "three": "^0.186.1",

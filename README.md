@@ -4,11 +4,11 @@ Walk from the fields into the courtyard house, upstairs and onto its roof terrac
 
 **Live:** https://small-village-eta.vercel.app/
 
-**Developers:** read [HANDOFF.md](HANDOFF.md) and [the connected-world notes](docs/CONNECTED_WORLD.md).
+**Developers:** read [HANDOFF.md](HANDOFF.md), [wandering systems](docs/WANDERING.md), and [the connected-world notes](docs/CONNECTED_WORLD.md).
 
 ## Enter and play
 
-The homepage contains two buttons: **Explore village** and **Enter house**. Both load `village.glb`; only the starting position changes. There is no gallery, story section or separate house world on the page.
+The homepage is the actual 3D village plan. Turn and zoom the map, then choose a pin at the yard, avenue, water, fields or school lane to start wandering. Every pin enters the same `village.glb`. **Summer night** sets a clear summer sky at 22:00 before you choose a starting point. **Overview** returns to this map.
 
 | Control | Action |
 | --- | --- |
@@ -23,12 +23,15 @@ The homepage contains two buttons: **Explore village** and **Enter house**. Both
 | L | Flashlight |
 | G · J · T | Change weather · season · time immediately while walking |
 | R | Restack targets |
+| Q · X | Start / act in a nearby activity · leave / decline |
 
-Click the weather chip or **Weather & tools** to choose weather, season, time and sound. The scene changes immediately behind the menu. Closing it resumes movement. Mobile devices show movement, interaction, flap and descend buttons.
+Click the weather chip or **Weather & tools** to choose weather, season, time and sound, or use **Summer night** there for the starry sky at your current location. The scene changes immediately behind the menu. Closing it resumes movement. Mobile devices show movement, interaction, flap and descend buttons.
 
-The two vehicles have detailed tyres, controls, mirrors/vents and working driving, steering and lights. Tools interact with targets; birds scatter and return. Chickens, dogs, cats, snakes, cows and sheep roam on clear ground. Holding a chicken gives the player a deliberately fantastical flight ability, with collision checks and a controlled landing.
+The small navigation map shows the player, home, waterways and destinations. Click a landmark to change the direction guide; this does not teleport the player. Energy declines during wandering, warns at 25%, and restores when resting in the actual yard/house. Outdoor activities pause the drain and award energy on completion: timed fishing, potato roasting, watermelon picking, rabbit chasing, kite flying and night fireworks. Prompts appear only near their locations, with random selection, wait times and cooldowns. The settings menu pauses activity timers and energy drain.
 
-The close roofscape follows the supplied balcony photographs. Fields use seasonal wheat/maize shapes, textured crop stands and wind motion. Poplars have shaped leaf clusters and bare winter branches. Water has animated currents, reflected sky colour, rain ripples, winter ice tint and bank reeds. These are detailed procedural game assets, not photogrammetry or a surveyed reconstruction.
+The two vehicles have detailed tyres, controls, mirrors/vents and working driving, steering and lights. Tools interact with targets; birds scatter and return. Chickens, dogs, cats, snakes, cows, sheep and rabbits roam with varied size, pace and movement. Holding a chicken gives the player a deliberately fantastical flight ability, with collision checks and a controlled landing.
+
+The close roofscape follows the supplied balcony photographs. Fields use uneven seasonal wheat/maize stands, vegetable beds and an orchard. Curved leaves, stems, vines, trellises and solid produce give the nearby plants depth; far grain fields use cheaper textured stands. Big spreading trees supplement the poplar avenues. Light green water has swimming regional fish types, irregular banks, stones, reeds and summer lotus flowers. Summer nights have individually twinkling stars and waterside fireflies. These are procedural game assets, not photogrammetry or a surveyed reconstruction.
 
 ## Develop
 
@@ -48,16 +51,21 @@ npm run test:walk         # Continuous courtyard/lane/road/field route and chick
 npm run test:stairs       # Rooms, stairs, upper corridor, terrace and descent
 npm run test:environment  # Shelters, precipitation, day/night, storms and wet materials
 npm run test:game         # Vehicles, collisions, targets, toys and snow rules
+npm run test:adventure    # Energy, all activities, cooldowns, seasonal rules and pause/recovery
 npm run test:touch        # Mobile arrows, real touch drag, live settings and snow tools
+npm run test:activities   # Dev server: garden/orchard views, fishing, kite and night fireworks
 ```
 
 Browser tests use installed Microsoft Edge and write ignored evidence to `artifacts/world/`. `BASE_URL` can point the same browser suite at production. Browser rendering on software WebGL is slower than normal GPU rendering.
 
 ## Source and deployment
 
-- `index.html`, `src/entry.js`, `src/world.css`: minimal entry and game controls.
+- `index.html`, `src/entry.js`, `src/world.css`, `src/adventure.css`: map entry and game controls.
+- `src/map.js`, `src/places.js`: projected entry pins, minimap and shared activity/garden coordinates.
 - `src/viewer.js`, `src/walk.js`, `src/environment.js`: world loading, navigation and weather/time.
 - `src/world.js`: surface textures, instanced vegetation, wind, water and distance-based crop detail.
+- `src/gardens.js`, `src/organic.js`: vegetable/fruit models, mature trees, banks, flowers, fish and fireflies.
+- `src/game/adventure.js`: energy, location encounters, minigames and rewards.
 - `src/game/`: vehicles, toys, animated creatures, chicken flight, sound and HUD.
 - `blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend`: authoritative editable architecture and map.
 - `blender/upgrade_connected_world.py`: repeatable close-roofscape refinement and vegetation metadata export.

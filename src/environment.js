@@ -29,7 +29,9 @@ void main(){vec3 n=normalize(v);float h=clamp(n.y,0.,1.);vec3 c=mix(horizon,top,
   const starPositions=new Float32Array(900*3);
   for(let i=0;i<900;i++){const a=Math.random()*Math.PI*2,y=.08+Math.random()*.92,r=Math.sqrt(1-y*y);starPositions.set([Math.cos(a)*r*1300,y*1300,Math.sin(a)*r*1300],i*3);}
   const starGeo=new THREE.BufferGeometry();starGeo.setAttribute('position',new THREE.BufferAttribute(starPositions,3));
-  const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xf3f6ff,size:1.6,sizeAttenuation:false,transparent:true,opacity:0,depthWrite:false,fog:false}));
+  const phases=new Float32Array(900),sizes=new Float32Array(900);for(let i=0;i<900;i++){phases[i]=Math.random()*6.28;sizes[i]=1.1+Math.random()*2;}
+  starGeo.setAttribute('phase',new THREE.BufferAttribute(phases,1));starGeo.setAttribute('starSize',new THREE.BufferAttribute(sizes,1));
+  const stars=new THREE.Points(starGeo,new THREE.ShaderMaterial({uniforms:{time:{value:0},visibility:{value:0}},transparent:true,depthWrite:false,fog:false,vertexShader:'attribute float phase;attribute float starSize;uniform float time;varying float brightness;varying float tint;void main(){brightness=.55+.45*sin(time*(.75+starSize*.2)+phase);tint=phase/6.28;gl_PointSize=starSize*(.85+.15*brightness);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform float visibility;varying float brightness;varying float tint;void main(){float d=length(gl_PointCoord-.5);float a=(1.-smoothstep(.1,.5,d))*brightness*visibility;gl_FragColor=vec4(mix(vec3(.75,.85,1.),vec3(1.,.92,.72),tint),a);\n#include <colorspace_fragment>\n}'}));
   stars.renderOrder=-9;stars.frustumCulled=false;scene.add(stars);
   const disc=(color,size)=>{const m=new THREE.Mesh(new THREE.CircleGeometry(size,32),new THREE.MeshBasicMaterial({color,transparent:true,depthWrite:false,fog:false}));m.renderOrder=-8;m.frustumCulled=false;scene.add(m);return m;};
   const sunDisc=disc(0xfff1c8,26),moonDisc=disc(0xe9eefc,17);
@@ -63,8 +65,9 @@ void main(){vec3 n=normalize(v);float h=clamp(n.y,0.,1.);vec3 c=mix(horizon,top,
     scene.background.copy(horizon);dome.material.uniforms.top.value.copy(top);dome.material.uniforms.horizon.value.copy(horizon);
     if(flash)dome.material.uniforms.top.value.lerp(lightningSky,Math.min(1,flash*2));
     scene.fog??=new THREE.Fog(horizon,s.near,s.fog);
-    scene.fog.color.copy(horizon);scene.fog.near=s.near;scene.fog.far=s.fog*(.55+.45*daylight);
+    scene.fog.color.copy(horizon);scene.fog.near=walking?s.near:1600;scene.fog.far=walking?s.fog*(.55+.45*daylight):3000;
     stars.material.opacity=Math.pow(1-daylight,3)*s.stars;
+    stars.material.uniforms.visibility.value=stars.material.opacity;host.dataset.nightStars=stars.material.opacity>.5?'twinkling':'hidden';host.dataset.summerNight=String(season==='summer'&&daylight<.1);
     sunDisc.material.opacity=s.stars>.5?daylight:0;moonDisc.material.opacity=(1-daylight)*Math.max(s.stars,.05);
     host.dataset.hour=effectiveHour().toFixed(2);host.dataset.daylight=daylight.toFixed(2);
   }
@@ -86,6 +89,7 @@ void main(){vec3 n=normalize(v);float h=clamp(n.y,0.,1.);vec3 c=mix(horizon,top,
     flash=Math.max(0,flash-dt*3.2);
     lighting();
     dome.position.copy(camera.position);stars.position.copy(camera.position);
+    stars.material.uniforms.time.value=time;
     dome.material.uniforms.time.value=time;dome.material.uniforms.cloud.value=['overcast','rain','storm','snow'].includes(weather)?.95:.45;dome.material.uniforms.day.value=daylight;
     sunDisc.position.copy(camera.position).addScaledVector(sunDir,1250);sunDisc.lookAt(camera.position);
     moonDisc.position.copy(camera.position).addScaledVector(sunDir,-1250).setY(camera.position.y+Math.abs(sunDir.y)*1250+180);moonDisc.lookAt(camera.position);

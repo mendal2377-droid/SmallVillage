@@ -1,6 +1,6 @@
 # SmallVillage — developer handoff
 
-Updated 3 October 2026. **Current application: connected-world upgrade on `main`.** Read [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) first for the latest entry, roofscape, vegetation, water, animals, chicken flight and validation contracts. Earlier photo/play baseline: `065ea71`; the notes below retain those architectural and historical export details where still applicable.
+Updated 4 October 2026. **Current application: wandering systems on `main`.** Read [docs/WANDERING.md](docs/WANDERING.md) first for 3D map entry, navigation map, energy, six outdoor activities, mixed gardens/ecology and summer nights. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
 
 - Repository: <https://github.com/mendal2377-droid/SmallVillage>
 - Production: <https://small-village-eta.vercel.app/>
@@ -13,18 +13,19 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 
 | Feature | Current behavior |
 | --- | --- |
-| Entry | Only Explore village / Enter house; no gallery, story or top links |
-| 3D world | Both entry buttons load the same full village containing the detailed house |
+| Entry | Interactive 3D village plan, five projected wandering pins including the yard; Summer night preset; no gallery/story |
+| 3D world | All entry points load the same full village containing the detailed house |
 | Navigation | Continuous full-screen walking; keyboard/mouse and mobile touch controls |
 | House access | Walk from the village lane through the red pedestrian gate, into the courtyard and rooms |
 | Upstairs | Climb two stair flights and the turning landing; walk the corridor and upper rooms; exit through the green door onto the roof terrace |
 | Collision | Height-aware walls/furniture, stair ramps, protected balcony/terrace edges, water barriers and bridge crossings |
-| Seasons | Shaped wheat/maize, dense textured crop stands, wind motion, winter seedlings/snow and bare poplars |
+| Seasons | Uneven wheat/maize, curved mixed vegetable beds, melon vines, fruit trees, mature spreading trees, winter seedlings/resting beds/bare crowns |
 | Weather and time | Clear, overcast, rain, thunderstorm (lightning and thunder), snowfall, fog and sunset; a day/night cycle with sun, moon and stars, optional time progression |
-| Play | Detailed e-trike/tractor; draw-and-release slingshot and other toys; animated birds and six animal kinds; hold a chicken to fly and land |
-| Water / sky | Moving water, rain ripples, winter ice tint, reeds, cloud sky and local sun shadows |
+| Play | Vehicles/toys/chicken flight retained; fishing, potato roasting, watermelon picking, rabbit chasing, kite flying, night fireworks |
+| Water / sky | Light green flowing water, five swimming fish types, soft banks/stones/reeds/lotus; twinkling stars and summer fireflies |
 | Immersion | Quiet HUD; score appears after target hits; weather/season controls in walk mode; hints fade |
-| Wayfinding | House ring/label when farther than 45 m; continuous village/house access |
+| Wayfinding | Expandable north-up minimap, player/home/destination and direction/distance; house beacon when farther than 45 m |
+| Energy | Time-based drain, 25% warning, physical home recovery, activity pause/rewards; no forced immobilisation |
 
 The supplied sketch controls roads, waterways, two ponds, fields and the school. The house is at the user's **star**, in the lower-right housing strip, below the east-west stream and just west of the east perimeter road. The former 184-parcel inventory is historical: the immediate neighbors were replaced with photo-based roof silhouettes. There are still 237 mapped poplars.
 
@@ -35,7 +36,7 @@ The supplied sketch controls roads, waterways, two ponds, fields and the school.
 - Keep the Chinese village name removed from the page's village heading. The English location remains.
 - Follow the supplied house photos/videos; clear temporary clutter from the house reconstruction.
 - Preserve the quiet, focused walking interface and usable mobile controls.
-- Keep the page to two entry buttons and use one full world for both starts. Chicken-assisted flight is explicitly requested gameplay. G/J change weather/season during walking.
+- Use the actual 3D village plan with wandering pins as the entry; every pin uses the full world. Chicken flight, energy, six activities and the Summer night preset are explicitly requested gameplay. G/J change weather/season during walking.
 - Keep continuous village-to-house-to-upstairs-to-terrace access.
 - Treat the star as the confirmed house location. North at the top is an assumption consistent with the satellite reference.
 - Distinguish observed features from estimated dimensions, neighboring plots, school details and concealed rooms. This is a visual reconstruction, not a survey.
@@ -85,8 +86,8 @@ flowchart LR
 
 | File | Responsibility / when to edit |
 | --- | --- |
-| `index.html` | Two-button entry overlay, game HUD and environment/tools menu |
-| `src/entry.js` | Lazy world loading, entry spawn, settings, menu, keyboard/touch UI |
+| `index.html` | Projected 3D map entry, minimap/energy/activity HUD and environment/tools menu |
+| `src/entry.js` | Startup overview loading, map-pin entry spawn, settings, menu, keyboard/touch UI |
 | `src/world.css` | Full-viewport layout, quiet HUD and mobile controls |
 | `src/world.js` | Surface textures, crop/leaf instancing, wind and water shader |
 | `src/game/creatures.js` | Animal anatomy/gaits, roaming, chicken holding/flight/landing |
@@ -117,7 +118,7 @@ flowchart LR
 | `docs/photo-validation.json` | Saved successful checks and exact export sizes |
 | `vercel.json` | Static build, output directory and response headers |
 
-`createViewer(host)` provides `load`, `preset`, `setSeason`, `setWeather`, `walkAt`, `pauseWalk`, `walkInput`, `reset`, `setActive` and `exitWalk`. `entry.js` uses `load('village')` for both entry buttons and selects the starting place. A `navigationchange` event communicates walking state back to `entry.js`.
+`createViewer(host, {onEnter})` provides `load`, `preset`, `setSeason`, `setWeather`, `walkAt`, `pauseWalk`, `walkInput`, `reset`, `setActive` and `exitWalk`. `entry.js` loads the full village at startup for the overview. Projected map pins select the starting place. A `navigationchange` event communicates walking state back to `entry.js`.
 
 ## 4. Blender editing and export workflow
 
@@ -241,11 +242,14 @@ Browser scripts use installed Microsoft Edge (`channel: 'msedge'`) and software 
 npm run test:stairs
 npm run test:environment
 npm run test:game
+npm run test:adventure
 
 # With the dev/preview server on port 4173, run sequentially
 npm test
 npm run test:walk
 npm run test:village
+npm run test:touch
+npm run test:activities   # Development server, uses development-only scene inspection
 ```
 
 To check a deployment from PowerShell:
@@ -256,7 +260,9 @@ npm run test:village
 Remove-Item Env:BASE_URL
 ```
 
-**Current test commands supersede the historical gallery suites:** `npm test` / `test:village` run `world-browser.mjs`; `test:walk` runs `connected-test.mjs`. `test:stairs`, `test:environment` and `test:game` remain current. New browser evidence is in ignored `artifacts/world/`. See README and CONNECTED_WORLD.md for exact coverage. Old gallery scripts do not match the new interface.
+**Current test commands supersede the historical gallery suites:** `npm test` / `test:village` run `world-browser.mjs`; `test:walk` runs `connected-test.mjs`; `test:adventure` covers energy and six activities; `test:touch` covers mobile entry/input. Stairs/environment/game checks remain current. New browser evidence is in ignored `artifacts/world/`. See README and WANDERING.md for exact coverage. Old gallery scripts do not match the new interface.
+
+Wandering release checks, 4 Oct 2026: build, connected walking/chicken flight, stairs, environment, vehicle/toy controllers and all six adventure controllers passed. Desktop browser checks passed for 3D pins, minimap/energy, fishing, home recovery, live settings and renderer reuse. Phone touch checks passed for map expansion, arrows/look, winter tools and the walking Summer night preset. The additional activity browser check passed fishing, kite and night fireworks, plus garden/orchard/fish captures, with no JavaScript or shader errors. These are functional and visual checks of a procedural scene, not a claim of photo fidelity.
 
 Historical evidence for baseline `065ea71` (run locally on 3 Oct 2026; sizes below precede UV/roofscape exports):
 
@@ -268,7 +274,7 @@ Historical evidence for baseline `065ea71` (run locally on 3 Oct 2026; sizes bel
 
 `docs/photo-validation.json` records the prior run; it is not a new test run whenever you open the file. `scripts/save_photo_validation.py` aggregates existing successful JSON files, has a fixed revision/date, and does not run tests. Update those fields and record new controller/environment results explicitly for a new release.
 
-Software WebGL can be slow at a large viewport. A production keyboard test originally timed out while progressing down the lane; the navigation data matched and there was no obstacle at that position. The village suite now uses a 1024×700 desktop viewport and 120-second movement waits. Distinguish slow rendering from a reproducible collision failure. The walk suite once timed out after the play layer was added; the cause was always-on zero-intensity lights, fixed by `visible=false` (see game contracts). If a browser test starts timing out again, first look for new per-frame GPU work. Avoid editing assets during a browser run: Vite reloads can abort navigation or reset the camera.
+Software WebGL can be slow at a large viewport. The current world suite uses 1000×650 and 180-second waits; activities use 760×500. Movement physics uses a capped step, while energy and activity timers use active elapsed time. Distinguish slow rendering from a reproducible collision failure. The walk suite once timed out after the play layer was added; the cause was always-on zero-intensity lights, fixed by `visible=false` (see game contracts). If a browser test starts timing out again, first look for new per-frame GPU work. Avoid editing assets during a browser run: Vite reloads can abort navigation or reset the camera.
 
 ## 7. Deployment and access
 
@@ -321,7 +327,7 @@ These scripts create a backup from the current source when their expected backup
 All requested features in the application baseline are implemented. These are development opportunities, not unfulfilled promises:
 
 - **Open items from the 3 Oct photo review.** Photo-faithful geometry was corrected only where it was clearly wrong. Still approximate: the stove front (arches are flat dark panels), wardrobe/furniture proportions in the rooms, and the village-side neighbouring walls seen from the courtyard. Check new work against `D:/blender/hometown/house/*.jpg` next to the matching browser screenshot.
-- Current animals, wind, textured fields/water and chicken flight are described in CONNECTED_WORLD.md. Future ideas: bicycle/car, quests, persistence, footstep/indoor-outdoor audio.
+- Current map/energy/activities/gardens/ecology/night are in WANDERING.md; earlier connected-world architecture and flight are in CONNECTED_WORLD.md. Future ideas: persistence, fuller route planning and footstep/indoor-outdoor audio.
 
 - Village distances and parcels are estimated; orientation is assumed. A measured/georeferenced plan would improve accuracy.
 - Most neighboring houses are procedural exterior blocks; they do not have the detailed, enterable interior of the owner's house. Upper rooms in the detailed house remain sparsely furnished because footage is incomplete.
@@ -344,4 +350,4 @@ All requested features in the application baseline are implemented. These are de
 
 ## 10. Copyable brief for the next developer or coding agent
 
-> Continue SmallVillage from current main. Read HANDOFF.md and docs/CONNECTED_WORLD.md first. The page has only village/house entry; both must use the full village model and continuous gate/rooms/stairs/terrace navigation. Preserve the starred house position, photo-based nearby roofscape, clean interiors, quiet HUD, mobile controls, live weather/season changes, animated vegetation/water/animals and chicken-assisted flight. Architecture is in blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend; runtime vegetation/water is in src/world.js and creatures/flight in src/game/creatures.js. Raw media is in D:/blender/hometown/house and D:/blender/hometown/village photos outside Git. Dimensions and neighbors are estimates. Do not replay old stage-backup scripts blindly. Export geometry, navigation and world metadata together; bump sceneVersion and run npm test, test:walk, test:stairs, test:environment, test:game and build. Vercel deploys GitHub main; obtain collaborator access from the owner. Implement the new requested change: [describe it here].
+> Continue SmallVillage from current main. Read HANDOFF.md, docs/WANDERING.md and docs/CONNECTED_WORLD.md first. The page is a 3D village plan with projected entry pins; every pin uses the full village model and continuous gate/rooms/stairs/terrace navigation. Preserve the starred house position, photo-based roofscape, clean interiors, quiet HUD/mobile controls, live weather/seasons, chicken flight, minimap/energy, location activities and Summer night preset. Shared coordinates are in src/places.js; activities/energy in src/game/adventure.js; garden/ecology geometry in src/gardens.js. Architecture is in blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend. Raw media is in D:/blender/hometown/house and D:/blender/hometown/village photos outside Git. Dimensions/neighbors/new gardens/species are estimates or gameplay interpretations. Do not replay old backup scripts blindly. Export architecture/navigation/metadata together if changed; bump sceneVersion and run relevant tests including test:adventure, npm test, test:touch and build. Vercel deploys GitHub main; obtain collaborator access from the owner. Implement the new requested change: [describe it here].
