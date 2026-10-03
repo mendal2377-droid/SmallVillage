@@ -1,0 +1,2426 @@
+{
+  "house_location": "star in lower-right housing strip, below east-west river and west of east road",
+  "orientation": "north at top assumed, consistent with supplied satellite screenshot",
+  "scale": "approximate 0.65 m per sketch pixel; not a survey",
+  "parcels": [
+    {
+      "id": 1,
+      "center": [
+        -411.33,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 2,
+      "center": [
+        -393.29,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 3,
+      "center": [
+        -375.26,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 4,
+      "center": [
+        -357.22,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 5,
+      "center": [
+        -339.18,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 6,
+      "center": [
+        -321.14,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 7,
+      "center": [
+        -303.11,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 8,
+      "center": [
+        -285.07,
+        44.26
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 9,
+      "center": [
+        -411.33,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 10,
+      "center": [
+        -393.29,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 11,
+      "center": [
+        -375.26,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 12,
+      "center": [
+        -357.22,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 13,
+      "center": [
+        -339.18,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 14,
+      "center": [
+        -321.14,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 15,
+      "center": [
+        -303.11,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 16,
+      "center": [
+        -285.07,
+        69.48
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 17,
+      "center": [
+        -411.33,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 18,
+      "center": [
+        -393.29,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 19,
+      "center": [
+        -375.26,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 20,
+      "center": [
+        -357.22,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 21,
+      "center": [
+        -339.18,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 22,
+      "center": [
+        -321.14,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 23,
+      "center": [
+        -303.11,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 24,
+      "center": [
+        -285.07,
+        94.7
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 25,
+      "center": [
+        -411.33,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 26,
+      "center": [
+        -393.29,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 27,
+      "center": [
+        -375.26,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 28,
+      "center": [
+        -357.22,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 29,
+      "center": [
+        -339.18,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 30,
+      "center": [
+        -321.14,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 31,
+      "center": [
+        -303.11,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 32,
+      "center": [
+        -285.07,
+        119.92
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 33,
+      "center": [
+        -411.33,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 34,
+      "center": [
+        -393.29,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 35,
+      "center": [
+        -375.26,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 36,
+      "center": [
+        -357.22,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 37,
+      "center": [
+        -339.18,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 38,
+      "center": [
+        -321.14,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 39,
+      "center": [
+        -303.11,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 40,
+      "center": [
+        -285.07,
+        145.14
+      ],
+      "dimensions": [
+        15.2375,
+        20.82
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 41,
+      "center": [
+        -250.14,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 42,
+      "center": [
+        -232.13,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 43,
+      "center": [
+        -214.11,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 44,
+      "center": [
+        -196.1,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 45,
+      "center": [
+        -178.09,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 46,
+      "center": [
+        -160.07,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 47,
+      "center": [
+        -142.06,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 48,
+      "center": [
+        -124.04,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 49,
+      "center": [
+        -106.03,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 50,
+      "center": [
+        -88.01,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 51,
+      "center": [
+        -70.0,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 52,
+      "center": [
+        -51.99,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 53,
+      "center": [
+        -33.97,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 54,
+      "center": [
+        -15.96,
+        44.97
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 55,
+      "center": [
+        -250.14,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 56,
+      "center": [
+        -232.13,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 57,
+      "center": [
+        -214.11,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 58,
+      "center": [
+        -196.1,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 59,
+      "center": [
+        -178.09,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 60,
+      "center": [
+        -160.07,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 61,
+      "center": [
+        -142.06,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 62,
+      "center": [
+        -124.04,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 63,
+      "center": [
+        -106.03,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 64,
+      "center": [
+        -88.01,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 65,
+      "center": [
+        -70.0,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 66,
+      "center": [
+        -51.99,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 67,
+      "center": [
+        -33.97,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 68,
+      "center": [
+        -15.96,
+        70.33
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 69,
+      "center": [
+        -250.14,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 70,
+      "center": [
+        -232.13,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 71,
+      "center": [
+        -214.11,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 72,
+      "center": [
+        -196.1,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 73,
+      "center": [
+        -178.09,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 74,
+      "center": [
+        -160.07,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 75,
+      "center": [
+        -142.06,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 76,
+      "center": [
+        -124.04,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 77,
+      "center": [
+        -106.03,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 78,
+      "center": [
+        -88.01,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 79,
+      "center": [
+        -70.0,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 80,
+      "center": [
+        -51.99,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 81,
+      "center": [
+        -33.97,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 82,
+      "center": [
+        -15.96,
+        95.67
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 83,
+      "center": [
+        -250.14,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 84,
+      "center": [
+        -232.13,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 85,
+      "center": [
+        -214.11,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 86,
+      "center": [
+        -196.1,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 87,
+      "center": [
+        -178.09,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 88,
+      "center": [
+        -160.07,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 89,
+      "center": [
+        -142.06,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 90,
+      "center": [
+        -124.04,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 91,
+      "center": [
+        -106.03,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 92,
+      "center": [
+        -88.01,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 93,
+      "center": [
+        -70.0,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 94,
+      "center": [
+        -51.99,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 95,
+      "center": [
+        -33.97,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 96,
+      "center": [
+        -15.96,
+        121.03
+      ],
+      "dimensions": [
+        15.214285714285712,
+        20.950000000000003
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 97,
+      "center": [
+        -410.72,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 98,
+      "center": [
+        -392.77,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 99,
+      "center": [
+        -374.81,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 100,
+      "center": [
+        -356.85,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 101,
+      "center": [
+        -338.9,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 102,
+      "center": [
+        -320.94,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 103,
+      "center": [
+        -302.98,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 104,
+      "center": [
+        -285.03,
+        -26.04
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 105,
+      "center": [
+        -410.72,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 106,
+      "center": [
+        -392.77,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 107,
+      "center": [
+        -374.81,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 108,
+      "center": [
+        -356.85,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 109,
+      "center": [
+        -338.9,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 110,
+      "center": [
+        -320.94,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 111,
+      "center": [
+        -302.98,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 112,
+      "center": [
+        -285.03,
+        0.29
+      ],
+      "dimensions": [
+        15.156249999999996,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 113,
+      "center": [
+        -248.94,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 114,
+      "center": [
+        -231.11,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 115,
+      "center": [
+        -213.28,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 116,
+      "center": [
+        -195.45,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 117,
+      "center": [
+        -177.62,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 118,
+      "center": [
+        -159.79,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 119,
+      "center": [
+        -141.96,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 120,
+      "center": [
+        -124.14,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 121,
+      "center": [
+        -106.31,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 122,
+      "center": [
+        -88.48,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 123,
+      "center": [
+        -70.65,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 124,
+      "center": [
+        -52.82,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 125,
+      "center": [
+        -34.99,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 126,
+      "center": [
+        -17.16,
+        -26.04
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 127,
+      "center": [
+        -248.94,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 128,
+      "center": [
+        -231.11,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 129,
+      "center": [
+        -213.28,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 130,
+      "center": [
+        -195.45,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 131,
+      "center": [
+        -177.62,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 132,
+      "center": [
+        -159.79,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 133,
+      "center": [
+        -141.96,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 134,
+      "center": [
+        -124.14,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 135,
+      "center": [
+        -106.31,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 136,
+      "center": [
+        -88.48,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 137,
+      "center": [
+        -70.65,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 138,
+      "center": [
+        -52.82,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 139,
+      "center": [
+        -34.99,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 140,
+      "center": [
+        -17.16,
+        0.29
+      ],
+      "dimensions": [
+        15.028571428571428,
+        21.924999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 141,
+      "center": [
+        -409.5,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 142,
+      "center": [
+        -391.71,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 143,
+      "center": [
+        -373.92,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 144,
+      "center": [
+        -356.12,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 145,
+      "center": [
+        -338.33,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 146,
+      "center": [
+        -320.53,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 147,
+      "center": [
+        -302.74,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 148,
+      "center": [
+        -284.95,
+        -105.66
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 149,
+      "center": [
+        -409.5,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 150,
+      "center": [
+        -391.71,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 151,
+      "center": [
+        -373.92,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 152,
+      "center": [
+        -356.12,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 153,
+      "center": [
+        -338.33,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 154,
+      "center": [
+        -320.53,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 155,
+      "center": [
+        -302.74,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 156,
+      "center": [
+        -284.95,
+        -72.19
+      ],
+      "dimensions": [
+        14.993750000000002,
+        29.074999999999996
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 157,
+      "center": [
+        -248.94,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 158,
+      "center": [
+        -231.11,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 159,
+      "center": [
+        -213.28,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 160,
+      "center": [
+        -195.45,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 161,
+      "center": [
+        -177.62,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 162,
+      "center": [
+        -159.79,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 163,
+      "center": [
+        -141.96,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 164,
+      "center": [
+        -124.14,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 165,
+      "center": [
+        -106.31,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 166,
+      "center": [
+        -88.48,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 167,
+      "center": [
+        -70.65,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 168,
+      "center": [
+        -52.82,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 169,
+      "center": [
+        -34.99,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 170,
+      "center": [
+        -17.16,
+        -66.5
+      ],
+      "dimensions": [
+        15.028571428571428,
+        20.299999999999997
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 171,
+      "center": [
+        -210.07,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 172,
+      "center": [
+        -192.52,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 173,
+      "center": [
+        -174.97,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 174,
+      "center": [
+        -157.42,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 175,
+      "center": [
+        -139.88,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 176,
+      "center": [
+        -122.32,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 177,
+      "center": [
+        -104.77,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 178,
+      "center": [
+        -87.22,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 179,
+      "center": [
+        -69.67,
+        -110.05
+      ],
+      "dimensions": [
+        14.75,
+        21.6
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 180,
+      "center": [
+        18.01,
+        122.0
+      ],
+      "dimensions": [
+        14.619999999999997,
+        38.50000000000001
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 181,
+      "center": [
+        35.43,
+        122.0
+      ],
+      "dimensions": [
+        14.619999999999997,
+        38.50000000000001
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 182,
+      "center": [
+        52.85,
+        122.0
+      ],
+      "dimensions": [
+        14.619999999999997,
+        38.50000000000001
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 183,
+      "center": [
+        70.27,
+        122.0
+      ],
+      "dimensions": [
+        14.619999999999997,
+        38.50000000000001
+      ],
+      "status": "estimated parcel within user block"
+    },
+    {
+      "id": 184,
+      "center": [
+        87.69,
+        122.0
+      ],
+      "dimensions": [
+        14.619999999999997,
+        38.50000000000001
+      ],
+      "status": "estimated parcel within user block"
+    }
+  ],
+  "trees": 237,
+  "crops": {
+    "green_blades": 6791,
+    "corn_stalks": 6791
+  },
+  "landmarks": [
+    "north pond",
+    "central pond",
+    "central river",
+    "east river branch",
+    "southern irrigation channel",
+    "primary school"
+  ],
+  "seasons": [
+    "green",
+    "corn",
+    "winter"
+  ],
+  "navigation": {
+    "bounds": [
+      -535,
+      -205,
+      315,
+      335
+    ],
+    "spawn": [
+      -38.7,
+      1.75,
+      130.5
+    ],
+    "ground": 0.1,
+    "waterZones": [
+      {
+        "shape": "rect",
+        "rect": [
+          -271.95,
+          -156.35000000000002,
+          -264.55,
+          236.5
+        ]
+      },
+      {
+        "shape": "rect",
+        "rect": [
+          -271.65,
+          -156.05000000000004,
+          -112.75,
+          -149.25000000000003
+        ]
+      },
+      {
+        "shape": "rect",
+        "rect": [
+          -266.65000000000003,
+          84.9,
+          3.800000000000003,
+          92.1
+        ]
+      },
+      {
+        "shape": "rect",
+        "rect": [
+          -512.55,
+          228.35000000000002,
+          290.0,
+          233.35000000000002
+        ]
+      },
+      {
+        "shape": "ellipse",
+        "center": [
+          -116.15,
+          -155.90000000000003
+        ],
+        "radius": [
+          35,
+          15
+        ]
+      },
+      {
+        "shape": "ellipse",
+        "center": [
+          -263.05,
+          88.5
+        ],
+        "radius": [
+          25,
+          13
+        ]
+      },
+      {
+        "shape": "rect",
+        "rect": [
+          -420.95000000000005,
+          140.5,
+          -419.75,
+          221.10000000000002
+        ]
+      },
+      {
+        "shape": "rect",
+        "rect": [
+          -149.25,
+          140.5,
+          -148.05,
+          221.10000000000002
+        ]
+      },
+      {
+        "shape": "rect",
+        "rect": [
+          6.750000000000002,
+          140.5,
+          7.950000000000001,
+          221.10000000000002
+        ]
+      }
+    ],
+    "bridges": [
+      [
+        -274.75,
+        -24.2,
+        -261.75,
+        -19.8
+      ],
+      [
+        -274.75,
+        45.99999999999999,
+        -261.75,
+        50.4
+      ],
+      [
+        -274.75,
+        129.85000000000002,
+        -261.75,
+        134.25
+      ],
+      [
+        -428.8,
+        224.35000000000002,
+        -423.59999999999997,
+        237.35000000000002
+      ],
+      [
+        -270.85,
+        224.35000000000002,
+        -265.65,
+        237.35000000000002
+      ],
+      [
+        -155.75,
+        224.35000000000002,
+        -153.25,
+        237.35000000000002
+      ],
+      [
+        -2.3999999999999972,
+        224.35000000000002,
+        2.800000000000003,
+        237.35000000000002
+      ],
+      [
+        -2.3999999999999972,
+        82.5,
+        2.800000000000003,
+        94.5
+      ]
+    ],
+    "places": {
+      "home": {
+        "spawn": [
+          -38.7,
+          1.75,
+          122.5
+        ],
+        "yaw": 0
+      },
+      "fields": {
+        "spawn": [
+          -154.5,
+          1.75,
+          206.8
+        ],
+        "yaw": 0
+      },
+      "avenue": {
+        "spawn": [
+          -480.8,
+          1.75,
+          241.25
+        ],
+        "yaw": -1.5707963267948966
+      },
+      "pond": {
+        "spawn": [
+          -285.15,
+          1.75,
+          48.199999999999996
+        ],
+        "yaw": -1.5707963267948966
+      },
+      "school": {
+        "spawn": [
+          0.20000000000000284,
+          1.75,
+          -150.7
+        ],
+        "yaw": -1.5707963267948966
+      }
+    }
+  }
+}

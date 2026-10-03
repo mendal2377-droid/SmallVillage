@@ -8,7 +8,7 @@ const pos=()=>page.locator('#canvas-host').getAttribute('data-camera-position').
 await mkdir('test-results',{recursive:true});
 try{
   await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173',{waitUntil:'domcontentloaded',timeout:90000});
-  assert.equal(await page.locator('.filmstrip img').count(),10);
+  assert.equal(await page.locator('.filmstrip img').count(),17);
   await page.locator('.filmstrip img').evaluateAll(images=>Promise.all(images.map(image=>{image.loading='eager';return image.decode();})));
   await page.locator('#three-mode').click();
   await page.locator('#loading').waitFor({state:'hidden',timeout:120000});

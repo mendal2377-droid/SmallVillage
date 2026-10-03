@@ -34,6 +34,11 @@ assert.equal(camera.position.y,upperY,'Cannot fall through balcony edge');
 assert.ok(camera.position.z<-1.64,'Balcony stops movement');
 go(3.5,-2.3,'return from glazing');
 go(-4.26,-2.3,'return to stair head');
+go(-4.26,3.8,'through green door onto terrace');
+assert.ok(Math.abs(camera.position.y-5.39)<.02,'Terrace shares upstairs level');
+travel('left',2);assert.ok(camera.position.x>-4.71,'Roof west parapet stops movement');
+go(-4.26,3.8,'return from roof parapet');
+go(-4.26,-2.3,'terrace back to stair head');
 go(-4.26,-6.7,'descend return flight');
 go(-2.87,-6.7,'turn on intermediate landing');
 go(-2.87,-2.2,'descend first flight');
@@ -54,4 +59,22 @@ go(-34.87,102.3,'village first flight');
 go(-36.26,102.3,'village turning landing');
 go(-36.26,106.7,'village second floor');
 assert.ok(Math.abs(camera.position.y-5.39)<.02);
+// Enter this same house from the village lane without changing scene or teleporting.
+walk.enter({...data.village,...data.village.places.home});
+go(-38.7,112.65,'walk village lane to pedestrian opening');
+go(-33.3,112.65,'through red gate into courtyard');
+go(-33.3,106.8,'yard to stairs in village');
+go(-34.87,106.8,'village staircase');go(-34.87,102.3,'first flight');
+go(-36.26,102.3,'turn');go(-36.26,106.7,'second floor');
+go(-36.26,112.8,'walk onto roof from village');
+assert.ok(Math.abs(camera.position.y-5.39)<.02,'Village roof eye height');
+for(const [name,place] of Object.entries(data.village.places)){
+  walk.enter({...data.village,...place});const start=camera.position.clone();travel('forward',.5);
+  assert.ok(camera.position.distanceTo(start)>.35,`${name} starting point is obstructed`);
+}
+const water=data.village.waterZones.find(z=>z.shape==='rect').rect;
+walk.enter({...data.village,spawn:[water[0]-1,1.75,10]});travel('right',4);
+assert.ok(camera.position.x<water[0]-.15,'River bank prevents walking into water');
+const bridge=data.village.bridges[0],bridgeZ=(bridge[1]+bridge[3])/2;
+walk.enter({...data.village,spawn:[bridge[0]+.3,1.75,bridgeZ]});go(bridge[2]-.3,bridgeZ,'cross river on bridge');
 console.log('PASS: all five rooms, two stair flights, upper corridor, balcony barrier, descent, and village stairs.');

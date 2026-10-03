@@ -1,14 +1,14 @@
 [
   {
     "name": "house",
-    "meshes": 49,
-    "triangles": 93985,
-    "bytes": 796152
+    "meshes": 59,
+    "triangles": 96369,
+    "bytes": 821668
   },
   {
     "name": "village",
-    "meshes": 81,
-    "triangles": 930085,
-    "bytes": 6384988
+    "meshes": 83,
+    "triangles": 399508,
+    "bytes": 2856232
   }
 ]

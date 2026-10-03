@@ -6,6 +6,7 @@ const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use
 await mkdir('test-results',{recursive:true});
 const page=await browser.newPage({viewport:{width:1440,height:1100}});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
+async function resetWalk(){await page.locator('#walk-exit').click();await page.locator('[data-view="walk"]').click();}
 const position=()=>page.locator('#canvas-host').getAttribute('data-camera-position').then(s=>s.split(',').map(Number));
 const waitForTravel=async(start,min)=>page.waitForFunction(({start,min})=>{
   const p=document.querySelector('#canvas-host').dataset.cameraPosition.split(',').map(Number);return Math.hypot(p[0]-start[0],p[2]-start[2])>min;
@@ -26,21 +27,21 @@ try{
   await page.mouse.move(canvasRect.x+canvasRect.width/2+120,canvasRect.y+canvasRect.height/2+20);
   await page.waitForFunction(previous=>document.querySelector('#canvas-host').dataset.cameraLook!==previous,look);
   await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.pointerLockElement);
-  await page.locator('#reset-view').click();
+  await resetWalk();
   await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.cameraPosition==='0.000,1.850,3.250');
   // Walk into the south wall: no tunneling even with the faster walking speed.
   await page.keyboard.down('ShiftLeft');await page.keyboard.down('KeyS');
   await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[2])>5.8,{},{timeout:15000});
   await page.waitForTimeout(700);await page.keyboard.up('KeyS');await page.keyboard.up('ShiftLeft');
   const wall=await position();assert.ok(wall[2]<6.0,'Walked through south wall');
-  await page.locator('#reset-view').click();
+  await resetWalk();
   await page.screenshot({path:'test-results/walk-house.png',fullPage:false});
   // Exit through the actual side passage, rather than colliding with its overhead lintel.
   await page.keyboard.down('KeyS');await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[2])>3.60);await page.keyboard.up('KeyS');
   await page.keyboard.down('ShiftLeft');await page.keyboard.down('KeyA');
   await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[0])<-5.6,{},{timeout:60000});
   await page.keyboard.up('KeyA');await page.keyboard.up('ShiftLeft');
-  await page.locator('[data-view="orbit"]').click();
+  await page.locator('#walk-exit').click();
   assert.equal(await page.locator('#walk-pad').isVisible(),false);
   await page.locator('[data-model="village"]').click();await page.locator('#loading').waitFor({state:'hidden',timeout:120000});
   await page.locator('[data-view="walk"]').click();
@@ -49,7 +50,7 @@ try{
   assert.ok((await position())[2]<village[2]-.45);
   await page.screenshot({path:'test-results/walk-village.png',fullPage:false});
   // Switching to images clears held movement and all walking overlays.
-  await page.locator('#render-mode').click();assert.equal(await page.locator('#walk-help').isVisible(),false);
+  await page.locator('#walk-exit').click();await page.locator('#render-mode').click();assert.equal(await page.locator('#walk-help').isVisible(),false);
   const mobile=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   mobile.on('pageerror',e=>errors.push(e.message));await mobile.goto(url,{waitUntil:'networkidle'});
   await mobile.locator('#three-mode').tap();await mobile.locator('#loading').waitFor({state:'hidden',timeout:120000});

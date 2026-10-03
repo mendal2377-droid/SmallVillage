@@ -1,21 +1,23 @@
 # SmallVillage
 
-A browser-based presentation of a Blender village reconstruction in Henan, China, with a detailed courtyard house and adjoining alley based on two videos, including a detailed 116-second interior tour.
+A browser-based presentation of a Blender village reconstruction in Henan, China. The house follows the courtyard, interior and roof videos plus new photographs. Village topology follows the supplied sketch, satellite reference and seventeen field and lane photographs.
 
 ## Explore
 
-- Ten rendered views: courtyard, alley, entrance, elevated context, kitchen, meeting room, bedroom, storage room, stairs, and upstairs.
-- Two interactive 3D scenes: the filmed house and the interpretive village.
+- Seventeen rendered views, including the roof terrace, village plan, poplar avenue, field path, autumn corn and winter road.
+- Two interactive 3D scenes, with the same detailed house included in the full village.
 - Orbit, zoom, pan, camera presets, and fullscreen.
-- First-person walking in both scenes, with floor-aware movement, furniture/wall collisions, and climbable stairs.
+- Immersive first-person walking, wall collisions, two climbable stair flights and an accessible roof terrace.
+- Four seasonal crop/snow views and independent clear, overcast, rain, snowfall and sunset conditions.
+- A highlighted house, camera focus button and village starting points along roads and field paths.
 - Responsive layout and a render-gallery fallback if WebGL is unavailable.
 - Downloadable, editable Blender source files.
 
-The house model is approximately 0.8 MB and the full village approximately 6.4 MB, using Draco compression. Model decoders are served locally with the site.
+The house model is approximately 0.8 MB and the full village approximately 2.9 MB, using Draco compression. Model decoders are served locally with the site.
 
 ### Walk through the scene
 
-Select a scene, choose **Explore in 3D**, then **Walk inside**. Use **WASD** or **arrow keys** to move, click the scene for mouse look, and hold **Shift** to move faster. **Esc** releases the mouse. Dragging to look also works without mouse capture. On touchscreens, hold the on-screen arrow buttons to walk and drag the scene to look around. **Reset** returns to the starting position; **Orbit view** leaves walking mode.
+Select a scene, choose **Explore in 3D**, then **Walk inside**. Use **WASD** or **arrow keys** to move, click the scene for mouse look, and hold **Shift** to move faster. **Esc** releases the mouse. Dragging to look also works without mouse capture. Touchscreens show arrow buttons and support dragging to look. **Menu** pauses walking and opens weather, season and village starting-point controls; **Exit walk** restores the page. Rain and snow stop under the exported roof footprints. There is no ambient audio.
 
 Enter the corner doorway to the left of the meeting room. Walk up the red stairs, turn left on the intermediate landing, then climb the return flight. You can walk along the enclosed upper corridor, look down into the courtyard, enter the upper rooms, and descend. The ground floor includes a kitchen, meeting room, bedroom, and tidy storage/dining room. Upstairs room furnishings are sparse because the footage mainly shows the corridor.
 
@@ -64,11 +66,13 @@ The website uses simplified material colors in 3D; the rendered gallery retains 
 
 **Observed in the video:** two-storey white house, enclosed glazed balcony, burgundy tiled plinth, decorative tile bands, red entrance gate with pedestrian opening, blue corrugated shed, kitchen stove, red-cushioned wooden sofas, bedroom desk and wardrobe, storage/dining room, dogleg red stairs, aluminum balcony glazing, narrow wet brick alley, ivy, wires and scooter.
 
-**Estimated:** dimensions, hidden rooms, roof layout, cardinal orientation and location within the surrounding village. The village-wide layout is interpretive and is **not a measured or map-verified survey**.
+**Additional observations:** roof terrace, green access door and adjacent window, white corridor ceiling/beams, bronze frames, open kitchen counter shelves, high kitchen window, field paths, irrigation crossings, whitewashed poplar trunks, seasonal crops and snowy road margins.
+
+**Confirmed placement:** the house occupies the starred position in the user's sketch. Road, water, pond and school connections follow that sketch. **Estimated:** distances, dimensions, individual neighboring plots, hidden rooms and generic school details. North is assumed at the top, consistent with the satellite reference. This is **not a measured survey**. See [photo revision notes](docs/PHOTO_RECONSTRUCTION.md).
 
 原始视频用于还原可见建筑特征与生活细节。尺寸、不可见空间、方位和村内位置均为推测，不可作为测绘资料。
 
-The original village file is preserved. The revised Blender file retains the replaced parcels in hidden `BACKUP` collections, with the new work organized in `VIDEO 00–05` collections. `VIDEO 05` contains the clean interiors and stairs. See `blender/video_revision/INTERIOR_NOTES.md` for the observed timestamps and estimated elements.
+The original village file is preserved. The revised Blender file organizes the detailed house in `VIDEO 00–05` collections and the new village in `MAP` collections. `VIDEO 05` contains clean interiors, stairs and the roof corrections. See `blender/video_revision/INTERIOR_NOTES.md` for the earlier observed timestamps and estimated elements.
 
 `rebuild_interiors.py` uses a local `../interior_reference/before_interiors.blend` backup of the pre-interior revision. On a fresh checkout, restore the Blender file from commit `a23b855` before the first run; the script then creates that local backup. Do not run multiple Blender save/export processes against the same file at once. Raw videos and reference frames stay outside this repository.
 

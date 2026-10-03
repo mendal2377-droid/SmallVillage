@@ -1,0 +1,102 @@
+{
+  "revision": "roof-weather-20261003",
+  "date": "2026-10-03",
+  "browser": {
+    "smoke": {
+      "url": "http://127.0.0.1:4173",
+      "passed": true,
+      "checks": [
+        "Desktop rendering",
+        "Gallery views",
+        "Scene selection consistency",
+        "House GLB load",
+        "Camera preset",
+        "Village GLB load",
+        "Return to renders",
+        "Mobile no horizontal overflow",
+        "WebGL failure fallback",
+        "No unexpected page errors"
+      ]
+    },
+    "walk": {
+      "passed": true,
+      "url": "http://127.0.0.1:4173",
+      "checks": [
+        "Chinese village name removed",
+        "House keyboard movement",
+        "Grounded eye height",
+        "Mouse look and Escape release",
+        "Reset walking position",
+        "Wall collision",
+        "Passage to alley is walkable",
+        "Orbit exit",
+        "Village arrow-key movement",
+        "Render exit clears walk UI",
+        "Mobile walking controls",
+        "Touch look",
+        "Mobile layout",
+        "No page errors"
+      ]
+    },
+    "village-browser": {
+      "url": "http://127.0.0.1:4173",
+      "passed": true,
+      "checks": [
+        "17 gallery images",
+        "Season geometry",
+        "House highlighted",
+        "Immersive viewport",
+        "Desktop minimal controls",
+        "Village lane to house",
+        "Real two-flight stairs",
+        "Roof terrace",
+        "Indoor precipitation shelter",
+        "Rain and snow particles",
+        "Sunset lighting",
+        "Menu pauses walking",
+        "Exit restores page",
+        "Mobile movement and touch look",
+        "No page errors"
+      ]
+    }
+  },
+  "models": [
+    {
+      "name": "house",
+      "meshes": 59,
+      "triangles": 96369,
+      "bytes": 821668
+    },
+    {
+      "name": "village",
+      "meshes": 83,
+      "triangles": 399508,
+      "bytes": 2856232
+    }
+  ],
+  "navigation": {
+    "house": {
+      "obstacles": 223,
+      "walk_surfaces": 10,
+      "shelter_footprints": 3
+    },
+    "village": {
+      "obstacles": 1394,
+      "walk_surfaces": 10,
+      "shelter_footprints": 234
+    }
+  },
+  "controller_checks": [
+    "All ground rooms",
+    "Two flights and intermediate landing",
+    "Upper corridor",
+    "Descent",
+    "Roof terrace and parapet barrier",
+    "Continuous village lane through pedestrian gate to roof",
+    "All five village starting points",
+    "River bank barrier",
+    "Bridge crossing"
+  ],
+  "build": "npm run build passed",
+  "limits": "Dimensions, individual village plots and unobserved room details estimated. North at top assumed. Visual weather; unchanged movement physics."
+}

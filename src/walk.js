@@ -23,6 +23,11 @@ export function createWalkController(camera, canvas, onChange) {
   function blocked(x,z,height){
     const [xmin,zmin,xmax,zmax]=nav.bounds;
     if(x<xmin+radius||x>xmax-radius||z<zmin+radius||z>zmax-radius)return true;
+    const onBridge=(nav.bridges||[]).some(([x0,z0,x1,z1])=>x>=x0&&x<=x1&&z>=z0&&z<=z1);
+    if(!onBridge&&(nav.waterZones||[]).some(zone=>{
+      if(zone.shape==='ellipse')return ((x-zone.center[0])/(zone.radius[0]+radius))**2+((z-zone.center[1])/(zone.radius[1]+radius))**2<1;
+      const [x0,z0,x1,z1]=zone.rect;return x>x0-radius&&x<x1+radius&&z>z0-radius&&z<z1+radius;
+    }))return true;
     return boxes.some(({cx,cz,hx,hz,c,s,low,high})=>{
       if(high<=height+.04||low>=height+eyeHeight+.08)return false;
       const localX=c*(x-cx)-s*(z-cz),localZ=s*(x-cx)+c*(z-cz);
@@ -66,7 +71,7 @@ export function createWalkController(camera, canvas, onChange) {
   document.addEventListener('mousemove',e=>{if(enabled&&!paused&&document.pointerLockElement===canvas)look(e.movementX,e.movementY);});
   return {
     get enabled(){return enabled;},
-    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;clearInput();yaw=0;pitch=0;camera.position.fromArray(nav.spawn);camera.rotation.set(0,0,0,'YXZ');camera.fov=70;camera.near=.05;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
+    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;clearInput();yaw=nav.yaw||0;pitch=0;camera.position.fromArray(nav.spawn);camera.rotation.set(0,yaw,0,'YXZ');camera.fov=70;camera.near=.05;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
     exit(){enabled=false;clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();onChange(false);},
     pause(value){paused=value;if(value){clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();}},
     input(direction,pressed){if(!enabled||paused)return;if(pressed)touches.add(direction);else touches.delete(direction);},
