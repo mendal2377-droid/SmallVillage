@@ -4,6 +4,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {createWalkController} from './walk.js';
 import {createEnvironment} from './environment.js';
+import {createGame} from './game/game.js';
 
 export function createViewer(host) {
   const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
@@ -14,12 +15,13 @@ export function createViewer(host) {
   renderer.domElement.setAttribute('aria-label','Interactive 3D reconstruction. Drag to orbit, scroll to zoom.');
   renderer.domElement.setAttribute('tabindex','0');
   const scene = new THREE.Scene();scene.background=new THREE.Color('#e3e8dc');
-  const camera=new THREE.PerspectiveCamera(42,1,.1,3000);
+  const camera=new THREE.PerspectiveCamera(42,1,.1,3000);scene.add(camera);
   function syncCameraState(){host.dataset.cameraPosition=camera.position.toArray().map(v=>v.toFixed(3)).join(',');host.dataset.cameraLook=[camera.rotation.x,camera.rotation.y].map(v=>v.toFixed(3)).join(',');}
   const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.495;
   const walk=createWalkController(camera,renderer.domElement,(walking)=>{
     controls.enabled=!walking;host.dataset.navigationMode=walking?'walk':'orbit';syncCameraState();
     environment.setWalking(walking);
+    if(walking)game.start(modelName);else game.stop();
     host.dispatchEvent(new CustomEvent('navigationchange',{detail:{walking}}));
   });
   const sceneVersion='house-details-20261003';
@@ -30,6 +32,8 @@ export function createViewer(host) {
   const fill=new THREE.DirectionalLight(0xe6f0ff,1.4);fill.position.set(40,25,-30);scene.add(fill);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(1600,1600),new THREE.MeshStandardMaterial({color:'#b5bf9d',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.35;scene.add(floor);
   const environment=createEnvironment(scene,camera,sun,sky,fill,floor,host);
+  function setWeather(value){environment.setWeather(value);host.dispatchEvent(new CustomEvent('environmentchange',{detail:{weather:environment.weather}}));}
+  const game=createGame({host,scene,camera,canvas:renderer.domElement,walk,environment,onWeather:setWeather});
   const marker=new THREE.Group();scene.add(marker);
   const ring=new THREE.Mesh(new THREE.RingGeometry(12.5,13,64),new THREE.MeshBasicMaterial({color:'#d4b362',side:THREE.DoubleSide,transparent:true,opacity:.8}));ring.rotation.x=-Math.PI/2;ring.position.set(-31,.30,108);marker.add(ring);
   const labelCanvas=document.createElement('canvas');labelCanvas.width=384;labelCanvas.height=96;
@@ -82,7 +86,8 @@ export function createViewer(host) {
     current=model;modelName=name;scene.add(model);environment.setModel(model,data[name]);setSeason(season);preset('orbit');
     host.dataset.loadedModel=name;
   }
+  if(import.meta.env.DEV)window.__viewer={THREE,scene,camera,renderer,walk,environment,game,get model(){return current;}};
   let previous=performance.now();
-  function frame(now){const dt=(now-previous)/1000;previous=now;if(active){if(walk.enabled)walk.update(dt);else controls.update();environment.update(dt,now/1000);marker.visible=modelName==='village'&&!walk.enabled;host.dataset.houseHighlighted=String(marker.visible);renderer.render(scene,camera);syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
-  return {load,preset,setSeason,setWeather:environment.setWeather,walkAt,pauseWalk(value){walk.pause(value);if(!value&&walk.enabled)renderer.domElement.focus({preventScroll:true});},walkInput:(direction,pressed)=>walk.input(direction,pressed),reset(){if(walk.enabled)walk.reset();else preset('orbit');},setActive(value){active=value;walk.pause(!value);if(value)resize();},exitWalk(){if(walk.enabled)preset('orbit');}};
+  function frame(now){const dt=Math.min(.1,(now-previous)/1000);previous=now;if(active){if(walk.enabled){walk.update(dt);game.update(dt,now/1000);}else controls.update();environment.update(dt,now/1000);marker.visible=modelName==='village'&&!walk.enabled;host.dataset.houseHighlighted=String(marker.visible);renderer.render(scene,camera);syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
+  return {load,preset,setSeason,setWeather,walkAt,setHour:environment.setHour,setDaySpeed:environment.setDaySpeed,get hour(){return environment.hour;},setSound(value){game.audio.enabled=value;},gameAction:(name)=>game.action(name),pauseWalk(value){walk.pause(value);if(!value&&walk.enabled)renderer.domElement.focus({preventScroll:true});},walkInput:(direction,pressed)=>walk.input(direction,pressed),reset(){if(walk.enabled)walk.reset();else preset('orbit');},setActive(value){active=value;walk.pause(!value);if(value)resize();},exitWalk(){if(walk.enabled)preset('orbit');}};
 }

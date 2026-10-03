@@ -11,7 +11,8 @@
     "test:walk": "node scripts/walk-test.mjs",
     "test:stairs": "node scripts/stairs-test.mjs",
     "test:village": "node scripts/village-browser.mjs",
-    "test:environment": "node scripts/environment-test.mjs"
+    "test:environment": "node scripts/environment-test.mjs",
+    "test:game": "node scripts/game-test.mjs"
   },
   "dependencies": {
     "three": "^0.186.1",

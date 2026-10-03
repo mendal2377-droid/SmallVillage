@@ -1,15 +1,15 @@
 import * as THREE from 'three';
 
 // A grounded camera with a small circular footprint. Axis separation lets it slide along walls.
+// The same floor/collision queries serve vehicles and thrown toys while the game layer is active.
 export function createWalkController(camera, canvas, onChange) {
-  let enabled=false, paused=false, nav, boxes=[], yaw=0, pitch=0, drag=null;
+  let enabled=false, paused=false, driving=false, nav, boxes=[], yaw=0, pitch=0, drag=null;
   const eyeHeight=1.65, maxStep=.26;
-  const keys=new Set(), touches=new Set();
+  const keys=new Set(), touches=new Set(), dynamic=new Map();
   const radius=.16;
   function clearInput(){keys.clear();touches.clear();drag=null;}
-  function look(dx,dy){yaw-=dx*.0025;pitch=THREE.MathUtils.clamp(pitch-dy*.0025,-1.35,1.35);camera.rotation.set(pitch,yaw,0,'YXZ');}
-  function floorAt(x,z){
-    const feet=camera.position.y-eyeHeight;
+  function look(dx,dy){yaw-=dx*.0025;pitch=THREE.MathUtils.clamp(pitch-dy*.0025,-1.35,1.35);if(!driving)camera.rotation.set(pitch,yaw,0,'YXZ');}
+  function floorAt(x,z,feet=camera.position.y-eyeHeight,step=maxStep){
     const candidates=[nav.ground ?? .2];
     for(const surface of nav.surfaces||[]){
       const [x0,z0,x1,z1]=surface.rect;
@@ -18,23 +18,32 @@ export function createWalkController(camera, canvas, onChange) {
       candidates.push(surface.height+(surface.rise||0)*t);
     }
     // Only take a reachable surface; never drop through an upper floor or jump up a storey.
-    return candidates.filter(h=>Math.abs(h-feet)<=maxStep).sort((a,b)=>b-a)[0];
+    return candidates.filter(h=>Math.abs(h-feet)<=step).sort((a,b)=>b-a)[0];
   }
-  function blocked(x,z,height){
-    const [xmin,zmin,xmax,zmax]=nav.bounds;
-    if(x<xmin+radius||x>xmax-radius||z<zmin+radius||z>zmax-radius)return true;
-    const onBridge=(nav.bridges||[]).some(([x0,z0,x1,z1])=>x>=x0&&x<=x1&&z>=z0&&z<=z1);
-    if(!onBridge&&(nav.waterZones||[]).some(zone=>{
-      if(zone.shape==='ellipse')return ((x-zone.center[0])/(zone.radius[0]+radius))**2+((z-zone.center[1])/(zone.radius[1]+radius))**2<1;
-      const [x0,z0,x1,z1]=zone.rect;return x>x0-radius&&x<x1+radius&&z>z0-radius&&z<z1+radius;
-    }))return true;
-    return boxes.some(({cx,cz,hx,hz,c,s,low,high})=>{
-      if(high<=height+.04||low>=height+eyeHeight+.08)return false;
-      const localX=c*(x-cx)-s*(z-cz),localZ=s*(x-cx)+c*(z-cz);
-      const dx=Math.max(0,Math.abs(localX)-hx),dz=Math.max(0,Math.abs(localZ)-hz);
-      return dx*dx+dz*dz<radius*radius;
+  function inWater(x,z,r=radius){
+    if((nav.bridges||[]).some(([x0,z0,x1,z1])=>x>=x0&&x<=x1&&z>=z0&&z<=z1))return false;
+    return (nav.waterZones||[]).some(zone=>{
+      if(zone.shape==='ellipse')return ((x-zone.center[0])/(zone.radius[0]+r))**2+((z-zone.center[1])/(zone.radius[1]+r))**2<1;
+      const [x0,z0,x1,z1]=zone.rect;return x>x0-r&&x<x1+r&&z>z0-r&&z<z1+r;
     });
   }
+  function hitBox(list,x,z,low,high,r,skip){
+    return list.find(b=>{
+      if(skip&&b.owner===skip)return false;
+      if(b.high<=low||b.low>=high)return false;
+      const localX=b.c*(x-b.cx)-b.s*(z-b.cz),localZ=b.s*(x-b.cx)+b.c*(z-b.cz);
+      const dx=Math.max(0,Math.abs(localX)-b.hx),dz=Math.max(0,Math.abs(localZ)-b.hz);
+      return dx*dx+dz*dz<r*r;
+    });
+  }
+  // Solid geometry between world heights low and high within r of (x,z); water and bounds count as solid.
+  function solidAt(x,z,low,high,r=radius,skip){
+    const [xmin,zmin,xmax,zmax]=nav.bounds;
+    if(x<xmin+r||x>xmax-r||z<zmin+r||z>zmax-r)return true;
+    if(low<(nav.ground??.2)+.5&&inWater(x,z,r))return true;
+    return Boolean(hitBox(boxes,x,z,low,high,r,skip)||hitBox([...dynamic.values()],x,z,low,high,r,skip));
+  }
+  function blocked(x,z,height){return solidAt(x,z,height+.04,height+eyeHeight+.08);}
   function move(dx,dz){
     const steps=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.06));
     for(let i=0;i<steps;i++){
@@ -44,7 +53,14 @@ export function createWalkController(camera, canvas, onChange) {
       }
     }
   }
-  const codes=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'];
+  function axis(){
+    return {
+      forward:Number(keys.has('KeyW')||keys.has('ArrowUp')||touches.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||touches.has('back')),
+      strafe:Number(keys.has('KeyD')||keys.has('ArrowRight')||touches.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||touches.has('left')),
+      fast:keys.has('ShiftLeft')||keys.has('ShiftRight'),brake:keys.has('Space')||touches.has('brake'),
+    };
+  }
+  const codes=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space'];
   window.addEventListener('keydown',e=>{
     if(!enabled||paused||e.target.closest?.('input,textarea,select'))return;
     if(codes.includes(e.code)){e.preventDefault();keys.add(e.code);}
@@ -70,19 +86,25 @@ export function createWalkController(camera, canvas, onChange) {
   window.addEventListener('pointerup',()=>drag=null);
   document.addEventListener('mousemove',e=>{if(enabled&&!paused&&document.pointerLockElement===canvas)look(e.movementX,e.movementY);});
   return {
-    get enabled(){return enabled;},
-    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;clearInput();yaw=nav.yaw||0;pitch=0;camera.position.fromArray(nav.spawn);camera.rotation.set(0,yaw,0,'YXZ');camera.fov=70;camera.near=.05;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
-    exit(){enabled=false;clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();onChange(false);},
+    get enabled(){return enabled;},get paused(){return paused;},get nav(){return nav;},
+    get yaw(){return yaw;},get pitch(){return pitch;},eyeHeight,
+    get driving(){return driving;},set driving(value){driving=value;if(!value)camera.rotation.set(pitch,yaw,0,'YXZ');},
+    axis,floorAt,solidAt,inWater,
+    // Moving props (vehicles) register oriented boxes in the same shape as the exported colliders.
+    setDynamic(id,box){if(box)dynamic.set(id,box);else dynamic.delete(id);},
+    place(x,y,z,lookYaw=yaw,lookPitch=0){camera.position.set(x,y,z);yaw=lookYaw;pitch=lookPitch;camera.rotation.set(pitch,yaw,0,'YXZ');},
+    standAt(x,z,feet){const height=floorAt(x,z,feet,.6);return height!==undefined&&!blocked(x,z,height)?height:undefined;},
+    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=0;camera.position.fromArray(nav.spawn);camera.rotation.set(0,yaw,0,'YXZ');camera.fov=70;camera.near=.05;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
+    exit(){enabled=false;driving=false;clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();onChange(false);},
     pause(value){paused=value;if(value){clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();}},
     input(direction,pressed){if(!enabled||paused)return;if(pressed)touches.add(direction);else touches.delete(direction);},
     reset(){if(enabled)this.enter(nav);},
     update(dt){
-      if(!enabled||paused)return;
-      let forward=Number(keys.has('KeyW')||keys.has('ArrowUp')||touches.has('forward'))-Number(keys.has('KeyS')||keys.has('ArrowDown')||touches.has('back'));
-      let strafe=Number(keys.has('KeyD')||keys.has('ArrowRight')||touches.has('right'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')||touches.has('left'));
+      if(!enabled||paused||driving)return;
+      const {forward,strafe,fast}=axis();
       const length=Math.hypot(forward,strafe);
       if(!length)return;
-      const speed=(keys.has('ShiftLeft')||keys.has('ShiftRight')?3.8:2)*Math.min(dt,.1)/length;
+      const speed=(fast?3.8:2)*Math.min(dt,.1)/length;
       move((strafe*Math.cos(yaw)-forward*Math.sin(yaw))*speed,(-forward*Math.cos(yaw)-strafe*Math.sin(yaw))*speed);
     }
   };

@@ -10,7 +10,8 @@ A browser-based presentation of a Blender village reconstruction in Henan, China
 - Two interactive 3D scenes, with the same detailed house included in the full village.
 - Orbit, zoom, pan, camera presets, and fullscreen.
 - Immersive first-person walking, wall collisions, two climbable stair flights and an accessible roof terrace.
-- Four seasonal crop/snow views and independent clear, overcast, rain, snowfall and sunset conditions.
+- Four seasonal crop/snow views; clear, overcast, rain, thunderstorm, snowfall, fog and sunset weather; a full day/night cycle with stars, moonlight and a flashlight.
+- A playful game layer: drive the family e-trike or a farm tractor, and use a slingshot, water pistol, firecrackers or snowballs on tins, bottles, straw targets and sparrows.
 - A highlighted house, camera focus button and village starting points along roads and field paths.
 - Responsive layout and a render-gallery fallback if WebGL is unavailable.
 - Downloadable, editable Blender source files.
@@ -19,11 +20,26 @@ The house model is approximately 0.8 MB and the full village approximately 2.9 M
 
 ### Walk through the scene
 
-Select a scene, choose **Explore in 3D**, then **Walk inside**. Use **WASD** or **arrow keys** to move, click the scene for mouse look, and hold **Shift** to move faster. **Esc** releases the mouse. Dragging to look also works without mouse capture. Touchscreens show arrow buttons and support dragging to look. **Menu** pauses walking and opens weather, season and village starting-point controls; **Exit walk** restores the page. Rain and snow stop under the exported roof footprints. There is no ambient audio.
+Select a scene, choose **Explore in 3D**, then **Walk inside**. Use **WASD** or **arrow keys** to move, click the scene for mouse look, and hold **Shift** to move faster. **Esc** releases the mouse. Dragging to look also works without mouse capture. Touchscreens show arrow buttons and support dragging to look. **Menu** pauses walking and opens weather, season, time of day, day speed, sound and village starting-point controls; **Exit walk** restores the page. Rain and snow stop under the exported roof footprints. Sound is synthesized in the browser and starts with your first key press or tap.
 
 Enter the corner doorway to the left of the meeting room. Walk up the red stairs, turn left on the intermediate landing, then climb the return flight. You can walk along the enclosed upper corridor, look down into the courtyard, enter the upper rooms, and descend. The ground floor includes a kitchen, meeting room, bedroom, and tidy storage/dining room. Upstairs room furnishings are sparse because the footage mainly shows the corridor.
 
 Walk surfaces and height-aware wall/furniture bounds come from the Blender source. The camera follows stair ramps at 1.65 m above the floor and rejects unsupported drops. Rebuild `public/models/navigation.json` with `blender --background --python scripts/export_navigation.py` after changing the architecture.
+
+### Play
+
+Nothing here is violent: toys knock over tins and startle birds, which fly off and come back.
+
+| Key | Action |
+| --- | --- |
+| **1** / **2** / **3** / **4** (or mouse wheel) | Slingshot, water pistol, firecrackers, snowballs (snow only); **0** puts them away |
+| Click / hold | Shoot a pebble, spray water, throw a firecracker or snowball |
+| **F** (or **E**) | Ride the e-trike or the tractor when the prompt appears; again to get off |
+| **W S A D**, **Space** | Drive, steer and brake; **V** switches chase/seat view, **H** sounds the horn |
+| **L** | Flashlight |
+| **T** / **G** / **R** | One hour later / next weather / restack the tins |
+
+Water puts out a lit firecracker. Tins restack themselves a few seconds after the last one falls. The e-trike is parked in the courtyard and on the village road near your lane; the tractor waits on the field path. Vehicles share the walker's collision boxes, floors, water and bridges, so they stay on land and cross streams only at bridges. On touchscreens, the arrow pad drives, **●** uses the selected toy, and **Ride / get off** appears next to a vehicle.
 
 ## Run locally
 
@@ -39,7 +55,7 @@ npm run build
 npm run preview
 ```
 
-With the dev server running, `npm test` runs browser smoke checks in headless Microsoft Edge, including both 3D models, scene controls, responsive layout and the WebGL fallback. `npm run test:walk` checks walking, mouse capture, wall collisions, the courtyard-to-alley passage, and touch movement/look. `npm run test:stairs` deterministically verifies the full room/stair route, descent, balcony barrier and village-scene stairs. `node scripts/stairs-browser.mjs` verifies keyboard climbing and mouse look in the rendered browser. Microsoft Edge must be installed for browser tests.
+With the dev server running, `npm test` runs browser smoke checks in headless Microsoft Edge, including both 3D models, scene controls, responsive layout and the WebGL fallback. `npm run test:walk` checks walking, mouse capture, wall collisions, the courtyard-to-alley passage, and touch movement/look. `npm run test:stairs` deterministically verifies the full room/stair route, descent, balcony barrier and village-scene stairs. `npm run test:game` checks vehicle driving, steering, water and dismounting plus toy hits, firecrackers and the snow rule without a browser. `node scripts/stairs-browser.mjs` verifies keyboard climbing and mouse look in the rendered browser. Microsoft Edge must be installed for browser tests.
 
 Vercel uses the checked-in `vercel.json` to build with Vite and publish `dist/`. The browser loads the Three.js viewer and the selected GLB only when **Explore in 3D** is selected.
 
@@ -48,6 +64,7 @@ Vercel uses the checked-in `vercel.json` to build with Vite and publish `dist/`.
 | Path | Contents |
 | --- | --- |
 | `src/` | Website styles, gallery interactions and Three.js viewer |
+| `src/game/` | Vehicles, toys and targets, synthesized audio and the play HUD |
 | `public/images/` | Optimized renders |
 | `public/models/` | Centered GLB exports, batched by material for fewer draw calls |
 | `blender/Yanlaozhai_Henan_Village.blend` | Original interpretive village |

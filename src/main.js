@@ -5,7 +5,7 @@ const stage = $('#stage');
 const image = $('#scene-image');
 const imageInfo = {
   courtyard: ['Life around the courtyard', 'Clean reconstructed courtyard with a glazed upper corridor and blue shed'],
-  kitchen: ['The family kitchen', 'Clean tiled masonry stove with two wok lids and an L-shaped preparation counter'],
+  kitchen: ['The family kitchen', 'Tiled masonry stove with arched fire mouths, a sink cabinet and a worn brick floor'],
   meeting: ['A room to gather', 'Facing timber sofas with red cushions, a tea table and a back console'],
   bedroom: ['A quiet place to rest', 'Neatly made red bed, golden wooden desk and pale sliding wardrobe'],
   storage: ['Everything in its place', 'Tidy storage shelves, a closed cabinet and a red round dining table'],
@@ -40,7 +40,7 @@ $('#canvas-host').addEventListener('navigationchange',({detail})=>{
   $('#walk-toolbar').hidden=!walking;closeWalkMenu();clearTimeout(hintTimer);
   $('#walk-place-label').hidden=selectedModel!=='village';$('#walk-place-go').hidden=selectedModel!=='village';
   $('#walk-season').disabled=selectedModel!=='village';
-  $('#walk-help').textContent=matchMedia('(pointer:coarse)').matches?'Use the arrow buttons to walk · drag the scene to look around':'WASD / arrows to move · click or drag to look · Shift to walk faster · Esc to release mouse';
+  $('#walk-help').textContent=matchMedia('(pointer:coarse)').matches?'Use the arrow buttons to walk · drag to look · ● uses a toy':'WASD to move · click to look · 1–4 toys, click to use · F ride · L flashlight · Menu for weather and time';
   for(const id of ['walk-help','walk-pad','walk-crosshair'])$('#'+id).hidden=!walking;
   if(walking)hintTimer=setTimeout(()=>$('#walk-help').hidden=true,6000);
   document.querySelector('[data-view="walk"]').setAttribute('aria-pressed',String(walking));
@@ -127,8 +127,16 @@ $('#scene-weather').addEventListener('change',async()=>{
 });
 $('#walk-weather').addEventListener('change',()=>{$('#scene-weather').value=$('#walk-weather').value;viewer?.setWeather($('#walk-weather').value);});
 $('#walk-season').addEventListener('change',()=>{$('#village-season').value=$('#walk-season').value;viewer?.setSeason($('#walk-season').value);});
+const clockText=(h)=>`${String(Math.floor(h)).padStart(2,'0')}:${String(Math.round(h%1*60)).padStart(2,'0')}`;
+function syncTime(){if(!viewer)return;$('#walk-time').value=String(Math.round(viewer.hour*4)/4%24);$('#walk-time-label').textContent=clockText(Number($('#walk-time').value));}
+$('#walk-time').addEventListener('input',()=>{viewer?.setHour($('#walk-time').value);$('#walk-time-label').textContent=clockText(Number($('#walk-time').value));});
+$('#walk-day-speed').addEventListener('change',()=>viewer?.setDaySpeed($('#walk-day-speed').value));
+$('#walk-sound').addEventListener('change',()=>viewer?.setSound($('#walk-sound').checked));
+$('#walk-reset-targets').addEventListener('click',()=>{viewer?.gameAction('reset');closeWalkMenu();});
+// Keyboard weather changes inside the walk keep both selectors in step.
+$('#canvas-host').addEventListener('environmentchange',({detail})=>{$('#scene-weather').value=detail.weather;$('#walk-weather').value=detail.weather;});
 $('#walk-menu-toggle').addEventListener('click',()=>{
-  const open=$('#walk-menu').hidden;$('#walk-menu').hidden=!open;$('#walk-menu-toggle').setAttribute('aria-expanded',String(open));viewer?.pauseWalk(open);
+  const open=$('#walk-menu').hidden;if(open)syncTime();$('#walk-menu').hidden=!open;$('#walk-menu-toggle').setAttribute('aria-expanded',String(open));viewer?.pauseWalk(open);
   if(open)$('#walk-weather').focus();
 });
 $('#walk-resume').addEventListener('click',closeWalkMenu);

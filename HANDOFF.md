@@ -20,7 +20,8 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 | Upstairs | Climb two stair flights and the turning landing; walk the corridor and upper rooms; exit through the green door onto the roof terrace |
 | Collision | Height-aware walls/furniture, stair ramps, protected balcony/terrace edges, water barriers and bridge crossings |
 | Seasons | Spring low green crops, summer green tall corn, autumn dry corn, winter snow and bare poplars |
-| Weather | Clear, overcast, rain, snowfall and sunset; sky/light/fog changes and precipitation particles |
+| Weather and time | Clear, overcast, rain, thunderstorm (lightning and thunder), snowfall, fog and sunset; a day/night cycle with sun, moon and stars, optional time progression |
+| Play | Drivable e-trike and tractor; slingshot, water pistol, firecrackers and snowballs; tins, bottles, straw targets and sparrows; flashlight; synthesized sound; HUD and touch buttons |
 | Immersion | Page panels and orbit controls hidden while walking; small Menu/Exit buttons; hints fade; touch pad appears on touch devices |
 | Wayfinding | House ring/label in the village orbit view, Find your house button and five village starting points |
 
@@ -82,7 +83,11 @@ flowchart LR
 | `src/style.css` | Layout, responsive styles, full-viewport walking, minimal toolbar and touch controls |
 | `src/viewer.js` | Renderer, camera presets, cached GLB loading, season visibility, highlight marker, animation loop |
 | `src/walk.js` | Grounded camera, movement, mouse/touch look, collisions, stair height selection and water/bridge rules |
-| `src/environment.js` | Sky gradient, lighting/fog, rain/snow particles, roof shelter and wet exterior materials |
+| `src/environment.js` | Time of day, sky gradient/stars/sun/moon, lighting/fog, rain/snow particles, lightning, roof shelter and wet exterior materials |
+| `src/game/game.js` | Play layer: keys, HUD, flashlight, ambience; started/stopped with walking |
+| `src/game/vehicles.js` | Procedural e-trike and tractor, parking spots per scene, driving physics, chase/seat camera, headlights |
+| `src/game/toys.js` | Toys, projectiles, tins/bottles, straw targets, sparrows and per-scene target layouts |
+| `src/game/audio.js` | Web Audio synthesis; no audio files |
 | `public/models/` | Generated GLBs, navigation JSON and model statistics |
 | `public/images/` | 17 published WebP gallery assets |
 | `public/draco/` | Locally served decoder files and their license |
@@ -90,6 +95,7 @@ flowchart LR
 | `blender/Yanlaozhai_Henan_Village.blend` | Original interpretive village, retained for history |
 | `blender/rebuild_village_from_photos.py` | Procedural village construction and sketch coordinate mapping; historical rebuild inputs described below |
 | `blender/video_revision/refine_roof_from_photos.py` | House/terrace corrections applied after the village rebuild |
+| `blender/video_revision/refine_house_details.py` | 3 Oct photo corrections (curtains, stove, sink, brick floor, façade bands, upper east window). Re-runnable: starts from `../house_detail_reference/before_house_details.blend` |
 | `blender/photo_village_inventory.json` | Estimated parcel inventory, landmarks, placement assumptions and village navigation configuration |
 | `scripts/export_web_models.py` | Both material-batched, Draco-compressed GLB exports |
 | `scripts/export_navigation.py` | Collision boxes, floor/stair surfaces, shelter footprints and scene configuration |
@@ -197,6 +203,16 @@ The collision exporter uses structural cuboids with **8 mesh vertices / 6 polygo
 
 Movement uses a `0.16` m camera footprint, `0.26` m maximum reachable step, axis-separated sliding and small movement substeps. Walking speed is `2` m/s or `3.8` with Shift. This is a navigation controller, not a rigid-body physics engine; it has no jump or free fall.
 
+### Game layer contracts
+
+- `walk.js` exposes `solidAt(x,z,low,high,r,skip)`, `floorAt`, `inWater`, `standAt`, `axis()` and `setDynamic(id,box)`. Vehicles and crates register oriented boxes in the exported box convention (`localX=c·dx−s·dz`, `localZ=s·dx+c·dz`) with an `owner` so a vehicle ignores itself.
+- `walk.driving=true` hands movement and the camera to `vehicles.js`; mouse look still updates `walk.yaw/pitch`, which the chase camera uses as an orbit offset.
+- Vehicle parking and target layouts are in `parking` (`vehicles.js`) and `LAYOUT` (`toys.js`). Village crates and straw targets are placed in front of each `places` spawn and nudged to the nearest clear spot. If you move the courtyard trike or crate, rerun `npm run test:walk`; the walk route passes close to them.
+- Vehicle bodies may overhang water (narrow ditches beside field paths); the centre line may not, so streams are crossed only at `bridges`.
+- Lights that are off are also `visible=false`; zero-intensity lights still cost per-pixel work and slowed the software-WebGL browser suite enough to time out.
+- The sky dome writes colours without output conversion, so night/dusk tones in `environment.js` are chosen by how they display.
+- In development only, `window.__viewer` exposes the scene, camera, walk controller, environment and game for inspection.
+
 ### Seasons and material batching
 
 Blender object property `season` survives export as GLB extras / Three.js `userData.season`. Current tags are `green`, `corn`, `winter`, `leaves`. The web selector values are `green`, `summer`, `corn`, `winter`. Summer reuses the corn geometry with green material colors; restore the saved autumn colors when leaving summer. Winter hides leaves.
@@ -213,6 +229,7 @@ Browser scripts use installed Microsoft Edge (`channel: 'msedge'`) and software 
 # Without a server
 npm run test:stairs
 npm run test:environment
+npm run test:game
 
 # With the dev/preview server on port 4173, run sequentially
 npm test
@@ -294,7 +311,8 @@ All requested features in the application baseline are implemented. These are de
 
 - Village distances and parcels are estimated; orientation is assumed. A measured/georeferenced plan would improve accuracy.
 - Most neighboring houses are procedural exterior blocks; they do not have the detailed, enterable interior of the owner's house. Upper rooms in the detailed house remain sparsely furnished because footage is incomplete.
-- Weather is visual. Roof shelter uses camera/footprint tests, not per-particle roof collision; there is no physical accumulation, seasonal time progression, weather API or wind simulation.
+- Weather is visual. Roof shelter uses camera/footprint tests, not per-particle roof collision; there is no physical accumulation, automatic season progression, weather API or wind simulation beyond slanted rain.
+- Vehicles and toys are procedural Three.js meshes, not Blender assets. Vehicles collide with box proxies and floors, not with arbitrary meshes, and do not tilt on slopes. Targets reset rather than persist; there is no save game.
 - Summer recolors existing corn geometry. The saved Blender variants/render helper use three crop states; a dedicated summer asset/render would make the pipeline more explicit.
 - Browser materials simplify Blender shaders. Baked textures, spatial batching/LOD and a mobile quality option could improve appearance/performance.
 - The viewer lacks a full dispose lifecycle and accessibility work beyond keyboard controls/menu labels. Test repeated scene entry, resize, pointer lock and touch when changing navigation.
