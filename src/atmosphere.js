@@ -1,16 +1,17 @@
 import * as THREE from 'three';
 import {seeded,material,oval,stem,merged,instances} from './organic.js';
 import {createPlantingMask} from './planting.js';
+import {canopyGeometry,paintedMaterial} from './painted.js';
 
 export function createVillageAtmosphere({scene,camera,environment,nav,metadata,host}){
   const root=new THREE.Group();root.name='Illustrated village atmosphere';scene.add(root);
   const r=seeded(482),mask=createPlantingMask(nav),forest=[],lights=[],chimneys=[],bankGroups=[];
-  const forestColours=['#527a5d','#72944f','#8ca564','#466f63'];
+  const forestColours=['#b1cbb9','#c0d1a3','#cad6b8','#83b3a7'];
   // Irregular lobed crowns and layered evergreens provide distinct silhouettes at the horizon.
-  function treeTemplate(kind){const g=new THREE.Group(),bark=material(kind===2?'#a4aa91':'#756e53'),leafMat=material(forestColours[kind]);
+  function treeTemplate(kind){const g=new THREE.Group(),bark=material(kind===2?'#a4aa91':'#756e53'),leafMat=paintedMaterial('foliage',forestColours[kind]);
     bark.userData.forestBark=true;stem(g,[[0,0,0],[.12,4.5,0],[-.08,8,0]],.19,bark);
-    if(kind===3){for(let j=0;j<6;j++){const m=new THREE.Mesh(new THREE.ConeGeometry(2.8-j*.34,2.6,9),leafMat);m.position.set((r()-.5)*.3,3.4+j*.98,0);m.rotation.y=j*.7;g.add(m);}}
-    else for(let j=0;j<10;j++){const a=j*2.4,reach=kind===1?1.3:2.1,y=5.2+r()*3.3,x=Math.sin(a)*reach*(.4+r()*.6),z=Math.cos(a)*reach*(.4+r()*.6);stem(g,[[0,3.6,0],[x*.6,y-.7,z*.6],[x,y,z]],.065,bark);oval(g,[x,y,z],[1.5+r()*.7,kind===1?2.4:1.5+r()*.6,1.4+r()*.6],leafMat);}
+    for(let j=0;j<5;j++){const a=j*2.4,reach=kind===1?1.3:2.1,y=5+r()*3,x=Math.sin(a)*reach,z=Math.cos(a)*reach;stem(g,[[0,3.6,0],[x*.6,y-.7,z*.6],[x,y,z]],.065,bark);}
+    g.add(new THREE.Mesh(canopyGeometry(kind,r),leafMat));
     return merged(g);
   }
   const [x0,z0,x1,z1]=nav.bounds,placements=[[],[],[],[]];
@@ -59,7 +60,7 @@ export function createVillageAtmosphere({scene,camera,environment,nav,metadata,h
   const practicals=[new THREE.PointLight('#ffd08c',0,15,2),new THREE.PointLight('#ffd79d',0,10,2)];practicals[0].position.set(-30,3.0,109);practicals[1].position.set(-31,6,104);practicals.forEach(l=>{l.visible=false;root.add(l);});
   host.dataset.forestTrees=String(forest.length);host.dataset.forestKinds='broadleaf,poplar,pale-trunk,evergreen';host.dataset.grassBanks=String(bankGroups.length);host.dataset.chimneys=String(chimneys.length);
   function update(dt,time){const night=1-THREE.MathUtils.smoothstep(environment.daylight,.05,.55),winter=environment.season==='winter';let lit=0,smoking=0;
-    forestRoot.children.forEach((g,i)=>g.children.forEach(m=>{if(m.material.userData.forestBark)return;m.visible=!winter||i===3;m.material.color.set(environment.season==='corn'&&i!==3?'#a79862':forestColours[i]);}));
+    forestRoot.children.forEach((g,i)=>g.children.forEach(m=>{if(m.material.userData.forestBark)return;m.visible=!winter||i===3;m.material.color.set(environment.season==='corn'&&i!==3?'#d2b688':forestColours[i]);}));
     grass.visible=!winter;bankMat.color.set(winter?'#cfdbcf':environment.season==='corn'?'#b5ad78':'#9bb777');
     for(const w of lights){w.g.visible=night>.02&&(w.house||environment.hour<23.4||w.phase%4===1);if(w.g.visible)lit++;}litMat.opacity=night*.94;
     pools.forEach(p=>{p.visible=night>.02;p.material.opacity=night*.5;});bulbs.forEach(b=>b.visible=night>.02);

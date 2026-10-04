@@ -5,6 +5,7 @@ export const PLACES=[
   {id:'pond',place:'pond',label:'Water & bridges',icon:'≈',x:-285.15,z:48.2,color:'#a3dcce'},
   {id:'fields',place:'fields',label:'Fields & gardens',icon:'✿',x:-154.5,z:206.8,color:'#e8d2a1'},
   {id:'school',place:'school',label:'School lane',icon:'⌖',x:.2,z:-150.7,color:'#e7dfbd'},
+  {id:'forest',place:'forest',label:'Forest & lakes',icon:'♧',x:194,z:94,color:'#b5d5be'},
 ];
 export const GARDEN_PLOTS=[
   {kind:'melon',rect:[-181,196,-163,208]},
@@ -15,6 +16,7 @@ export const GARDEN_PLOTS=[
   {kind:'cucumber',rect:[-244,194,-228,215]},
 ];
 export const ACTIVITY_SITES=[
+  {id:'fish-woodland',kind:'fish',label:'Woodland pond fishing',x:192,z:124,radius:14},
   {id:'fish-pond',kind:'fish',label:'Pond fishing',x:-290,z:87,radius:11},
   {id:'fish-river',kind:'fish',label:'River fishing',x:-276,z:113,radius:8},
   {id:'fish-bridge',kind:'fish',label:'Bridge-side fishing',x:-285.15,z:48.2,radius:10},

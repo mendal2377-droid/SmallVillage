@@ -116,7 +116,8 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   function spawn(name){
     sceneName=name;clearProps();const layout=LAYOUT[name];if(!layout||!walk.nav)return;
     if(layout.crates==='places'){
-      for(const p of Object.values(walk.nav.places||{})){
+      for(const [place,p] of Object.entries(walk.nav.places||{})){
+        if(place==='forest')continue;
         const yaw=p.yaw||0,a=clearSpot(...frontOf(p.spawn,yaw,7,-2.2));if(a)addCrate(...a,yaw);
         const b=clearSpot(...frontOf(p.spawn,yaw,13,2.5));if(b)addBoard(...b,yaw);
       }

@@ -1,5 +1,7 @@
 # Illustrated village — 4 October 2026
 
+This document records the first illustration pass. The current imagegen foliage/ground/meadow assets, accessible forest lakes and flower trails are documented in [PAINTED_WOODLAND.md](PAINTED_WOODLAND.md). Its asset version and crown implementation supersede those described below.
+
 The owner changed the visual direction from a reconstruction of real surfaces to an illustrated village, retaining the current house shape and connected map. Reference: the supplied frames of [this video](https://x.com/LexnLin/status/2106493673425047896/video/1), showing painted greens, fine building/tree outlines, grass-covered banks, varied woodland and pale drifting chimney smoke. The X page could not be fetched directly; the attached frames guided the treatment. No video frames or third-party artwork are shipped as assets.
 
 ## What changed

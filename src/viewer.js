@@ -9,6 +9,9 @@ import {createWorldDetails} from './world.js';
 import {createMaps} from './map.js';
 import {createIllustration,paintArchitecture} from './illustration.js';
 import {createVillageAtmosphere} from './atmosphere.js';
+import {loadPaintedAssets} from './painted.js';
+import {extendWoodlandNavigation} from './woodland-layout.js';
+import {createWoodland} from './woodland.js';
 
 export function createViewer(host,{onEnter=()=>{}}={}) {
   const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
@@ -29,7 +32,7 @@ export function createViewer(host,{onEnter=()=>{}}={}) {
     if(walking)game.start(modelName);else game.stop();
     host.dispatchEvent(new CustomEvent('navigationchange',{detail:{walking}}));
   });
-  const sceneVersion='illustrated-village-20261004-1';
+  const sceneVersion='painted-woodland-20261004-2';
   const navigation=fetch(`/models/navigation.json?v=${sceneVersion}`).then(response=>{if(!response.ok)throw new Error('Navigation data unavailable');return response.json();});
   let navigationData;
   const sky=new THREE.HemisphereLight(0xe8eef1,0x858988,2.8);scene.add(sky);
@@ -38,7 +41,7 @@ export function createViewer(host,{onEnter=()=>{}}={}) {
   const fill=new THREE.DirectionalLight(0xe6f0ff,1.4);fill.position.set(40,25,-30);scene.add(fill);
   const floor=new THREE.Mesh(new THREE.PlaneGeometry(1600,1600),new THREE.MeshStandardMaterial({color:'#b5bf9d',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.35;scene.add(floor);
   const environment=createEnvironment(scene,camera,sun,sky,fill,floor,host);
-  const illustration=createIllustration(renderer,scene,camera,environment,host);let atmosphere;
+  const illustration=createIllustration(renderer,scene,camera,environment,host);let atmosphere,woodland;
   const details=createWorldDetails({scene,camera,host,environment});
   function setWeather(value){environment.setWeather(value);game.refreshTools();host.dispatchEvent(new CustomEvent('environmentchange',{detail:{weather:environment.weather}}));}
   const maps=createMaps({host,camera,walk,onEnter});
@@ -95,14 +98,15 @@ export function createViewer(host,{onEnter=()=>{}}={}) {
       const promise=loader.loadAsync(`/models/${name}.glb?v=${sceneVersion}`,(e)=>onProgress(e.total?`Loading model · ${Math.round(e.loaded/e.total*100)}%`:`Loading model · ${(e.loaded/1048576).toFixed(1)} MB`)).then(g=>g.scene);
       cache.set(name,promise);promise.catch(()=>cache.delete(name));
     }
-    const [model,data,metadata,architecture]=await Promise.all([cache.get(name),navigation,fetch(`/models/world-details.json?v=${sceneVersion}`).then(r=>r.json()),fetch(`/models/atmosphere.json?v=${sceneVersion}`).then(r=>r.json())]);navigationData=data;
+    const [model,source,metadata,architecture]=await Promise.all([cache.get(name),navigation,fetch(`/models/world-details.json?v=${sceneVersion}`).then(r=>r.json()),fetch(`/models/atmosphere.json?v=${sceneVersion}`).then(r=>r.json()),loadPaintedAssets()]);
+    const data={...source,village:extendWoodlandNavigation(source.village)};navigationData=data;
     if(version!==loadVersion)return;
     if(current)scene.remove(current);
-    current=model;modelName=name;scene.add(model);environment.setModel(model,data[name]);details.install(model,metadata,data[name]);paintArchitecture(model);if(atmosphere)scene.remove(atmosphere.root);atmosphere=undefined;if(name==='village')atmosphere=createVillageAtmosphere({scene,camera,environment,nav:data[name],metadata:architecture,host});maps.install(data[name],metadata);setSeason(season);preset('orbit');
+    current=model;modelName=name;scene.add(model);environment.setModel(model,data[name]);details.install(model,metadata,data[name]);paintArchitecture(model);if(atmosphere)scene.remove(atmosphere.root);if(woodland)scene.remove(woodland.root);atmosphere=undefined;woodland=undefined;if(name==='village'){atmosphere=createVillageAtmosphere({scene,camera,environment,nav:data[name],metadata:architecture,host});woodland=createWoodland({scene,camera,nav:data[name],environment,host});}maps.install(data[name],metadata);setSeason(season);preset('orbit');
     host.dataset.loadedModel=name;
   }
-  if(import.meta.env.DEV)window.__viewer={THREE,scene,camera,renderer,walk,environment,game,details,maps,illustration,get atmosphere(){return atmosphere;},get model(){return current;}};
+  if(import.meta.env.DEV)window.__viewer={THREE,scene,camera,renderer,walk,environment,game,details,maps,illustration,get atmosphere(){return atmosphere;},get woodland(){return woodland;},get model(){return current;}};
   let previous=performance.now();
-  function frame(now){const elapsedDt=Math.max(0,(now-previous)/1000),dt=Math.min(.1,elapsedDt);previous=now;if(active){if(walk.enabled){walk.update(dt);game.update(dt,now/1000,elapsedDt);}else controls.update();environment.update(dt,now/1000);details.update(dt,now/1000);atmosphere?.update(dt,now/1000);maps.update(dt);marker.visible=modelName==='village'&&walk.enabled&&camera.position.distanceTo(pin.position)>45;host.dataset.houseHighlighted=String(marker.visible);illustration.render();syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
+  function frame(now){const elapsedDt=Math.max(0,(now-previous)/1000),dt=Math.min(.1,elapsedDt);previous=now;if(active){if(walk.enabled){walk.update(dt);game.update(dt,now/1000,elapsedDt);}else controls.update();environment.update(dt,now/1000);details.update(dt,now/1000);atmosphere?.update(dt,now/1000);woodland?.update(dt,now/1000);maps.update(dt);marker.visible=modelName==='village'&&walk.enabled&&camera.position.distanceTo(pin.position)>45;host.dataset.houseHighlighted=String(marker.visible);illustration.render();syncCameraState();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
   return {load,preset,setSeason,setWeather,walkAt,setHour:environment.setHour,setDaySpeed:environment.setDaySpeed,get hour(){return environment.hour;},setSound(value){game.audio.enabled=value;},gameAction:(name)=>game.action(name),pauseWalk(value){walk.pause(value);if(!value&&walk.enabled)renderer.domElement.focus({preventScroll:true});},walkInput:(direction,pressed)=>walk.input(direction,pressed),reset(){if(walk.enabled)walk.reset();else preset('orbit');},setActive(value){active=value;previous=performance.now();walk.pause(!value);if(value)resize();},exitWalk(){if(walk.enabled)preset('orbit');}};
 }

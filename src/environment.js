@@ -6,7 +6,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
   let weather='clear',season='green',nav,model,walking=false,sheltered=false,hour=14,daySpeed=0,flash=0,nextBolt=6;
   const listeners=new Set();
   const settings={
-    clear:{top:'#8abcc8',horizon:'#e0e7c9',light:2.6,ambient:2.8,fill:1.2,color:'#fff1ce',fog:1800,near:350,stars:1},
+    clear:{top:'#8abcc8',horizon:'#e0e7c9',light:3.1,ambient:1.85,fill:.55,color:'#ffe9b4',fog:950,near:150,stars:1},
     overcast:{top:'#8d9ba6',horizon:'#c6cccd',light:.65,ambient:2.7,fill:.8,color:'#e3e8ec',fog:1100,near:350,stars:.15},
     rain:{top:'#637682',horizon:'#a1afb3',light:.4,ambient:2.3,fill:.7,color:'#dde7ed',fog:700,near:90,stars:0,drops:'rain',wind:.08,rate:11},
     storm:{top:'#5d6c7a',horizon:'#929ea4',light:.25,ambient:1.9,fill:.5,color:'#cfd9e2',fog:420,near:40,stars:0,drops:'rain',wind:.32,rate:15},

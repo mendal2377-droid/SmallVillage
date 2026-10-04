@@ -80,3 +80,7 @@ Browser tests use installed Microsoft Edge and write ignored evidence to `artifa
 - `public/models/world-details.json`: tree positions and field rectangles from the Blender source.
 
 Vercel builds `dist/` from GitHub `main`. Raw reference photos/videos and credentials stay outside Git. Existing rendered assets remain in the repository for historical reference, but the page never loads them. The legacy browser scripts for the former gallery are historical; use the commands above for current validation.
+
+## Painted woodland update
+
+Original imagegen foliage and meadow artwork, flower-lined roads, and a connected Forest & lakes destination are implemented in the 3D world. See [PAINTED_WOODLAND.md](docs/PAINTED_WOODLAND.md) and the [design board and prompts](docs/design/IMAGEGEN.md).

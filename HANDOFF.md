@@ -1,6 +1,6 @@
 # SmallVillage — developer handoff
 
-Updated 4 October 2026. **Current application: illustrated wandering village on `main`.** Read [docs/ILLUSTRATION.md](docs/ILLUSTRATION.md) for the current painted visual direction, mixed woodland, grassy banks, smoke and night lighting. [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) documents level roads, safe planting and pond life; [docs/WANDERING.md](docs/WANDERING.md) covers map entry, energy and activities. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
+Updated 4 October 2026. **Current application: illustrated wandering village on `main`.** Read [docs/PAINTED_WOODLAND.md](docs/PAINTED_WOODLAND.md) for the imagegen artwork, flower paths and connected forest lakes. Read [docs/ILLUSTRATION.md](docs/ILLUSTRATION.md) for the current painted visual direction, mixed woodland, grassy banks, smoke and night lighting. [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) documents level roads, safe planting and pond life; [docs/WANDERING.md](docs/WANDERING.md) covers map entry, energy and activities. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
 
 - Repository: <https://github.com/mendal2377-droid/SmallVillage>
 - Production: <https://small-village-eta.vercel.app/>
@@ -13,9 +13,10 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 
 | Feature | Current behavior |
 | --- | --- |
-| Entry | Interactive 3D village plan, five projected wandering pins including the yard; Summer night preset; no gallery/story |
+| Entry | Interactive 3D village plan, six projected wandering pins including the yard; Summer night preset; no gallery/story |
 | 3D world | All entry points load the same full village containing the detailed house |
-| Visual direction | Painted palette/surfaces, fine depth outlines, fuller tree crowns, mixed distant woodland; existing house shape/map retained |
+| Visual direction | Imagegen foliage, meadow and ground artwork; fine depth outlines and warmer directional lighting; existing house shape/map retained |
+| Forest destination | 330 mixed trees, two large ponds, connected flower trails and a sixth overview pin; browser-created landscape/nav layer |
 | Village atmosphere | Grassy banks, intermittent neighbour chimney smoke, warm window and yard lights after dusk |
 | Navigation | Continuous full-screen walking; keyboard/mouse and mobile touch controls |
 | House access | Walk from the village lane through the red pedestrian gate, into the courtyard and rooms |
@@ -24,12 +25,12 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 | Seasons | Uneven wheat/maize, curved mixed vegetable beds, melon vines, fruit trees, mature spreading trees, winter seedlings/resting beds/bare crowns |
 | Weather and time | Clear, overcast, rain, thunderstorm (lightning and thunder), snowfall, fog and sunset; a day/night cycle with sun, moon and stars, optional time progression |
 | Play | Vehicles/toys/chicken flight retained; fishing, potato roasting, watermelon picking, rabbit chasing, kite flying, night fireworks |
-| Water / sky | Light green flowing water, five swimming fish types, 17 hopping pond frogs, water grass/cattails/duckweed/dragonflies, soft banks/lotus; twinkling stars and summer fireflies |
+| Water / sky | Light green flowing water, five swimming fish types, 37 hopping pond frogs, water grass/cattails/duckweed/dragonflies, soft banks/lotus; twinkling stars and summer fireflies |
 | Immersion | Quiet HUD; score appears after target hits; weather/season controls in walk mode; hints fade |
 | Wayfinding | Expandable north-up minimap, player/home/destination and direction/distance; house beacon when farther than 45 m |
 | Energy | Time-based drain, 25% warning, physical home recovery, activity pause/rewards; no forced immobilisation |
 
-The supplied sketch controls roads, waterways, two ponds, fields and the school. The house is at the user's **star**, in the lower-right housing strip, below the east-west stream and just west of the east perimeter road. The former 184-parcel inventory is historical: the immediate neighbors were replaced with photo-based roof silhouettes. There are still 237 mapped poplars; three were relocated away from bridge approaches. The browser adds 37 spreading/fruit trees, including 20 orchard trees. Ground-level roads and bridge decks have continuous level paving, with the former 637 raised joint bars removed.
+The supplied sketch controls roads, waterways, two ponds, fields and the school. The house is at the user's **star**, in the lower-right housing strip, below the east-west stream and just west of the east perimeter road. The former 184-parcel inventory is historical: the immediate neighbors were replaced with photo-based roof silhouettes. There are still 237 mapped poplars; the browser now adds 330 navigable woodland trees and two large lakes east of the fields, using an additive navigation layer; three were relocated away from bridge approaches. The browser adds 37 spreading/fruit trees, including 20 orchard trees. Ground-level roads and bridge decks have continuous level paving, with the former 637 raised joint bars removed.
 
 ### Preserve these user decisions
 
@@ -281,7 +282,9 @@ Wandering release checks, 4 Oct 2026: build, connected walking/chicken flight, s
 
 Road/wetland update: Blender repair and paired exports passed. Planting validation checked all 237 source poplars and eight bridge routes; connected walking and stairs passed again. The local ecology browser passed level roads, clear bridge, denser trees, actual frog movement and winter/summer visibility with no JavaScript or shader errors. Latest model counts: house 59 meshes / 97,569 triangles / 1,218,860 bytes; village 92 meshes / 410,080 triangles / 4,099,156 bytes. Navigation has 224 house and 1,397 village obstacles. See ROAD_REPAIR.md for scope and evidence.
 
-Illustration update: the saved house/map geometry and navigation are retained; art surfaces, crown masses, 667 distant trees, 34 bank segments, 21 decorative chimneys and day/night lighting are generated in the browser. The local illustration suite passed smoke movement, home lighting, winter/day changes and shader checks; walking, stairs, safe planting and environment checks passed again. See ILLUSTRATION.md for the reference, asset contracts and visual evidence.
+Initial illustration update: the saved house/map geometry and base navigation were retained; art surfaces, crown masses, 667 distant trees, 34 bank segments, 21 decorative chimneys and day/night lighting were generated in the browser. The local illustration suite passed smoke movement, home lighting, winter/day changes and shader checks. This initial crown treatment is superseded by the imagegen artwork below.
+
+Painted woodland update: the built-in imagegen tool produced an original concept board and three actual runtime textures (foliage, meadow, ground). Painted sprays replace the opaque crown spheres; roadside flower ribbons and 330 mixed woodland trees surround two new large ponds. The sixth overview pin starts on a clear forest trail, with a continuous route back to the yard. The augmented runtime navigation adds pond barriers, path footprints and trunk colliders while preserving the original GLBs and measured house. Build, woodland route/planting, connected walking/chicken flight, stairs, weather, vehicles/toys, energy/activities, desktop forest/season/night rendering, phone controls and illustration/night-house checks passed without JavaScript or shader errors. See PAINTED_WOODLAND.md and docs/design/IMAGEGEN.md for the source contract and exact prompts.
 
 Historical evidence for baseline `065ea71` (run locally on 3 Oct 2026; sizes below precede UV/roofscape exports):
 
