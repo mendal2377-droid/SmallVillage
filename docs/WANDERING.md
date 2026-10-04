@@ -1,5 +1,7 @@
 # Wandering systems — 4 October 2026
 
+The activity interactions described below are the historical first version. [INTERACTIVE_ACTIVITIES.md](INTERACTIVE_ACTIVITIES.md) documents the current bait/cast/hook/fight/release fishing loop, cooking heat and browning, quiet harvesting, rabbit trust, kite gusts and selectable fireworks. Map, energy and seasonal availability contracts below remain current.
+
 This supersedes the two-button entry documented in the historical connected-world notes. The actual full village model loads as a 3D plan at startup, with five projected entry pins. Every entry uses the same geometry and navigation; the owner's yard, stairs and balcony remain continuously accessible. The Summer night buttons in the overview and walking menu set clear weather, summer, 22:00 and fixed time. They do not teleport the player.
 
 ## Modules and contracts

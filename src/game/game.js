@@ -4,6 +4,7 @@ import {createVehicles} from './vehicles.js';
 import {createToys,TOOLS} from './toys.js';
 import {createCreatures} from './creatures.js';
 import {createAdventure} from './adventure.js';
+import {bindToolInput} from './tool-input.js';
 
 const $=(s)=>document.querySelector(s);
 const WEATHER_LABEL={clear:'Clear',overcast:'Overcast',rain:'Rain',storm:'Thunderstorm',snow:'Snowfall',fog:'Fog',sunset:'Sunset'};
@@ -28,6 +29,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(type==='bang')host.dataset.bangs=String(Number(host.dataset.bangs||0)+1);
     renderScore();
   }});
+  const toolInput=bindToolInput({canvas,button:$('#hud-fire'),toys,allowed:()=>active&&!walk.paused&&!vehicles.driving&&!creatures.held&&!adventure.task&&toys.tool!=='hands',startAudio:()=>audio.start()});
   const torch=new THREE.SpotLight('#fff4dc',0,32,.42,.65,1.1);torch.visible=false;torch.position.set(.15,-.1,0);torch.target.position.set(0,0,-1);camera.add(torch,torch.target);
   environment.on(e=>{if(e==='lightning')audio.play('thunder');});
 
@@ -52,11 +54,15 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     $('#hud-tools').hidden=Boolean(v)||Boolean(creatures.held)||Boolean(adventure.task);$('#game-hud').classList.toggle('driving',Boolean(v));
     $('#hud-prompt').hidden=!prompt;$('#hud-prompt').innerHTML=prompt;
     $('#hud-use').hidden=!prompt;$('#hud-fire').hidden=Boolean(v)||Boolean(creatures.held)||Boolean(adventure.task)||toys.tool==='hands';
+    $('#hud-fire').textContent=toys.tool==='water'?'Squirt · P':toys.tool==='slingshot'?'Hold / release · P':'Throw · P';
     $('#hud-flap').hidden=!creatures.held;$('#hud-descend').hidden=!creatures.held;
     renderAdventure();
   }
   function renderAdventure(){const s=adventure.state(),energy=$('#energy-hud');energy.hidden=!active;energy.classList.toggle('low',s.low&&!s.home);energy.classList.toggle('resting',s.home);$('#energy-label').textContent=s.home?'Resting at home':s.task?'Taking a break':'Energy';$('#energy-number').textContent=`${Math.ceil(s.energy)}%`;$('#energy-fill').style.width=`${s.energy}%`;$('#energy-meter').setAttribute('aria-valuenow',String(Math.round(s.energy)));$('#energy-reminder').hidden=!s.low||s.home;host.dataset.energy=s.energy.toFixed(2);host.dataset.energyLow=String(s.low);host.dataset.resting=String(s.home);host.dataset.activity=s.task?.site.kind||'';host.dataset.encounter=s.offer?.kind||'';host.dataset.activityPhase=s.task?.phase||'';host.dataset.activityOutcome=s.outcome;
-    const card=$('#activity-card');card.hidden=!active||!s.offer&&!s.task;card.classList.toggle('running',Boolean(s.task));card.classList.toggle('bite',s.task?.phase==='bite');$('#activity-place').textContent=s.task?'A refreshing detour':s.offer?.label||'A little detour';$('#activity-title').textContent=s.title;$('#activity-description').textContent=s.description;$('.activity-progress').hidden=!s.task;$('#activity-progress-fill').style.width=`${s.progress*100}%`;$('#activity-action').textContent=!s.task?'Try it · Q':s.task.site.kind==='fish'?(s.task.phase==='bite'?'Reel now! · Q':'Reel · Q'):s.task.site.kind==='potato'?'Turn potato · Q':s.task.site.kind==='kite'?'Pull line · Q':s.task.site.kind==='rabbit'?'Catch gently · Q':s.task.site.kind==='melon'?'Pick melon · Q':'Watching…';$('#activity-action').disabled=s.task?.site.kind==='firework';$('#activity-dismiss').textContent=s.task?'Leave · X':'Later · X';
+    const card=$('#activity-card');card.hidden=!active||!s.offer&&!s.task;card.classList.toggle('running',Boolean(s.task));card.classList.toggle('bite',s.task?.phase==='bite');card.classList.toggle('danger',Boolean(s.meter?.danger));$('#activity-place').textContent=s.task?s.task.site.label:s.offer?.label||'A little detour';$('#activity-title').textContent=s.title;$('#activity-description').textContent=s.description;$('.activity-progress').hidden=!s.task||!s.progress;$('#activity-progress-fill').style.width=`${s.progress*100}%`;$('#activity-action').textContent=s.task?s.action||'Continue · Q':'Try it · Q';$('#activity-action').disabled=Boolean(s.disabled);$('#activity-dismiss').textContent=s.task?'Leave · X':'Later · X';
+    $('#activity-secondary').hidden=!s.secondary;$('#activity-secondary').textContent=s.secondary||'';$('#activity-brace').hidden=!s.brace;
+    const meter=$('#activity-meter');meter.hidden=!s.meter;$('#activity-meter-label').textContent=s.meter?.label||'';$('#activity-meter-detail').textContent=s.meter?.detail||'';$('#activity-meter-fill').style.width=`${(s.meter?.value||0)*100}%`;$('#activity-meter-track').setAttribute('aria-label',s.meter?.label||'Activity');$('#activity-meter-track').setAttribute('aria-valuenow',String(Math.round((s.meter?.value||0)*100)));
+    host.dataset.fishTension=s.task?.fishing?.state.tension.toFixed(2)||'';host.dataset.fishSurge=s.task?.fishing?String(Boolean(s.task.fishing.state.cycle)):'';
   }
   function interact(chickenFirst=false){
     if(!active||walk.paused)return;
@@ -72,7 +78,9 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
   window.addEventListener('keydown',e=>{
     if(!active||walk.paused||e.target.closest?.('input,textarea,select')||e.repeat)return;
     audio.start();
-    if(e.code==='KeyQ'){e.preventDefault();adventure.act();toys.hold(false);renderStatus();return;}
+    if(e.code==='KeyQ'){e.preventDefault();toolInput.cancel();adventure.press();renderStatus();return;}
+    if(e.code==='KeyB'&&adventure.task){e.preventDefault();adventure.secondary();renderStatus();return;}
+    if((e.code==='KeyZ'||e.code==='KeyV')&&adventure.task?.phase==='fight'){e.preventDefault();adventure.aim(e.code==='KeyZ'?-1:1);return;}
     if(e.code==='KeyX'){adventure.skip();renderStatus();return;}
     const tool=TOOLS.find(t=>t.key===e.key);
     if(tool&&!vehicles.driving&&!creatures.held&&!adventure.task){toys.select(tool.id);return;}
@@ -86,16 +94,20 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(e.code==='KeyJ'){const list=Object.keys(SEASON_LABEL);onSeason(list[(list.indexOf(environment.season)+1)%list.length]);notice(SEASON_LABEL[environment.season]);renderTools();}
     if(e.code==='KeyR'){toys.resetTargets();notice('Targets reset');}
   });
-  // Right mouse uses tools during drag look; captured left mouse retains its original controls.
-  canvas.addEventListener('mousedown',e=>{if(active&&!walk.paused&&(e.button===2||e.button===0&&document.pointerLockElement===canvas)&&!vehicles.driving&&!creatures.held&&!adventure.task){audio.start();toys.hold(true);}});
+  window.addEventListener('keyup',e=>{if(e.code==='KeyQ'){adventure.release();if(active)renderStatus();}if(e.code==='KeyZ'||e.code==='KeyV')adventure.aim(0);});
+  window.addEventListener('blur',()=>{heldButton=false;suppressClick=false;adventure.clearInputs();});document.addEventListener('visibilitychange',()=>{heldButton=false;suppressClick=false;adventure.clearInputs();});
   canvas.addEventListener('contextmenu',e=>{if(active)e.preventDefault();});
-  window.addEventListener('mouseup',()=>toys.hold(false));
   canvas.addEventListener('wheel',e=>{if(!active||vehicles.driving||document.pointerLockElement!==canvas)return;const usable=TOOLS.filter(t=>toys.available(t.id));const i=usable.findIndex(t=>t.id===toys.tool);toys.select(usable[(i+(e.deltaY>0?1:-1)+usable.length)%usable.length].id);},{passive:true});
-  $('#hud-fire').addEventListener('pointerdown',e=>{e.preventDefault();audio.start();toys.hold(true);});
-  for(const ev of ['pointerup','pointercancel','pointerleave'])$('#hud-fire').addEventListener(ev,()=>toys.hold(false));
   $('#hud-use').addEventListener('click',()=>{audio.start();interact();});
   $('#chicken-call').addEventListener('click',()=>{audio.start();interact(true);canvas.focus({preventScroll:true});});
-  $('#activity-action').addEventListener('click',()=>{audio.start();adventure.act();toys.hold(false);renderStatus();canvas.focus({preventScroll:true});});
+  let heldButton=false,pressTime=0,suppressClick=false,heldPhase='';
+  const activityButton=$('#activity-action');
+  activityButton.addEventListener('pointerdown',e=>{suppressClick=false;const t=adventure.task;if(!t||walk.paused||activityButton.disabled)return;const hold=t.fishing&&['rig','charge','fight'].includes(t.phase)||['melon','kite'].includes(t.site.kind);if(!hold)return;e.preventDefault();heldButton=true;suppressClick=true;heldPhase=t.phase;pressTime=e.timeStamp;activityButton.setPointerCapture(e.pointerId);audio.start();adventure.press();renderStatus();});
+  activityButton.addEventListener('pointerup',e=>{if(!heldButton)return;e.preventDefault();heldButton=false;const tap=e.timeStamp-pressTime<350;adventure.release();if(tap&&heldPhase!=='rig'&&heldPhase!=='charge')adventure.act();renderStatus();});
+  for(const ev of ['pointercancel','lostpointercapture'])activityButton.addEventListener(ev,()=>{if(heldButton){heldButton=false;adventure.clearInputs();renderStatus();}});
+  activityButton.addEventListener('click',e=>{if(suppressClick&&e.detail){suppressClick=false;return;}suppressClick=false;audio.start();adventure.act();toys.hold(false);renderStatus();canvas.focus({preventScroll:true});});
+  $('#activity-secondary').addEventListener('click',()=>{audio.start();adventure.secondary();renderStatus();});
+  for(const b of document.querySelectorAll('[data-activity-aim]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);adventure.aim(Number(b.dataset.activityAim));});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>adventure.aim(0));}
   $('#activity-dismiss').addEventListener('click',()=>{adventure.skip();renderStatus();});
 
   return {
@@ -111,7 +123,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
       if(vehicles.driving)vehicles.dismount();
       creatures.stop();
       adventure.stop();$('#energy-hud').hidden=true;$('#activity-card').hidden=true;
-      active=false;toys.hold(false);toys.clear();vehicles.spawn('none');setTorch(false);audio.engine(null,0);audio.ambience({});
+      active=false;toolInput.cancel();toys.clear();vehicles.spawn('none');setTorch(false);audio.engine(null,0);audio.ambience({});
       $('#game-hud').hidden=true;host.dataset.game='off';
     },
     action(name){if(name==='use')interact();if(name==='torch')setTorch(!flashlightOn);if(name==='reset')toys.resetTargets();},
@@ -124,6 +136,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
       const carried=Boolean(creatures.held);creatures.update(dt,time);if(carried&&!creatures.held)toys.setVisible(true);
       $('#chicken-call').hidden=Boolean(vehicles.driving);$('#chicken-call').textContent=creatures.held?'Land · E':'Fly · E';
       adventure.update(dt,time,elapsedDt);toys.setVisible(!vehicles.driving&&!creatures.held&&!adventure.task);
+      walk.setActivityPace(adventure.task?.quiet ? .45 : 1);
       toys.update(dt,time);
       if(creatures.held){prompt='<kbd>E</kbd> Land & release · <kbd>Space</kbd> Flap · <kbd>Ctrl</kbd> Descend';}
       else if(!vehicles.driving){

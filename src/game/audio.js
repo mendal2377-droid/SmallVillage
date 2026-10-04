@@ -40,6 +40,9 @@ export function createAudio(){
     door:()=>{tone({frequency:180,end:120,duration:.18,type:'square',gain:.12});},
     horn:()=>{tone({frequency:420,duration:.35,type:'square',gain:.18});tone({frequency:520,duration:.35,type:'square',gain:.12});},
     pickup:()=>{tone({frequency:660,end:990,duration:.12,gain:.2});},
+    reel:()=>{tone({frequency:160,end:190,duration:.035,type:'triangle',gain:.07});burst({duration:.04,frequency:2200,gain:.025});},
+    hook:()=>{tone({frequency:340,end:680,duration:.08,gain:.12});burst({duration:.12,frequency:800,gain:.08});},
+    snap:()=>burst({duration:.08,frequency:2800,gain:.15}),
   };
   return{
     start,

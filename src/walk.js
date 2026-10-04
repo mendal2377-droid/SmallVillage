@@ -4,7 +4,7 @@ import * as THREE from 'three';
 // The same floor/collision queries serve vehicles and thrown toys while the game layer is active.
 export function createWalkController(camera, canvas, onChange) {
   let enabled=false, paused=false, driving=false, nav, boxes=[], yaw=0, pitch=0, drag=null, feet=0, sensitivity=1, captureMouse=false;
-  const eyeHeight=1.65, maxStep=.26;
+  const eyeHeight=1.65, maxStep=.26;let activityPace=1;
   const keys=new Set(), touches=new Set(), dynamic=new Map();
   const radius=.16;
   function clearInput(){keys.clear();touches.clear();drag=null;}
@@ -95,6 +95,7 @@ export function createWalkController(camera, canvas, onChange) {
     setLookOptions(options){if(options.sensitivity!==undefined)sensitivity=THREE.MathUtils.clamp(Number(options.sensitivity)||1,.3,1.5);if(options.captureMouse!==undefined){captureMouse=Boolean(options.captureMouse);if(!captureMouse&&document.pointerLockElement===canvas)document.exitPointerLock();}},
     levelLook(){pitch=0;camera.rotation.set(0,yaw,0,'YXZ');},
     axis,floorAt,solidAt,inWater,
+    setActivityPace(value){activityPace=THREE.MathUtils.clamp(value,.3,1);},
     // Moving props (vehicles) register oriented boxes in the same shape as the exported colliders.
     setDynamic(id,box){if(box)dynamic.set(id,box);else dynamic.delete(id);},
     place(x,y,z,lookYaw=yaw,lookPitch=0){camera.position.set(x,y,z);feet=y-eyeHeight;yaw=lookYaw;pitch=lookPitch;camera.rotation.set(pitch,yaw,0,'YXZ');},
@@ -108,7 +109,7 @@ export function createWalkController(camera, canvas, onChange) {
       if(!enabled||paused||driving)return;
       const {forward,strafe,fast}=axis();
       const length=Math.hypot(forward,strafe);
-      if(length){const speed=(tightSpace()?1.15:fast?3.8:2)*Math.min(dt,.1)/length;
+      if(length){const speed=(activityPace<1?2*activityPace:tightSpace()?1.15:fast?3.8:2)*Math.min(dt,.1)/length;
       move((strafe*Math.cos(yaw)-forward*Math.sin(yaw))*speed,(-forward*Math.cos(yaw)-strafe*Math.sin(yaw))*speed);}
       // Collision follows the actual floor; the eye eases over stair treads and landings.
       camera.position.y=THREE.MathUtils.damp(camera.position.y,feet+eyeHeight,14,Math.min(dt,.1));

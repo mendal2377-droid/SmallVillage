@@ -246,9 +246,11 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   return {
     TOOLS,get tool(){return tool;},select,fire,spawn,resetTargets,available,
     hold(value){if(tool==='slingshot'){if(value){holding=true;draw=0;}else if(holding){fire();holding=false;draw=0;}}else{holding=value;if(value)fire();}},
+    cancelHold(){holding=false;draw=0;},
     get stats(){return {cans:cans.length,down:cans.filter(c=>c.down).length,birds:birds.length,flying:birds.filter(b=>b.state==='fly').length,projectiles:projectiles.length};},
-    setVisible(value){view.visible=value;},get shake(){return shake;},get projectiles(){return projectiles;},
+    setVisible(value){view.visible=value;if(!value){holding=false;draw=0;}},get shake(){return shake;},get projectiles(){return projectiles;},
     update(dt,time){
+      if(walk.paused){holding=false;draw=0;return;}
       cooldown=Math.max(0,cooldown-dt);if(holding&&tool==='water')fire();
       if(holding&&tool==='slingshot')draw=Math.min(1,draw+dt*1.6);
       const sling=viewModels.slingshot,to=new THREE.Vector3(0,.115,.025+draw*.12);sling.userData.pouch.position.copy(to);for(const {band,from} of sling.userData.bands){const d=to.clone().sub(from);band.position.copy(from).addScaledVector(d,.5);band.scale.y=d.length();band.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());}

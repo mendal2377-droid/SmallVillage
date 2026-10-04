@@ -1,6 +1,7 @@
 import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
+import {playFishing} from './activity-helpers.mjs';
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const page=await browser.newPage({viewport:{width:1000,height:650}});page.setDefaultTimeout(180000);
 const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('PAGE ERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.log('CONSOLE ERROR',m.text());}});
@@ -25,7 +26,7 @@ if(await page.evaluate(()=>Boolean(window.__viewer))){
   await page.evaluate(()=>{window.__viewer.walk.place(-276,1.75,99,-Math.PI/2,-.08);});await page.screenshot({path:'artifacts/world/water.png'});
   await page.evaluate(()=>{const v=window.__viewer;v.walk.place(-31,1.85,110,0,.20);});await page.screenshot({path:'artifacts/world/chicken.png'});
   await page.evaluate(()=>{const v=window.__viewer;v.environment.setWeather('clear');v.environment.setHour(14);v.walk.place(-171,1.75,204,Math.PI/2,-.45);});await page.screenshot({path:'artifacts/world/gardens.png'});
-  await page.evaluate(()=>{const v=window.__viewer;v.walk.place(-276,1.75,113,-Math.PI/2,-.3);});await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.encounter==='fish');await page.keyboard.press('q');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.activityPhase==='bite');await page.keyboard.press('q');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.activityOutcome==='fish'&&document.querySelector('#canvas-host').dataset.activity==='');console.log('Fishing caught and released');
+  await page.evaluate(()=>{const v=window.__viewer;v.walk.place(-276,1.75,113,-Math.PI/2,-.3);});await playFishing(page);console.log('Fishing caught and released');
   await page.evaluate(()=>{const v=window.__viewer;v.game.adventure.energy.update(1300);v.walk.place(-154.5,1.75,206.8);});await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.energyLow==='true');assert.equal(await page.locator('#energy-reminder').isVisible(),true);await page.evaluate(()=>window.__viewer.walk.place(-32,1.85,109));await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.energyLow==='false');console.log('Fishing, low energy reminder and home recovery passed');
   await page.evaluate(()=>{const v=window.__viewer;v.environment.setWeather('clear');v.environment.setSeason('summer');v.details.setSeason('summer');v.environment.setHour(22);v.walk.place(-284,1.75,104,0,.8);});await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.nightStars==='twinkling');await page.screenshot({path:'artifacts/world/summer-night.png'});
 }
