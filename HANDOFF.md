@@ -1,5 +1,7 @@
 # SmallVillage — developer handoff
 
+Latest input fix: [docs/WEAPON_AIM.md](docs/WEAPON_AIM.md) covers cursor-based toy aiming, a visible reticle, held-trigger steering and centred touch/pointer-lock aim. Preserve drag-to-look without accidental shots.
+
 Latest addition: [docs/COAST_AND_FIREWORKS.md](docs/COAST_AND_FIREWORKS.md) covers the connected fictional coast, shared curved sea boundary, seventh map pin and harmless pooled firework Gatling (5; hold P/right mouse/touch trigger). Keep distant trees out of the ocean when changing the map bounds.
 
 Latest follow-up: [docs/COMFORT_UPDATE.md](docs/COMFORT_UPDATE.md) covers smoother upstairs movement, adjustable drag look, the photo-based sunset and storage door, a persistent flight chicken, and activity markers/entry on the plan. Keep the separate door materials and runtime collider aligned when exporting the house.

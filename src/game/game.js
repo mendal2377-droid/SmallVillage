@@ -30,9 +30,13 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(type==='bang')host.dataset.bangs=String(Number(host.dataset.bangs||0)+1);
     if(type==='firework-shot')host.dataset.fireworkShots=String(detail);
     if(type==='firework-burst')host.dataset.fireworkBursts=String(detail);
+    if(type==='toy-shot'){host.dataset.toyShots=String(Number(host.dataset.toyShots||0)+1);host.dataset.shotAim=JSON.stringify(detail.aim);host.dataset.shotDirection=JSON.stringify(detail.direction);}
     renderScore();
   }});
-  const toolInput=bindToolInput({canvas,button:$('#hud-fire'),toys,allowed:()=>active&&!walk.paused&&!vehicles.driving&&!creatures.held&&!adventure.task&&toys.tool!=='hands',startAudio:()=>audio.start()});
+  const canUseTool=()=>active&&!walk.paused&&!vehicles.driving&&!creatures.held&&!adventure.task&&toys.tool!=='hands';
+  const toolInput=bindToolInput({canvas,button:$('#hud-fire'),toys,allowed:canUseTool,startAudio:()=>audio.start(),onAim(x,y){
+    const reticle=$('#walk-crosshair');reticle.style.left=`${(x+1)*50}%`;reticle.style.top=`${(1-y)*50}%`;
+  }});
   const torch=new THREE.SpotLight('#fff4dc',0,32,.42,.65,1.1);torch.visible=false;torch.position.set(.15,-.1,0);torch.target.position.set(0,0,-1);camera.add(torch,torch.target);
   environment.on(e=>{if(e==='lightning')audio.play('thunder');});
 
@@ -44,6 +48,8 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
       b.innerHTML=`<span aria-hidden="true">${t.icon}</span><small>${t.key}</small><em>${t.label}</em>`;
       b.addEventListener('click',()=>{toys.select(t.id);canvas.focus({preventScroll:true});});return b;}));
     host.dataset.tool=toys.tool;
+    const reticle=$('#walk-crosshair');reticle.classList.toggle('weapon-aim',toys.tool!=='hands');reticle.textContent=toys.tool==='hands'?'·':'';
+    if(toys.tool==='hands'){reticle.style.left='50%';reticle.style.top='50%';toys.setAim(0,0);}
   }
   function renderScore(){
     const s=toys.stats;$('#hud-score').textContent=`Tins ${s.down}/${s.cans}${rings?` · Target ${rings}`:''}${startled?` · Birds startled ${startled}`:''}`;
@@ -58,6 +64,8 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     $('#hud-prompt').hidden=!prompt;$('#hud-prompt').innerHTML=prompt;
     $('#hud-use').hidden=!prompt;$('#hud-fire').hidden=Boolean(v)||Boolean(creatures.held)||Boolean(adventure.task)||toys.tool==='hands';
     $('#hud-fire').textContent=toys.tool==='water'?'Squirt · P':toys.tool==='gatling'?'Hold fireworks · P':toys.tool==='slingshot'?'Hold / release · P':'Throw · P';
+    $('#walk-crosshair').classList.toggle('aim-blocked',!canUseTool()&&toys.tool!=='hands');
+    host.classList.toggle('weapon-equipped',canUseTool());
     $('#hud-flap').hidden=!creatures.held;$('#hud-descend').hidden=!creatures.held;
     renderAdventure();
   }
@@ -126,7 +134,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
       if(vehicles.driving)vehicles.dismount();
       creatures.stop();
       adventure.stop();$('#energy-hud').hidden=true;$('#activity-card').hidden=true;
-      active=false;toolInput.cancel();toys.clear();vehicles.spawn('none');setTorch(false);audio.engine(null,0);audio.ambience({});
+      active=false;toolInput.cancel();host.classList.remove('weapon-equipped');toys.clear();vehicles.spawn('none');setTorch(false);audio.engine(null,0);audio.ambience({});
       $('#game-hud').hidden=true;host.dataset.game='off';
     },
     action(name){if(name==='use')interact();if(name==='torch')setTorch(!flashlightOn);if(name==='reset')toys.resetTargets();},

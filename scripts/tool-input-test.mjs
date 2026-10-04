@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import {bindToolInput} from '../src/game/tool-input.js';
 const canvas=new EventTarget(),button=new EventTarget(),win=new EventTarget(),doc=new EventTarget();button.setPointerCapture=()=>{};
+canvas.getBoundingClientRect=()=>({left:20,top:30,width:400,height:200});
+let aim=[0,0],firedAim;
 let usable=true,captured=false,shots=0,held=false,releases=0,cancels=0;
-const input=bindToolInput({canvas,button,win,doc,allowed:()=>usable,locked:()=>captured,toys:{fire(){shots++;},hold(v){held=v;if(!v)releases++;},cancelHold(){held=false;cancels++;}}});
+const input=bindToolInput({canvas,button,win,doc,allowed:()=>usable,locked:()=>captured,toys:{setAim(x,y){aim=[x,y];},fire(){shots++;firedAim=aim;},hold(v){held=v;if(!v)releases++;},cancelHold(){held=false;cancels++;}}});
 function event(target,name,fields={}){const e=new Event(name,{cancelable:true});for(const [k,v] of Object.entries(fields))Object.defineProperty(e,k,{value:v});target.dispatchEvent(e);}
 const mouse={pointerType:'mouse',pointerId:1,button:0,clientX:100,clientY:100};
 event(canvas,'pointerdown',mouse);event(win,'pointerup',mouse);assert.equal(shots,1,'Free-look click fires');
@@ -17,3 +19,10 @@ usable=false;event(canvas,'pointerdown',mouse);event(win,'pointerup',mouse);even
 usable=true;event(win,'keydown',{code:'KeyP',repeat:false});usable=false;event(win,'keyup',{code:'KeyP'});assert.equal(releases,4,'Entering a blocked state cancels rather than releasing a shot');assert.ok(cancels);
 usable=true;event(win,'keydown',{code:'KeyP',repeat:false,target:{closest:selector=>selector.includes('button')?button:null}});assert.equal(held,true,'P still fires after selecting a tool with a focused HUD button');event(win,'keyup',{code:'KeyP'});assert.equal(releases,5);input.cancel();
 console.log('PASS: click versus drag, right/captured hold, touch trigger, P, blur cancellation and activity/menu/flight guards.');
+event(canvas,'pointermove',{...mouse,clientX:320,clientY:80});assert.deepEqual(aim,[.5,.5],'Mouse moves crosshair right and up inside offset canvas');
+event(canvas,'pointerdown',{...mouse,clientX:120,clientY:180});event(win,'pointerup',{...mouse,clientX:120,clientY:180});assert.deepEqual(firedAim,[-.5,-.5],'Click shoots at the pointer, left and down');
+event(canvas,'pointerdown',{...mouse,button:2});event(win,'pointermove',{...mouse,clientX:420,clientY:230});assert.deepEqual(aim,[1,-1],'Held right trigger can steer across the screen');event(win,'pointerup',{...mouse,button:2,clientX:320,clientY:80});assert.deepEqual(aim,[.5,.5],'Slingshot release uses final pointer position');
+captured=true;event(canvas,'pointermove',{...mouse,clientX:420});assert.deepEqual(aim,[0,0],'Captured mouse aims through the centre');captured=false;
+event(canvas,'pointermove',{...mouse,clientX:320,clientY:80});event(button,'pointerdown',{...mouse,pointerType:'touch'});assert.deepEqual(aim,[0,0],'Touch trigger clears stale desktop aim');event(win,'pointerup',{...mouse,pointerType:'touch'});
+event(canvas,'pointermove',{...mouse,clientX:900,clientY:-90});assert.deepEqual(aim,[1,1],'Pointer capture clamps aim to the viewport');event(win,'resize');assert.deepEqual(aim,[0,0],'Resizing resets the reticle and shot together');
+console.log('PASS: cursor aiming, held-trigger steering, final release aim, pointer lock, touch and resize resets.');

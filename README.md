@@ -16,6 +16,7 @@ The forest trail continues to a sandy beach with turquoise surf, a rocky headlan
 | --- | --- |
 | WASD / arrows · Shift | Walk · run |
 | Click · drag · C | Fire the selected toy · look · level the camera |
+| Move mouse | Aim the crosshair anywhere in the view; held shots follow it |
 | 0–5 / mouse wheel | Hands, slingshot, water pistol, firecrackers, snowballs, firework Gatling |
 | 5, then hold P / right mouse / trigger button | Spin the toy barrels and launch colourful starbursts |
 | Right mouse / P / trigger button: hold and release | Draw and shoot the slingshot |
@@ -30,6 +31,8 @@ The forest trail continues to a sandy beach with turquoise surf, a rocky headlan
 | Z / V during fishing | Brace the rod left / right against the fish's pull |
 
 Click the weather chip or **Weather & tools** to choose weather, season, time and sound, or use **Summer night** there for the starry sky at your current location. The scene changes immediately behind the menu. Closing it resumes movement. Mobile devices show movement, interaction, flap and descend buttons.
+
+The crosshair marks the launch direction. Pebbles, water and thrown toys still arc under gravity. On phones, drag to aim the view and use the trigger button; with **Capture mouse for looking**, mouse movement turns the view and the crosshair stays centred.
 
 Fishing now includes bait, casting distance, nibbles, hooking, fish struggles and line tension. Roasting, harvesting, rabbits, kites and fireworks also respond to timing and choices. See [interactive activity rules and controls](docs/INTERACTIVE_ACTIVITIES.md).
 

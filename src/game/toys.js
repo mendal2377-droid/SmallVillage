@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {buildCreature} from './creatures.js';
 import {createFireworkLauncher,FIREWORK_LIMITS} from './firework-launcher.js';
+import {weaponAimDirection} from './weapon-aim.js';
 
 // Playful, non-lethal toys: a slingshot, a water pistol, firecrackers and (when there is snow) snowballs.
 // Things to aim at: tin cans on crates, bottles on the terrace parapet, straw targets and sparrows that
@@ -40,6 +41,7 @@ const LAYOUT={
 export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   let tool='hands',projectiles=[],cans=[],boards=[],birds=[],sparks=[],cooldown=0,holding=false,shake=0,sceneName,recoil=0;
   let draw=0;
+  const aim=new THREE.Vector2(),aimDirection=new THREE.Vector3(),localDirection=new THREE.Vector3(),cameraRotation=new THREE.Quaternion();
   const flashLight=new THREE.PointLight('#ffcf80',0,14,1.6);flashLight.visible=false;scene.add(flashLight);
   const props=new THREE.Group();scene.add(props);
   const view=new THREE.Group();camera.add(view);view.position.set(.26,-.24,-.5);view.scale.setScalar(.8);
@@ -133,8 +135,9 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
     onEvent('targets',{total:cans.length});
   }
   function emit(kind){
-    const dir=new THREE.Vector3();camera.getWorldDirection(dir);
-    const origin=camera.position.clone().addScaledVector(dir,.35).add(new THREE.Vector3(0,-.08,0));
+    const dir=weaponAimDirection(camera,aim);
+    const origin=camera.getWorldPosition(new THREE.Vector3()).addScaledVector(dir,.35);
+    onEvent('toy-shot',{tool:kind,aim:aim.toArray(),direction:dir.toArray()});
     if(kind==='gatling'){launcher.fire(origin,dir);recoil=.15;return;}
     const spec={slingshot:{speed:30,up:.02,geo:G.pebble,m:M.pebble,life:5},water:{speed:13,up:.05,geo:G.drop,m:M.drop,life:2},firecracker:{speed:11,up:.22,geo:G.cracker,m:M.cracker,life:6,fuse:1.6},snowball:{speed:17,up:.08,geo:G.snow,m:M.snow,life:5}}[kind];
     const v=dir.clone().add(new THREE.Vector3(0,spec.up,0)).normalize().multiplyScalar(kind==='slingshot'&&holding?18+draw*18:spec.speed);
@@ -250,6 +253,8 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   function resetTargets(){for(const c of cans){c.m.position.copy(c.home);c.m.rotation.set(0,0,0);c.vel.set(0,0,0);c.rest=true;c.down=false;}onEvent('can',{down:0,total:cans.length});}
   return {
     TOOLS,get tool(){return tool;},select,fire,spawn,resetTargets,available,
+    setAim(x,y){aim.set(THREE.MathUtils.clamp(x,-1,1),THREE.MathUtils.clamp(y,-1,1));},
+    get aim(){return {x:aim.x,y:aim.y};},
     hold(value){if(tool==='slingshot'){if(value){holding=true;draw=0;}else if(holding){fire();holding=false;draw=0;}}else{holding=value;if(value)fire();}},
     cancelHold(){holding=false;draw=0;},
     get stats(){return {cans:cans.length,down:cans.filter(c=>c.down).length,birds:birds.length,flying:birds.filter(b=>b.state==='fly').length,projectiles:projectiles.length,fireworks:launcher.stats};},
@@ -260,7 +265,10 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
       launcher.update(dt,holding&&tool==='gatling');
       if(holding&&tool==='slingshot')draw=Math.min(1,draw+dt*1.6);
       const sling=viewModels.slingshot,to=new THREE.Vector3(0,.115,.025+draw*.12);sling.userData.pouch.position.copy(to);for(const {band,from} of sling.userData.bands){const d=to.clone().sub(from);band.position.copy(from).addScaledVector(d,.5);band.scale.y=d.length();band.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());}
-      recoil=Math.max(0,recoil-dt*6);view.position.set(.26,-.24+Math.sin(time*2)*.004,-.5+recoil*.05);view.rotation.x=recoil*.25;
+      recoil=Math.max(0,recoil-dt*6);view.position.set(.26,-.24+Math.sin(time*2)*.004,-.5+recoil*.05);
+      weaponAimDirection(camera,aim,aimDirection);camera.getWorldQuaternion(cameraRotation);
+      localDirection.copy(aimDirection).applyQuaternion(cameraRotation.invert());
+      view.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),localDirection);view.rotateX(recoil*.25);
       for(const p of projectiles){
         stepProjectile(p,dt);
         if(p.kind==='firecracker'&&p.fuse!==undefined){p.fuse-=dt;if(Math.random()<.6){const s=new THREE.Mesh(G.spark,M.spark);s.position.copy(p.mesh.position);scene.add(s);sparks.push({m:s,vel:new THREE.Vector3((Math.random()-.5),1,(Math.random()-.5)),life:.15});}
