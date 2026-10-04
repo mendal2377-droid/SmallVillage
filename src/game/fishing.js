@@ -43,8 +43,10 @@ export function createFishing(random=Math.random){
     if(f.phase==='charge'){f.power=clamp(f.power+dt*.5);return;}
     if(f.phase==='cast'){if(f.age>=.8)phase('wait');return;}
     if(f.phase==='wait'||f.phase==='nibble'){
-      if(!nibbled&&f.age>=wait*.45){nibbled=true;f.window=Math.max(.9,Math.min(20,seconds*1.75));phase('nibble');return;}
-      if(f.phase==='nibble'){f.window-=dt;if(f.window<=0){phase('wait');wait=2.2+random()*2;}return;}
+      if(!nibbled&&f.age>=wait*.45){nibbled=true;f.window=Math.max(.9,Math.min(3,seconds*1.75));phase('nibble');return;}
+      // Nibbles need no reaction. Let their passive animation use elapsed time,
+      // while the actual bite and fish fight retain slow-frame protection.
+      if(f.phase==='nibble'){f.window-=Math.max(0,seconds);if(f.window<=0){phase('wait');wait=2.2+random()*2;}return;}
       if(f.age>=wait){f.window=Math.max(4,Math.min(20,seconds*1.75));phase('bite');return;}
     }
     if(f.phase==='bite'){f.window-=dt;if(f.window<=0){f.reason='The bite passed. Change bait or cast again.';phase('miss');}return;}

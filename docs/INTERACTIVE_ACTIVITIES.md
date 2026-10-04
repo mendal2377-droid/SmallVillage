@@ -27,7 +27,7 @@ X / Leave packs up any activity. Riding or chicken flight also cancels it. Weath
 
 ## Timing and controls
 
-Waiting for fish uses active elapsed time, while interactive reaction/fight/cooking steps cap each frame's advancement at 0.25 seconds. A delayed render cannot instantly snap the line, burn a potato or consume a newly shown bite window. This deliberately makes the interactive processes run slower when rendering is slow. Menus and hidden tabs pause; blur, visibility changes, pointer cancellation and menus clear holds and toggled reels. Restarting a missed cast does not award energy.
+Waiting for fish and passive nibbles use active elapsed time, while interactive reaction/fight/cooking steps cap each frame's advancement at 0.25 seconds. A delayed render cannot instantly snap the line, burn a potato or consume a newly shown bite window. This deliberately makes the interactive processes run slower when rendering is slow. Menus and hidden tabs pause; blur, visibility changes, pointer cancellation and menus clear holds and toggled reels. Restarting a missed cast does not award energy.
 
 All new actions have labelled on-screen buttons for phone and keyboard use. Holding has pointer capture and cancellation support. There is no rapid tapping requirement. C still levels the camera; Z/V only control the rod during a fish fight. The expanded navigation map remains above the activity panel.
 
