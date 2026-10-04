@@ -1,14 +1,14 @@
 import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
-const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader'],...(process.env.PLAYWRIGHT_PROXY?{proxy:{server:process.env.PLAYWRIGHT_PROXY,bypass:'127.0.0.1,localhost'}}:{})});
 const url=process.env.BASE_URL||'http://127.0.0.1:4173',out='artifacts/aim',errors=[];mkdirSync(out,{recursive:true});
 try{
  const context=await browser.newContext({viewport:{width:760,height:500}}),page=await context.newPage();page.setDefaultTimeout(180000);
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto(url);await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');await page.locator('[data-entry=house]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');
  const dev=await page.evaluate(()=>Boolean(window.__viewer));
- const clearCooldown=async()=>{if(dev)await page.evaluate(()=>{const t=window.__viewer.game.toys;t.cancelHold();t.clear();t.update(.95,0);});else await page.waitForTimeout(1800);};
+ const clearCooldown=async()=>{if(dev)await page.evaluate(()=>{const t=window.__viewer.game.toys;t.cancelHold();t.clear();t.update(.95,0);});else await page.evaluate(()=>new Promise(resolve=>{let previous=performance.now(),elapsed=0;function tick(now){elapsed+=Math.min(.1,(now-previous)/1000);previous=now;if(elapsed>=1)resolve();else requestAnimationFrame(tick);}requestAnimationFrame(tick);}));};
  const read=()=>page.evaluate(()=>{const h=document.querySelector('#canvas-host'),r=document.querySelector('#walk-crosshair');return {shots:Number(h.dataset.toyShots||0),aim:JSON.parse(h.dataset.shotAim||'[0,0]'),direction:JSON.parse(h.dataset.shotDirection||'[0,0,-1]'),rect:{x:r.getBoundingClientRect().x,y:r.getBoundingClientRect().y,width:r.getBoundingClientRect().width,height:r.getBoundingClientRect().height},weapon:r.classList.contains('weapon-aim')};});
  const checkReticle=async(x,y)=>{const {rect,weapon}=await read();assert.ok(weapon);assert.ok(Math.abs(rect.x+rect.width/2-x)<2&&Math.abs(rect.y+rect.height/2-y)<2,'Crosshair follows mouse position');};
  await page.keyboard.press('1');await clearCooldown();
