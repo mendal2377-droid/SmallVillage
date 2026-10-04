@@ -5,7 +5,7 @@ import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {createWalkController} from './walk.js';
 import {createEnvironment} from './environment.js';
 import {createGame} from './game/game.js';
-import {createWorldDetails} from './world.js';
+import {createWorldDetails,openWaterbed} from './world.js';
 import {createMaps} from './map.js';
 import {createIllustration,paintArchitecture} from './illustration.js';
 import {createVillageAtmosphere} from './atmosphere.js';
@@ -105,7 +105,7 @@ export function createViewer(host,{onEnter=()=>{}}={}) {
     const data={...source,village:extendCoastNavigation(extendWoodlandNavigation(source.village))};navigationData=data;
     if(version!==loadVersion)return;
     if(current)scene.remove(current);
-    current=model;modelName=name;scene.add(model);environment.setModel(model,data[name]);details.install(model,metadata,data[name]);paintArchitecture(model);if(atmosphere)scene.remove(atmosphere.root);if(woodland)scene.remove(woodland.root);if(coast)scene.remove(coast.root);atmosphere=undefined;woodland=undefined;coast=undefined;if(name==='village'){atmosphere=createVillageAtmosphere({scene,camera,environment,nav:data[name],metadata:architecture,host});woodland=createWoodland({scene,camera,nav:data[name],environment,host});coast=createCoast({scene,camera,nav:data[name],environment,host});}maps.install(data[name],metadata);setSeason(season);preset('orbit');
+    current=model;modelName=name;scene.add(model);openWaterbed(floor.material,{waterZones:data[name].woodland?.ponds||[]});environment.setModel(model,data[name]);details.install(model,metadata,data[name]);paintArchitecture(model);if(atmosphere)scene.remove(atmosphere.root);if(woodland)scene.remove(woodland.root);if(coast)scene.remove(coast.root);atmosphere=undefined;woodland=undefined;coast=undefined;if(name==='village'){atmosphere=createVillageAtmosphere({scene,camera,environment,nav:data[name],metadata:architecture,host});woodland=createWoodland({scene,camera,nav:data[name],environment,host});coast=createCoast({scene,camera,nav:data[name],environment,host});}maps.install(data[name],metadata);setSeason(season);preset('orbit');
     houseDoor?.dispose();houseDoor=createHouseDoor({scene,model,mode:name,camera,walk,host});
     host.dataset.loadedModel=name;
   }

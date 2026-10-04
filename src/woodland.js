@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {seeded,material,stem,merged,instances} from './organic.js';
 import {canopyGeometry,paintedMaterial,paintGround} from './painted.js';
 import {createPlantingMask} from './planting.js';
+import {createForestPonds} from './forest-pond.js';
 
 export function createWoodland({scene,camera,nav,environment,host}){
   const root=new THREE.Group();root.name='Painted woodland and flower walks';scene.add(root);
@@ -15,6 +16,8 @@ export function createWoodland({scene,camera,nav,environment,host}){
   const verts=[],indices=[];
   woodland.trail.forEach(([x,z],i)=>{const before=woodland.trail[Math.max(0,i-1)],after=woodland.trail[Math.min(woodland.trail.length-1,i+1)],dx=after[0]-before[0],dz=after[1]-before[1],len=Math.hypot(dx,dz)||1;for(const side of [-1,1])verts.push(x-dz/len*1.45*side,.115,z+dx/len*1.45*side);if(i){const k=i*2;indices.push(k-2,k,k-1,k-1,k,k+1);}});
   const pathGeo=new THREE.BufferGeometry();pathGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));pathGeo.setIndex(indices);pathGeo.computeVertexNormals();const path=new THREE.Mesh(pathGeo,pathMat);path.material.side=THREE.DoubleSide;path.receiveShadow=true;root.add(path);
+  for(let i=1;i<nav.pondGarden.branch.length;i++){const [x,z]=nav.pondGarden.branch[i-1],[a,b]=nav.pondGarden.branch[i];if(x===195&&a===195)continue;const dx=a-x,dz=b-z,geo=new THREE.PlaneGeometry(Math.hypot(dx,dz),2.9);geo.rotateX(-Math.PI/2);const link=new THREE.Mesh(geo,pathMat);link.rotation.y=-Math.atan2(dz,dx);link.position.set((x+a)/2,.116,(z+b)/2);link.receiveShadow=true;root.add(link);}
+  const ponds=createForestPonds({parent:root,scene,camera,nav,environment,host});
   const colours=['#c4d3b1','#cfddab','#bad2c9','#82afa0','#b7cc9c'];
   for(let kind=0;kind<5;kind++){
     const frame=new THREE.Group(),bark=material(kind===2?'#c4c4a8':'#756c52');
@@ -54,7 +57,7 @@ export function createWoodland({scene,camera,nav,environment,host}){
   const motesGeo=new THREE.BufferGeometry(),motesPos=new Float32Array(90*3),phases=Array.from({length:90},()=>r()*6.28);motesGeo.setAttribute('position',new THREE.BufferAttribute(motesPos,3));
   const motes=new THREE.Points(motesGeo,new THREE.PointsMaterial({color:'#f9dda1',size:.055,transparent:true,opacity:.45,depthWrite:false}));motes.frustumCulled=false;root.add(motes);
   host.dataset.woodlandTrees=String(nav.woodlandTrees.length);host.dataset.woodlandPonds=String(woodland.ponds.length);host.dataset.flowerClumps=String(points.length);host.dataset.generatedArt='foliage,meadow,ground';let lastSeason;
-  return {root,points,canopies,update(dt,time){const winter=environment.season==='winter',autumn=environment.season==='corn';groundMat.color.set(winter?'#d7ddca':autumn?'#d9cfaa':'#dce2c3');if(lastSeason!==environment.season){groundMat.map=winter?null:groundArtwork;groundMat.needsUpdate=true;lastSeason=environment.season;}pathMat.color.set(winter?'#d6d4c1':'#cebd8c');
+  return {root,points,canopies,ponds,update(dt,time){ponds.update(dt,time);const winter=environment.season==='winter',autumn=environment.season==='corn';groundMat.color.set(winter?'#d7ddca':autumn?'#d9cfaa':'#dce2c3');if(lastSeason!==environment.season){groundMat.map=winter?null:groundArtwork;groundMat.needsUpdate=true;lastSeason=environment.season;}pathMat.color.set(winter?'#d6d4c1':'#cebd8c');
     for(const f of flowers)f.group.visible=!winter&&(camera.position.y>50||Math.hypot(camera.position.x-f.x,camera.position.z-f.z)<125);
     flowerMat.color.set(autumn?'#c8b697':'#ffffff');
     for(const {group,mat,colour,kind} of canopies){mat.color.set(autumn&&kind!==3?'#d7b984':colour);for(const m of group.children)if(m.material===mat)m.visible=!winter||kind===3;}

@@ -1,5 +1,7 @@
 # SmallVillage — developer handoff
 
+Latest landscape refinement: [docs/FOREST_PONDS.md](docs/FOREST_PONDS.md) covers clear gravel beds, 48 koi, lilies/frogs, mossy stone banks, the protected cove bridge, pavilion and seasonal cascade. Keep rendered bridge deck heights aligned with shared navigation ramps.
+
 Latest input fix: [docs/WEAPON_AIM.md](docs/WEAPON_AIM.md) covers cursor-based toy aiming, a visible reticle, held-trigger steering and centred touch/pointer-lock aim. Preserve drag-to-look without accidental shots.
 
 Latest addition: [docs/COAST_AND_FIREWORKS.md](docs/COAST_AND_FIREWORKS.md) covers the connected fictional coast, shared curved sea boundary, seventh map pin and harmless pooled firework Gatling (5; hold P/right mouse/touch trigger). Keep distant trees out of the ocean when changing the map bounds.
