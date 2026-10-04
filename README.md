@@ -13,19 +13,22 @@ The homepage is the actual 3D village plan. Turn and zoom the map, then choose a
 | Control | Action |
 | --- | --- |
 | WASD / arrows · Shift | Walk · run |
-| Click / drag · Esc | Look · release the mouse |
+| Click · drag · C | Fire the selected toy · look · level the camera |
 | 0–4 / mouse wheel | Hands, slingshot, water pistol, firecrackers, snowballs |
-| Hold and release | Draw and shoot the slingshot |
-| Hold | Spray water; click throws other toys |
+| Right mouse / P / trigger button: hold and release | Draw and shoot the slingshot |
+| Right mouse / P / trigger button: hold | Spray water; click throws other toys |
 | F · V · H | Ride / get off · vehicle view · horn |
 | E | Hold a nearby chicken; land and release when already holding it |
 | Space · Ctrl | Flap upward · descend while holding a chicken |
 | L | Flashlight |
 | G · J · T | Change weather · season · time immediately while walking |
 | R | Restack targets |
-| Q · X | Start / act in a nearby activity · leave / decline |
+| Q · B · X | Start / act / hold to cast or reel · secondary activity action · leave |
+| Z / V during fishing | Brace the rod left / right against the fish's pull |
 
 Click the weather chip or **Weather & tools** to choose weather, season, time and sound, or use **Summer night** there for the starry sky at your current location. The scene changes immediately behind the menu. Closing it resumes movement. Mobile devices show movement, interaction, flap and descend buttons.
+
+Fishing now includes bait, casting distance, nibbles, hooking, fish struggles and line tension. Roasting, harvesting, rabbits, kites and fireworks also respond to timing and choices. See [interactive activity rules and controls](docs/INTERACTIVE_ACTIVITIES.md).
 
 The small navigation map shows the player, home, waterways and destinations. Click a landmark to change the direction guide; this does not teleport the player. Energy declines during wandering, warns at 25%, and restores when resting in the actual yard/house. Outdoor activities pause the drain and award energy on completion: timed fishing, potato roasting, watermelon picking, rabbit chasing, kite flying and night fireworks. Prompts appear only near their locations, with random selection, wait times and cooldowns. The settings menu pauses activity timers and energy drain.
 
@@ -51,6 +54,10 @@ npm run test:walk         # Continuous courtyard/lane/road/field route and chick
 npm run test:stairs       # Rooms, stairs, upper corridor, terrace and descent
 npm run test:environment  # Shelters, precipitation, day/night, storms and wet materials
 npm run test:game         # Vehicles, collisions, targets, toys and snow rules
+npm run test:tool-input   # Click/drag separation, held trigger, touch and cancellation
+npm run test:tools-ui     # Real browser water and slingshot controls
+npm run test:fishing      # Casting, bites, fish fight, tension, retry and landing
+npm run test:interactive  # Desktop and phone activity controls and completion
 npm run test:adventure    # Energy, all activities, cooldowns, seasonal rules and pause/recovery
 npm run test:comfort      # Stair smoothing, look controls, task entries, companion and door
 npm run test:comfort-ui   # Desktop follow-up controls, photo door and sunset captures
