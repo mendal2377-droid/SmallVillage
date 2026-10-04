@@ -1,5 +1,7 @@
 # SmallVillage — developer handoff
 
+Latest addition: [docs/COAST_AND_FIREWORKS.md](docs/COAST_AND_FIREWORKS.md) covers the connected fictional coast, shared curved sea boundary, seventh map pin and harmless pooled firework Gatling (5; hold P/right mouse/touch trigger). Keep distant trees out of the ocean when changing the map bounds.
+
 Latest follow-up: [docs/COMFORT_UPDATE.md](docs/COMFORT_UPDATE.md) covers smoother upstairs movement, adjustable drag look, the photo-based sunset and storage door, a persistent flight chicken, and activity markers/entry on the plan. Keep the separate door materials and runtime collider aligned when exporting the house.
 
 Updated 4 October 2026. **Current application: illustrated wandering village on `main`.** Read [docs/PAINTED_WOODLAND.md](docs/PAINTED_WOODLAND.md) for the imagegen artwork, flower paths and connected forest lakes. Read [docs/ILLUSTRATION.md](docs/ILLUSTRATION.md) for the current painted visual direction, mixed woodland, grassy banks, smoke and night lighting. [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) documents level roads, safe planting and pond life; [docs/WANDERING.md](docs/WANDERING.md) covers map entry, energy and activities. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
@@ -15,7 +17,7 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 
 | Feature | Current behavior |
 | --- | --- |
-| Entry | Interactive 3D village plan, six projected wandering pins including the yard; Summer night preset; no gallery/story |
+| Entry | Interactive 3D village plan, seven projected wandering pins including the yard and coast; Summer night preset; no gallery/story |
 | 3D world | All entry points load the same full village containing the detailed house |
 | Visual direction | Imagegen foliage, meadow and ground artwork; fine depth outlines and warmer directional lighting; existing house shape/map retained |
 | Forest destination | 330 mixed trees, two large ponds, connected flower trails and a sixth overview pin; browser-created landscape/nav layer |

@@ -1,6 +1,6 @@
 // Small synthesized soundscape: no audio files, nothing plays until the first user gesture.
 export function createAudio(){
-  let ctx,master,noise,rainGain,windGain,engine,enabled=true;
+  let ctx,master,noise,rainGain,windGain,surfGain,engine,enabled=true;
   function start(){
     if(ctx||!enabled)return ctx?.resume();
     const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
@@ -8,6 +8,7 @@ export function createAudio(){
     noise=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
     const loop=(type,frequency,q)=>{const src=ctx.createBufferSource();src.buffer=noise;src.loop=true;const f=ctx.createBiquadFilter();f.type=type;f.frequency.value=frequency;f.Q.value=q;const g=ctx.createGain();g.gain.value=0;src.connect(f).connect(g).connect(master);src.start();return g;};
     rainGain=loop('highpass',1400,.4);windGain=loop('lowpass',380,.7);
+    surfGain=loop('lowpass',850,.4);
     // Engine: two detuned oscillators through a low-pass, pitched by vehicle speed.
     const o1=ctx.createOscillator(),o2=ctx.createOscillator(),f=ctx.createBiquadFilter(),g=ctx.createGain();
     o1.type='sawtooth';o2.type='square';f.type='lowpass';f.frequency.value=420;g.gain.value=0;
@@ -27,6 +28,8 @@ export function createAudio(){
   const sounds={
     slingshot:()=>{tone({frequency:220,end:90,duration:.12,type:'triangle',gain:.35});burst({duration:.08,frequency:2500,gain:.15});},
     water:()=>burst({duration:.12,frequency:3200,q:.6,gain:.12}),
+    'firework-launch':()=>tone({frequency:420,end:1100,duration:.18,type:'sine',gain:.045}),
+    'firework-pop':()=>{burst({duration:.22,frequency:1700,q:.5,gain:.055});tone({frequency:740,end:370,duration:.18,gain:.025});},
     throw:()=>burst({duration:.18,frequency:700,q:.5,gain:.12}),
     fuse:()=>burst({duration:.5,frequency:5000,q:2,gain:.06,decay:.5}),
     bang:()=>{burst({duration:.5,frequency:180,type:'lowpass',gain:1.2,decay:.45});burst({duration:.12,frequency:2400,gain:.7,decay:.1});},
@@ -50,7 +53,7 @@ export function createAudio(){
     set enabled(value){enabled=value;if(ctx)master.gain.value=value?.55:0;if(value)start();},
     play(name){if(ctx&&enabled)sounds[name]?.();},
     // Continuous layers follow the environment and vehicle every frame.
-    ambience({rain=0,wind=0}){if(!ctx)return;rainGain.gain.setTargetAtTime(rain*.22,now(),.4);windGain.gain.setTargetAtTime(wind*.25,now(),.6);},
+    ambience({rain=0,wind=0,surf=0}){if(!ctx)return;rainGain.gain.setTargetAtTime(rain*.22,now(),.4);windGain.gain.setTargetAtTime(wind*.25,now(),.6);surfGain.gain.setTargetAtTime(surf*.16*(.7+.3*Math.sin(now()*.6)),now(),.5);},
     engine(kind,speed){
       if(!ctx)return;const on=kind?1:0,t=now(),base=kind==='tractor'?38:70;
       engine.o1.frequency.setTargetAtTime(base+Math.abs(speed)*(kind==='tractor'?6:9),t,.1);engine.o2.frequency.setTargetAtTime((base+Math.abs(speed)*7)*1.01,t,.1);

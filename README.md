@@ -8,13 +8,16 @@ Wander through an illustrated village, from the fields into the courtyard house,
 
 ## Enter and play
 
-The homepage is the actual 3D village plan. Turn and zoom the map, then choose a pin at the yard, avenue, water, fields or school lane to start wandering. Every pin enters the same `village.glb`. **Summer night** sets a clear summer sky at 22:00 before you choose a starting point. **Overview** returns to this map.
+The homepage is the actual 3D village plan. Turn and zoom the map, then choose a pin at the yard, avenue, water, fields, school lane, forest lakes or coast to start wandering. Every pin enters the same connected village. **Summer night** sets a clear summer sky at 22:00 before you choose a starting point. **Overview** returns to this map.
+
+The forest trail continues to a sandy beach with turquoise surf, a rocky headland and gulls. Select **5 / Firework Gatling** for colourful repeating starbursts. See [coast and toy fireworks](docs/COAST_AND_FIREWORKS.md).
 
 | Control | Action |
 | --- | --- |
 | WASD / arrows · Shift | Walk · run |
 | Click · drag · C | Fire the selected toy · look · level the camera |
-| 0–4 / mouse wheel | Hands, slingshot, water pistol, firecrackers, snowballs |
+| 0–5 / mouse wheel | Hands, slingshot, water pistol, firecrackers, snowballs, firework Gatling |
+| 5, then hold P / right mouse / trigger button | Spin the toy barrels and launch colourful starbursts |
 | Right mouse / P / trigger button: hold and release | Draw and shoot the slingshot |
 | Right mouse / P / trigger button: hold | Spray water; click throws other toys |
 | F · V · H | Ride / get off · vehicle view · horn |
@@ -54,6 +57,8 @@ npm run test:walk         # Continuous courtyard/lane/road/field route and chick
 npm run test:stairs       # Rooms, stairs, upper corridor, terrace and descent
 npm run test:environment  # Shelters, precipitation, day/night, storms and wet materials
 npm run test:game         # Vehicles, collisions, targets, toys and snow rules
+npm run test:coast        # Beach route, sea barriers, bounded fireworks and cancellation
+npm run test:coast-ui     # Desktop/phone map entry, launcher controls and day/night rendering
 npm run test:tool-input   # Click/drag separation, held trigger, touch and cancellation
 npm run test:tools-ui     # Real browser water and slingshot controls
 npm run test:fishing      # Casting, bites, fish fight, tension, retry and landing

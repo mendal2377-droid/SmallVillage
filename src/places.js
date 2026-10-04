@@ -6,6 +6,7 @@ export const PLACES=[
   {id:'fields',place:'fields',label:'Fields & gardens',icon:'✿',x:-154.5,z:206.8,color:'#e8d2a1'},
   {id:'school',place:'school',label:'School lane',icon:'⌖',x:.2,z:-150.7,color:'#e7dfbd'},
   {id:'forest',place:'forest',label:'Forest & lakes',icon:'♧',x:194,z:94,color:'#b5d5be'},
+  {id:'coast',place:'coast',label:'Coast & beach',icon:'≈',x:476,z:160,color:'#a4dce5'},
 ];
 export const GARDEN_PLOTS=[
   {kind:'melon',rect:[-181,196,-163,208]},

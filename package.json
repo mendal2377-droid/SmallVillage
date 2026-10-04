@@ -27,7 +27,9 @@
     "test:painted": "node scripts/woodland-browser.mjs",
     "test:comfort": "node scripts/comfort-test.mjs",
     "test:comfort-ui": "node scripts/comfort-browser.mjs",
-    "test:comfort-touch": "node scripts/comfort-touch.mjs"
+    "test:comfort-touch": "node scripts/comfort-touch.mjs",
+    "test:coast": "node scripts/coast-test.mjs",
+    "test:coast-ui": "node scripts/coast-browser.mjs"
   },
   "dependencies": {
     "three": "^0.186.1",

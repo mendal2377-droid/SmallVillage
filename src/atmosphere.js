@@ -18,7 +18,7 @@ export function createVillageAtmosphere({scene,camera,environment,nav,metadata,h
   for(let edge=0;edge<4;edge++)for(let row=0;row<3;row++){const len=edge%2?z1-z0:x1-x0;for(let d=0;d<len;d+=7+r()*7){let x,z;if(row>0&&Math.sin(d*.037+edge)*Math.cos(d*.015)>.36)continue;
     if(edge===0){x=x0+d;z=z0-20-row*22-r()*42;}else if(edge===1){x=x1+24+row*22+r()*42;z=z0+d;}else if(edge===2){x=x0+d;z=z1+22+row*22+r()*42;}else{x=x0-22-row*22-r()*42;z=z0+d;}
     // Keep the avenues' continuation visually open, even outside the walkable boundary.
-    if(mask.onRoad(x,z,4))continue;const kind=Math.floor(r()*4),p={x,z,y:-.25,angle:r()*6.28,scale:1.1+r()*1.3,tint:new THREE.Color().setHSL(.23+r()*.10,.18,.70+r()*.24)};placements[kind].push(p);forest.push({...p,kind});
+    if(mask.onRoad(x,z,4)||mask.inWater(x,z,8))continue;const kind=Math.floor(r()*4),p={x,z,y:-.25,angle:r()*6.28,scale:1.1+r()*1.3,tint:new THREE.Color().setHSL(.23+r()*.10,.18,.70+r()*.24)};placements[kind].push(p);forest.push({...p,kind});
   }}
   const forestRoot=new THREE.Group();forestRoot.name='Mixed distant woodland';root.add(forestRoot);placements.forEach((pts,i)=>forestRoot.add(instances(treeTemplate(i),pts)));
   const bankMat=material('#9bb777'),grassMat=material('#749952');

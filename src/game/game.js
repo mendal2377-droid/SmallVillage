@@ -5,6 +5,7 @@ import {createToys,TOOLS} from './toys.js';
 import {createCreatures} from './creatures.js';
 import {createAdventure} from './adventure.js';
 import {bindToolInput} from './tool-input.js';
+import {shoreX} from '../coast-layout.js';
 
 const $=(s)=>document.querySelector(s);
 const WEATHER_LABEL={clear:'Clear',overcast:'Overcast',rain:'Rain',storm:'Thunderstorm',snow:'Snowfall',fog:'Fog',sunset:'Sunset'};
@@ -27,6 +28,8 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(type==='ring'){rings+=detail.score;notice(detail.score===10?'Bullseye! +10':`Target +${detail.score}`);}
     if(type==='birds'){startled+=detail.count;host.dataset.birdsStartled=String(startled);}
     if(type==='bang')host.dataset.bangs=String(Number(host.dataset.bangs||0)+1);
+    if(type==='firework-shot')host.dataset.fireworkShots=String(detail);
+    if(type==='firework-burst')host.dataset.fireworkBursts=String(detail);
     renderScore();
   }});
   const toolInput=bindToolInput({canvas,button:$('#hud-fire'),toys,allowed:()=>active&&!walk.paused&&!vehicles.driving&&!creatures.held&&!adventure.task&&toys.tool!=='hands',startAudio:()=>audio.start()});
@@ -54,7 +57,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     $('#hud-tools').hidden=Boolean(v)||Boolean(creatures.held)||Boolean(adventure.task);$('#game-hud').classList.toggle('driving',Boolean(v));
     $('#hud-prompt').hidden=!prompt;$('#hud-prompt').innerHTML=prompt;
     $('#hud-use').hidden=!prompt;$('#hud-fire').hidden=Boolean(v)||Boolean(creatures.held)||Boolean(adventure.task)||toys.tool==='hands';
-    $('#hud-fire').textContent=toys.tool==='water'?'Squirt · P':toys.tool==='slingshot'?'Hold / release · P':'Throw · P';
+    $('#hud-fire').textContent=toys.tool==='water'?'Squirt · P':toys.tool==='gatling'?'Hold fireworks · P':toys.tool==='slingshot'?'Hold / release · P':'Throw · P';
     $('#hud-flap').hidden=!creatures.held;$('#hud-descend').hidden=!creatures.held;
     renderAdventure();
   }
@@ -146,7 +149,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
         prompt=vehicle&&distance<1.6?`<kbd>F</kbd> Ride ${vehicle.spec.label} · <kbd>E</kbd> Fly`:'';
       }else prompt=`<kbd>F</kbd> Get off · <kbd>V</kbd> View · <kbd>H</kbd> Horn`;
       const storm=environment.weather==='storm';
-      audio.ambience({rain:environment.wet&&!environment.sheltered?(storm?1:.6):environment.wet?.2:0,wind:storm?.9:environment.weather==='snow'?.35:environment.weather==='fog'?.15:.08});
+      audio.ambience({rain:environment.wet&&!environment.sheltered?(storm?1:.6):environment.wet?.2:0,wind:storm?.9:environment.weather==='snow'?.35:environment.weather==='fog'?.15:.08,surf:walk.nav?.coast?THREE.MathUtils.clamp(1-Math.abs(camera.position.x-shoreX(camera.position.z))/130,0,1):0});
       host.dataset.driving=vehicles.driving?vehicles.driving.kind:'';host.dataset.speed=(vehicles.driving?.speed||0).toFixed(2);
       if((hudTimer-=elapsedDt)<=0){hudTimer=.2;renderStatus();if(darkness>.6&&!flashlightOn&&!host.dataset.torchHint){host.dataset.torchHint='1';notice('It is getting dark. Press L for a flashlight.');}}
     },

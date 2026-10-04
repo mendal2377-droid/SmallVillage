@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {buildCreature} from './creatures.js';
+import {createFireworkLauncher,FIREWORK_LIMITS} from './firework-launcher.js';
 
 // Playful, non-lethal toys: a slingshot, a water pistol, firecrackers and (when there is snow) snowballs.
 // Things to aim at: tin cans on crates, bottles on the terrace parapet, straw targets and sparrows that
@@ -11,6 +12,7 @@ export const TOOLS=[
   {id:'water',key:'2',label:'Water pistol',icon:'💧'},
   {id:'firecracker',key:'3',label:'Firecrackers',icon:'🧨'},
   {id:'snowball',key:'4',label:'Snowballs',icon:'❄'},
+  {id:'gatling',key:'5',label:'Firework Gatling',icon:'✺'},
 ];
 const mat=(color,o={})=>new THREE.MeshStandardMaterial({color,roughness:.6,...o});
 const G={
@@ -41,7 +43,9 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   const flashLight=new THREE.PointLight('#ffcf80',0,14,1.6);flashLight.visible=false;scene.add(flashLight);
   const props=new THREE.Group();scene.add(props);
   const view=new THREE.Group();camera.add(view);view.position.set(.26,-.24,-.5);view.scale.setScalar(.8);
+  const launcher=createFireworkLauncher({scene,walk,audio,onEvent});
   const models={
+    gatling(){return launcher.model;},
     slingshot(){const g=new THREE.Group(),wood=mat('#81603c');const fork=new THREE.CatmullRomCurve3([new THREE.Vector3(-.07,.12,0),new THREE.Vector3(-.042,.04,.01),new THREE.Vector3(0,-.015,.015),new THREE.Vector3(.042,.04,.01),new THREE.Vector3(.07,.12,0)]);g.add(new THREE.Mesh(new THREE.TubeGeometry(fork,20,.015,10,false),wood));const handle=new THREE.Mesh(new THREE.CapsuleGeometry(.020,.13,6,10),wood);handle.position.y=-.09;g.add(handle);
       for(let j=0;j<10;j++){const wrap=new THREE.Mesh(new THREE.TorusGeometry(.022,.003,5,12),mat('#493d2c'));wrap.rotation.x=Math.PI/2;wrap.position.y=-.045-j*.012;g.add(wrap);}
       g.userData.bands=[];for(const s of [-1,1]){const band=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,1,8),mat('#caac62',{roughness:.85}));g.add(band);g.userData.bands.push({band,from:new THREE.Vector3(s*.07,.12,0)});}const pouch=new THREE.Mesh(new RoundedBoxGeometry(.04,.024,.018,2,.003),mat('#4b3524'));g.add(pouch);g.userData.pouch=pouch;return g;},
@@ -68,7 +72,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
     return h;
   }
   let crateList=[];const crates=()=>crateList;
-  function clearProps(){props.clear();cans=[];boards=[];birds=[];crateList=[];projectiles.forEach(p=>scene.remove(p.mesh));projectiles=[];for(let i=0;i<8;i++)walk.setDynamic('crate-'+i,null);}
+  function clearProps(){launcher.clear();holding=false;props.clear();cans=[];boards=[];birds=[];crateList=[];projectiles.forEach(p=>scene.remove(p.mesh));projectiles=[];for(let i=0;i<8;i++)walk.setDynamic('crate-'+i,null);}
   function addCrate(x,z,yaw=0){
     const y=walk.floorAt(x,z,walk.nav.ground??.2,.6)??(walk.nav.ground??.2),size=[.62,.5,.62];
     const m=new THREE.Mesh(new THREE.BoxGeometry(...size),M.crate);m.position.set(x,y+size[1]/2,z);m.rotation.y=yaw;props.add(m);
@@ -117,7 +121,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
     sceneName=name;clearProps();const layout=LAYOUT[name];if(!layout||!walk.nav)return;
     if(layout.crates==='places'){
       for(const [place,p] of Object.entries(walk.nav.places||{})){
-        if(place==='forest')continue;
+        if(place==='forest'||place==='coast')continue;
         const yaw=p.yaw||0,a=clearSpot(...frontOf(p.spawn,yaw,7,-2.2));if(a)addCrate(...a,yaw);
         const b=clearSpot(...frontOf(p.spawn,yaw,13,2.5));if(b)addBoard(...b,yaw);
       }
@@ -131,6 +135,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   function emit(kind){
     const dir=new THREE.Vector3();camera.getWorldDirection(dir);
     const origin=camera.position.clone().addScaledVector(dir,.35).add(new THREE.Vector3(0,-.08,0));
+    if(kind==='gatling'){launcher.fire(origin,dir);recoil=.15;return;}
     const spec={slingshot:{speed:30,up:.02,geo:G.pebble,m:M.pebble,life:5},water:{speed:13,up:.05,geo:G.drop,m:M.drop,life:2},firecracker:{speed:11,up:.22,geo:G.cracker,m:M.cracker,life:6,fuse:1.6},snowball:{speed:17,up:.08,geo:G.snow,m:M.snow,life:5}}[kind];
     const v=dir.clone().add(new THREE.Vector3(0,spec.up,0)).normalize().multiplyScalar(kind==='slingshot'&&holding?18+draw*18:spec.speed);
     if(kind==='water')v.add(new THREE.Vector3((Math.random()-.5)*.6,(Math.random()-.5)*.4,(Math.random()-.5)*.6));
@@ -141,7 +146,7 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
   function fire(){
     if(tool==='hands'||cooldown>0||walk.paused)return;
     if(tool==='snowball'&&!snowy()){select('hands');return;}
-    emit(tool);cooldown={slingshot:.45,water:.06,firecracker:.9,snowball:.5}[tool];
+    emit(tool);cooldown={slingshot:.45,water:.06,firecracker:.9,snowball:.5,gatling:FIREWORK_LIMITS.cadence}[tool];
     audio.play({slingshot:'slingshot',water:'water',firecracker:'fuse',snowball:'throw'}[tool]);
   }
   function scare(point,radius,why){
@@ -247,11 +252,12 @@ export function createToys({scene,camera,walk,audio,onEvent=()=>{}}){
     TOOLS,get tool(){return tool;},select,fire,spawn,resetTargets,available,
     hold(value){if(tool==='slingshot'){if(value){holding=true;draw=0;}else if(holding){fire();holding=false;draw=0;}}else{holding=value;if(value)fire();}},
     cancelHold(){holding=false;draw=0;},
-    get stats(){return {cans:cans.length,down:cans.filter(c=>c.down).length,birds:birds.length,flying:birds.filter(b=>b.state==='fly').length,projectiles:projectiles.length};},
+    get stats(){return {cans:cans.length,down:cans.filter(c=>c.down).length,birds:birds.length,flying:birds.filter(b=>b.state==='fly').length,projectiles:projectiles.length,fireworks:launcher.stats};},
     setVisible(value){view.visible=value;if(!value){holding=false;draw=0;}},get shake(){return shake;},get projectiles(){return projectiles;},
     update(dt,time){
       if(walk.paused){holding=false;draw=0;return;}
-      cooldown=Math.max(0,cooldown-dt);if(holding&&tool==='water')fire();
+      cooldown=Math.max(0,cooldown-dt);if(holding&&(tool==='water'||tool==='gatling'))fire();
+      launcher.update(dt,holding&&tool==='gatling');
       if(holding&&tool==='slingshot')draw=Math.min(1,draw+dt*1.6);
       const sling=viewModels.slingshot,to=new THREE.Vector3(0,.115,.025+draw*.12);sling.userData.pouch.position.copy(to);for(const {band,from} of sling.userData.bands){const d=to.clone().sub(from);band.position.copy(from).addScaledVector(d,.5);band.scale.y=d.length();band.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());}
       recoil=Math.max(0,recoil-dt*6);view.position.set(.26,-.24+Math.sin(time*2)*.004,-.5+recoil*.05);view.rotation.x=recoil*.25;

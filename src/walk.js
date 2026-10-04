@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {inCoastWater} from './coast-layout.js';
 
 // A grounded camera with a small circular footprint. Axis separation lets it slide along walls.
 // The same floor/collision queries serve vehicles and thrown toys while the game layer is active.
@@ -22,6 +23,7 @@ export function createWalkController(camera, canvas, onChange) {
     return candidates.filter(h=>Math.abs(h-level)<=step).sort((a,b)=>b-a)[0];
   }
   function inWater(x,z,r=radius){
+    if(inCoastWater(nav,x,z,r))return true;
     if((nav.bridges||[]).some(([x0,z0,x1,z1])=>x>=x0&&x<=x1&&z>=z0&&z<=z1))return false;
     return (nav.waterZones||[]).some(zone=>{
       if(zone.shape==='ellipse')return ((x-zone.center[0])/(zone.radius[0]+r))**2+((z-zone.center[1])/(zone.radius[1]+r))**2<1;
@@ -100,7 +102,7 @@ export function createWalkController(camera, canvas, onChange) {
     setDynamic(id,box){if(box)dynamic.set(id,box);else dynamic.delete(id);},
     place(x,y,z,lookYaw=yaw,lookPitch=0){camera.position.set(x,y,z);feet=y-eyeHeight;yaw=lookYaw;pitch=lookPitch;camera.rotation.set(pitch,yaw,0,'YXZ');},
     standAt(x,z,feet){const height=floorAt(x,z,feet,.6);return height!==undefined&&!blocked(x,z,height)?height:undefined;},
-    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=0;camera.position.fromArray(nav.spawn);feet=camera.position.y-eyeHeight;camera.rotation.set(0,yaw,0,'YXZ');camera.fov=64;camera.near=.04;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
+    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=nav.pitch||0;camera.position.fromArray(nav.spawn);feet=camera.position.y-eyeHeight;camera.rotation.set(pitch,yaw,0,'YXZ');camera.fov=64;camera.near=.04;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
     exit(){enabled=false;driving=false;clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();onChange(false);},
     pause(value){paused=value;if(value){clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();}},
     input(direction,pressed){if(!enabled||paused)return;if(pressed)touches.add(direction);else touches.delete(direction);},

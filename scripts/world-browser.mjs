@@ -6,7 +6,7 @@ const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use
 const page=await browser.newPage({viewport:{width:1000,height:650}});page.setDefaultTimeout(180000);
 const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('PAGE ERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.log('CONSOLE ERROR',m.text());}});
 mkdirSync('artifacts/world',{recursive:true});
-await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');console.log('Checking',page.url());await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');assert.equal(await page.locator('[data-entry]').count(),6);assert.equal(await page.locator('img').count(),0);assert.equal(await page.locator('a').count(),0);
+await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');console.log('Checking',page.url());await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');assert.equal(await page.locator('[data-entry]').count(),7);assert.equal(await page.locator('img').count(),0);assert.equal(await page.locator('a').count(),0);
 for(const pin of await page.locator('[data-entry]').all())assert.equal(await pin.isVisible(),true,'Map destination visible');await page.screenshot({path:'artifacts/world/entry.png'});console.log('Entry: clickable pins on the full 3D overview');
 await page.locator('#summer-night').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.summerNight==='true'&&document.querySelector('#canvas-host').dataset.nightStars==='twinkling');await page.screenshot({path:'artifacts/world/summer-night-overview.png'});
 await page.locator('[data-entry=house]').click();
