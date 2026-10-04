@@ -62,9 +62,9 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(!active||walk.paused)return;
     if(creatures.held){creatures.release();return;}
     if(vehicles.driving){if(!vehicles.dismount())notice('No room to get off here.');toys.setVisible(true);return;}
-    if(chickenFirst||creatures.nearest().distance<1.9){if(creatures.grab()){if(adventure.task)adventure.skip();toys.hold(false);toys.select('hands');toys.setVisible(false);return;}if(chickenFirst)return;}
     const {vehicle,distance}=vehicles.nearest(camera.position);
-    if(vehicle&&distance<1.6){if(adventure.task)adventure.skip();vehicles.mount(vehicle);toys.setVisible(false);notice(`On ${vehicle.spec.label}. W/S drive · A/D steer · Space brake · V view · F get off`);}
+    if(!chickenFirst&&vehicle&&distance<1.6){if(adventure.task)adventure.skip();vehicles.mount(vehicle);toys.setVisible(false);notice(`On ${vehicle.spec.label}. W/S drive · A/D steer · Space brake · V view · F get off`);return;}
+    if(creatures.grab(chickenFirst)){if(adventure.task)adventure.skip();toys.hold(false);toys.select('hands');toys.setVisible(false);}
   }
   function setTorch(value){flashlightOn=value;torch.intensity=value?26:0;torch.visible=value;host.dataset.flashlight=String(value);}
   function cycleWeather(){const list=environment.weathers.filter(w=>w!=='sunset');const next=list[(list.indexOf(environment.weather)+1)%list.length];onWeather(next);notice(WEATHER_LABEL[next]);}
@@ -78,6 +78,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(tool&&!vehicles.driving&&!creatures.held&&!adventure.task){toys.select(tool.id);return;}
     if(e.code==='KeyF'||e.code==='KeyE'){e.preventDefault();interact(e.code==='KeyE');}
     if(e.code==='KeyL'){setTorch(!flashlightOn);notice(flashlightOn?'Flashlight on':'Flashlight off');}
+    if(e.code==='KeyC')walk.levelLook();
     if(e.code==='KeyV'&&vehicles.driving){vehicles.toggleView();}
     if(e.code==='KeyH')vehicles.horn();
     if(e.code==='KeyT'){environment.setHour(environment.hour+1);notice(`Time ${clock(environment.hour)}`);}
@@ -85,13 +86,15 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
     if(e.code==='KeyJ'){const list=Object.keys(SEASON_LABEL);onSeason(list[(list.indexOf(environment.season)+1)%list.length]);notice(SEASON_LABEL[environment.season]);renderTools();}
     if(e.code==='KeyR'){toys.resetTargets();notice('Targets reset');}
   });
-  // Fire with the left button only once the mouse is captured, so the capturing click is not a shot.
-  canvas.addEventListener('mousedown',e=>{if(active&&e.button===0&&document.pointerLockElement===canvas&&!vehicles.driving&&!creatures.held&&!adventure.task){audio.start();toys.hold(true);}});
+  // Right mouse uses tools during drag look; captured left mouse retains its original controls.
+  canvas.addEventListener('mousedown',e=>{if(active&&!walk.paused&&(e.button===2||e.button===0&&document.pointerLockElement===canvas)&&!vehicles.driving&&!creatures.held&&!adventure.task){audio.start();toys.hold(true);}});
+  canvas.addEventListener('contextmenu',e=>{if(active)e.preventDefault();});
   window.addEventListener('mouseup',()=>toys.hold(false));
   canvas.addEventListener('wheel',e=>{if(!active||vehicles.driving||document.pointerLockElement!==canvas)return;const usable=TOOLS.filter(t=>toys.available(t.id));const i=usable.findIndex(t=>t.id===toys.tool);toys.select(usable[(i+(e.deltaY>0?1:-1)+usable.length)%usable.length].id);},{passive:true});
   $('#hud-fire').addEventListener('pointerdown',e=>{e.preventDefault();audio.start();toys.hold(true);});
   for(const ev of ['pointerup','pointercancel','pointerleave'])$('#hud-fire').addEventListener(ev,()=>toys.hold(false));
   $('#hud-use').addEventListener('click',()=>{audio.start();interact();});
+  $('#chicken-call').addEventListener('click',()=>{audio.start();interact(true);canvas.focus({preventScroll:true});});
   $('#activity-action').addEventListener('click',()=>{audio.start();adventure.act();toys.hold(false);renderStatus();canvas.focus({preventScroll:true});});
   $('#activity-dismiss').addEventListener('click',()=>{adventure.skip();renderStatus();});
 
@@ -119,6 +122,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
       const darkness=1-environment.daylight;
       vehicles.update(dt,time,darkness);
       const carried=Boolean(creatures.held);creatures.update(dt,time);if(carried&&!creatures.held)toys.setVisible(true);
+      $('#chicken-call').hidden=Boolean(vehicles.driving);$('#chicken-call').textContent=creatures.held?'Land · E':'Fly · E';
       adventure.update(dt,time,elapsedDt);toys.setVisible(!vehicles.driving&&!creatures.held&&!adventure.task);
       toys.update(dt,time);
       if(creatures.held){prompt='<kbd>E</kbd> Land & release · <kbd>Space</kbd> Flap · <kbd>Ctrl</kbd> Descend';}
@@ -126,7 +130,7 @@ export function createGame({host,scene,camera,canvas,walk,environment,world,onHo
         // Re-apply the look direction each frame so firecracker shake never accumulates.
         const shake=toys.shake;camera.rotation.set(walk.pitch+(Math.random()-.5)*shake,walk.yaw+(Math.random()-.5)*shake,0,'YXZ');
         const {vehicle,distance}=vehicles.nearest(camera.position);
-        prompt=creatures.nearest().distance<1.9?'<kbd>E</kbd> Hold chicken & fly':vehicle&&distance<1.6?`<kbd>F</kbd> Ride ${vehicle.spec.label}`:'';
+        prompt=vehicle&&distance<1.6?`<kbd>F</kbd> Ride ${vehicle.spec.label} · <kbd>E</kbd> Fly`:'';
       }else prompt=`<kbd>F</kbd> Get off · <kbd>V</kbd> View · <kbd>H</kbd> Horn`;
       const storm=environment.weather==='storm';
       audio.ambience({rain:environment.wet&&!environment.sheltered?(storm?1:.6):environment.wet?.2:0,wind:storm?.9:environment.weather==='snow'?.35:environment.weather==='fog'?.15:.08});

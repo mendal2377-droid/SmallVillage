@@ -11,9 +11,11 @@ const data=JSON.parse(readFileSync('public/models/navigation.json','utf8'));
 walk.enter(data.house);
 // Follow the real route with the same movement controller used by keyboard and touch.
 function travel(direction,amount){
+  const start=camera.position.clone();let stalled=0;
   walk.input(direction,true);
-  for(let i=0;i<Math.round(amount/.02);i++)walk.update(.01);
+  for(let i=0;i<30000&&Math.hypot(camera.position.x-start.x,camera.position.z-start.z)<amount-.003;i++){const old=camera.position.clone();walk.update(Math.min(.01,(amount-Math.hypot(camera.position.x-start.x,camera.position.z-start.z))/2));stalled=old.distanceTo(camera.position)<.00001?stalled+1:0;if(stalled>50)break;}
   walk.input(direction,false);
+  for(let i=0;i<50;i++)walk.update(.01);
 }
 function go(x,z,label){
   let dx=x-camera.position.x;travel(dx>0?'right':'left',Math.abs(dx));

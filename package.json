@@ -20,7 +20,10 @@
     "test:ecology": "node scripts/road-ecology-browser.mjs",
     "test:illustration": "node scripts/illustration-browser.mjs",
     "test:woodland": "node scripts/woodland-test.mjs",
-    "test:painted": "node scripts/woodland-browser.mjs"
+    "test:painted": "node scripts/woodland-browser.mjs",
+    "test:comfort": "node scripts/comfort-test.mjs",
+    "test:comfort-ui": "node scripts/comfort-browser.mjs",
+    "test:comfort-touch": "node scripts/comfort-touch.mjs"
   },
   "dependencies": {
     "three": "^0.186.1",

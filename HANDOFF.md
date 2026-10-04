@@ -1,5 +1,7 @@
 # SmallVillage — developer handoff
 
+Latest follow-up: [docs/COMFORT_UPDATE.md](docs/COMFORT_UPDATE.md) covers smoother upstairs movement, adjustable drag look, the photo-based sunset and storage door, a persistent flight chicken, and activity markers/entry on the plan. Keep the separate door materials and runtime collider aligned when exporting the house.
+
 Updated 4 October 2026. **Current application: illustrated wandering village on `main`.** Read [docs/PAINTED_WOODLAND.md](docs/PAINTED_WOODLAND.md) for the imagegen artwork, flower paths and connected forest lakes. Read [docs/ILLUSTRATION.md](docs/ILLUSTRATION.md) for the current painted visual direction, mixed woodland, grassy banks, smoke and night lighting. [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) documents level roads, safe planting and pond life; [docs/WANDERING.md](docs/WANDERING.md) covers map entry, energy and activities. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
 
 - Repository: <https://github.com/mendal2377-droid/SmallVillage>

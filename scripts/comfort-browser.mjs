@@ -1,0 +1,39 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync} from 'node:fs';
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const page=await browser.newPage({viewport:{width:760,height:500}});page.setDefaultTimeout(180000);
+const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+mkdirSync('artifacts/comfort',{recursive:true});
+const frame=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+try{
+ await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
+ assert.equal(await page.locator('.map-pin:visible').count(),6);assert.equal(await page.locator('[data-map-activity]:visible').count(),6);assert.equal(await page.locator('#canvas-host').getAttribute('data-activity-markers'),'9');
+ await page.locator('[data-map-activity=potato]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.mapTarget==='potato');assert.ok(await page.locator('[data-activity-entry=potato]').isVisible());await page.screenshot({path:'artifacts/comfort/activity-plan.png'});
+ await page.locator('[data-activity-entry=potato]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.walkLocation==='activity');
+ await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chickenCompanion==='following');assert.ok(await page.locator('#chicken-call').isVisible());
+ await page.locator('#chicken-call').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chicken==='held'&&document.querySelector('#chicken-call').textContent==='Land · E');console.log('Activity entry and chicken summon');
+ await page.keyboard.down('Space');await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.flightAltitude)>1);await page.keyboard.up('Space');await page.locator('#chicken-call').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chicken==='');await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.companionDistance)<2.2);
+ await page.locator('#map-expand').click();await page.locator('[data-map-activity=fish]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.mapTarget.startsWith('fish'));assert.ok((await page.locator('#map-destination').textContent()).includes('fishing'));await page.locator('#map-expand').click();
+ await page.locator('#walk-exit').click();await page.locator('[data-entry=house]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.walkLocation==='courtyard');console.log('Flap, land and map controls');
+ // Drag remains free of pointer lock and the level-camera shortcut works.
+ const before=await page.locator('#canvas-host').getAttribute('data-camera-look');await page.mouse.move(480,310);await page.mouse.down();await page.mouse.move(560,340,{steps:5});await page.mouse.up();await page.waitForFunction(s=>document.querySelector('#canvas-host').dataset.cameraLook!==s,before);assert.equal(await page.evaluate(()=>document.pointerLockElement),null);
+ await page.keyboard.press('c');await page.waitForFunction(()=>Math.abs(Number(document.querySelector('#canvas-host').dataset.cameraLook.split(',')[0]))<.001);
+ await page.locator('#walk-menu-toggle').click();await page.locator('#look-sensitivity').evaluate(e=>{e.value='0.5';e.dispatchEvent(new Event('input',{bubbles:true}));});assert.equal(await page.locator('#look-capture').isChecked(),false);await page.locator('#walk-resume').click();
+ const dev=await page.evaluate(()=>Boolean(window.__viewer));
+ if(dev){
+  await page.evaluate(()=>{const v=window.__viewer;v.walk.place(-31,2.07,110,Math.atan2(-2.6,3.97),0);});await frame();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.storageDoor==='closed');
+  const pose=await page.evaluate(()=>({parts:window.__viewer.houseDoor.root.children.length,angle:window.__viewer.houseDoor.angle}));assert.equal(pose.parts,3);assert.ok(pose.angle<.01);await page.screenshot({path:'artifacts/comfort/photo-door.png'});console.log('Photo door and drag controls');
+  await page.evaluate(()=>window.__viewer.walk.place(-28.4,2.07,107.7,0));await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.storageDoor==='open');await page.evaluate(()=>window.__viewer.walk.input('forward',true));await page.waitForFunction(()=>window.__viewer.camera.position.z<105.8);await page.evaluate(()=>window.__viewer.walk.input('forward',false));
+  // Upstairs keyboard movement is careful and does not acquire a racing boost.
+  await page.evaluate(()=>window.__viewer.walk.place(-32,5.39,106.7,0));await frame();await page.keyboard.down('Shift');await page.keyboard.down('d');await page.waitForFunction(()=>window.__viewer.camera.position.x>-31.4);await page.keyboard.up('d');await page.keyboard.up('Shift');assert.ok(await page.evaluate(()=>window.__viewer.walk.careful));await page.screenshot({path:'artifacts/comfort/upstairs.png'});
+  await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.companionDistance)<2.2);await page.keyboard.press('e');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chicken==='held');await page.keyboard.press('e');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chicken==='');
+  // A vehicle must still win the F interaction even with a chicken following nearby.
+  await page.evaluate(()=>{const v=window.__viewer,t=v.game.vehicles.list.find(t=>t.kind==='tractor');v.walk.place(t.x+1.2,1.75,t.z,0);});await frame();await page.keyboard.press('f');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.driving==='tractor');await page.keyboard.press('f');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.driving==='');
+  await page.locator('#walk-menu-toggle').click();await page.locator('#walk-season').selectOption('winter');await page.locator('#walk-weather').selectOption('sunset');await page.locator('#walk-resume').click();
+  await page.evaluate(()=>window.__viewer.walk.place(-36.26,5.39,112.8,Math.PI/2,0));await frame();assert.equal(await page.locator('#canvas-host').getAttribute('data-sunset-clouds'),'wisps');await page.screenshot({path:'artifacts/comfort/terrace-sunset.png'});
+  await page.evaluate(()=>window.__viewer.walk.place(-440,1.75,241.25,Math.atan2(1,-.38),.12));await frame();await page.screenshot({path:'artifacts/comfort/field-sunset.png'});
+ }
+ if(!dev){await page.locator('#walk-menu-toggle').click();await page.locator('#walk-season').selectOption('winter');await page.locator('#walk-weather').selectOption('sunset');await page.locator('#walk-resume').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.sunsetClouds==='wisps');const manifest=await page.evaluate(async()=>await(await fetch('/models/manifest.json')).json());assert.equal(manifest.find(m=>m.name==='village').meshes,95,'Published corrected door export');}
+ assert.deepEqual(errors,[]);writeFileSync(`artifacts/comfort/${dev?'result':'production-result'}.json`,JSON.stringify({pass:true,url:page.url(),dev,errors},null,2));console.log(dev?'PASS: activity plan/entry/routes, summon/flap/land/reuse chicken, drag and level camera, photo door passage, upstairs controls, F vehicle priority and sunset.':'PASS: production activity plan/entry/routes, chicken summon/flap/land, drag/level controls, live sunset and corrected model export.');
+}finally{await browser.close();}

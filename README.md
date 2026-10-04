@@ -52,6 +52,9 @@ npm run test:stairs       # Rooms, stairs, upper corridor, terrace and descent
 npm run test:environment  # Shelters, precipitation, day/night, storms and wet materials
 npm run test:game         # Vehicles, collisions, targets, toys and snow rules
 npm run test:adventure    # Energy, all activities, cooldowns, seasonal rules and pause/recovery
+npm run test:comfort      # Stair smoothing, look controls, task entries, companion and door
+npm run test:comfort-ui   # Desktop follow-up controls, photo door and sunset captures
+npm run test:comfort-touch # Phone map, flight, settings and touch input
 npm run test:touch        # Mobile arrows, real touch drag, live settings and snow tools
 npm run test:activities   # Dev server: garden/orchard views, fishing, kite and night fireworks
 npm run test:planting     # Exported road masks, every mapped poplar and all bridge routes

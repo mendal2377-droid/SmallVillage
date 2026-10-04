@@ -3,13 +3,14 @@ import * as THREE from 'three';
 // A grounded camera with a small circular footprint. Axis separation lets it slide along walls.
 // The same floor/collision queries serve vehicles and thrown toys while the game layer is active.
 export function createWalkController(camera, canvas, onChange) {
-  let enabled=false, paused=false, driving=false, nav, boxes=[], yaw=0, pitch=0, drag=null;
+  let enabled=false, paused=false, driving=false, nav, boxes=[], yaw=0, pitch=0, drag=null, feet=0, sensitivity=1, captureMouse=false;
   const eyeHeight=1.65, maxStep=.26;
   const keys=new Set(), touches=new Set(), dynamic=new Map();
   const radius=.16;
   function clearInput(){keys.clear();touches.clear();drag=null;}
-  function look(dx,dy){yaw-=dx*.0025;pitch=THREE.MathUtils.clamp(pitch-dy*.0025,-1.35,1.35);if(!driving)camera.rotation.set(pitch,yaw,0,'YXZ');}
-  function floorAt(x,z,feet=camera.position.y-eyeHeight,step=maxStep){
+  function tightSpace(){return feet>1||(nav?.surfaces||[]).some(s=>s.rise&&camera.position.x>=s.rect[0]&&camera.position.x<=s.rect[2]&&camera.position.z>=s.rect[1]&&camera.position.z<=s.rect[3]);}
+  function look(dx,dy){const rate=(tightSpace()?.0015:.002)*sensitivity;yaw-=THREE.MathUtils.clamp(dx,-160,160)*rate;pitch=THREE.MathUtils.clamp(pitch-THREE.MathUtils.clamp(dy,-160,160)*rate,-1.15,1.15);if(!driving)camera.rotation.set(pitch,yaw,0,'YXZ');}
+  function floorAt(x,z,level=feet,step=maxStep){
     const candidates=[nav.ground ?? .2];
     for(const surface of nav.surfaces||[]){
       const [x0,z0,x1,z1]=surface.rect;
@@ -18,7 +19,7 @@ export function createWalkController(camera, canvas, onChange) {
       candidates.push(surface.height+(surface.rise||0)*t);
     }
     // Only take a reachable surface; never drop through an upper floor or jump up a storey.
-    return candidates.filter(h=>Math.abs(h-feet)<=step).sort((a,b)=>b-a)[0];
+    return candidates.filter(h=>Math.abs(h-level)<=step).sort((a,b)=>b-a)[0];
   }
   function inWater(x,z,r=radius){
     if((nav.bridges||[]).some(([x0,z0,x1,z1])=>x>=x0&&x<=x1&&z>=z0&&z<=z1))return false;
@@ -49,7 +50,7 @@ export function createWalkController(camera, canvas, onChange) {
     for(let i=0;i<steps;i++){
       for(const [ax,az] of [[dx/steps,0],[0,dz/steps]]){
         const x=camera.position.x+ax,z=camera.position.z+az,height=floorAt(x,z);
-        if(height!==undefined&&!blocked(x,z,height))camera.position.set(x,height+eyeHeight,z);
+        if(height!==undefined&&!blocked(x,z,height)){feet=height;camera.position.x=x;camera.position.z=z;}
       }
     }
   }
@@ -72,9 +73,9 @@ export function createWalkController(camera, canvas, onChange) {
   document.addEventListener('visibilitychange',clearInput);
   document.addEventListener('pointerlockchange',clearInput);
   canvas.addEventListener('pointerdown',e=>{
-    if(!enabled||paused)return;
+    if(!enabled||paused||e.pointerType==='mouse'&&e.button===2)return;
     canvas.focus({preventScroll:true});
-    if(e.pointerType==='mouse' && !document.pointerLockElement){
+    if(captureMouse&&e.pointerType==='mouse' && !document.pointerLockElement){
       try{canvas.requestPointerLock?.()?.catch(()=>{});}catch{}
     }
     if(!document.pointerLockElement){drag={id:e.pointerId,x:e.clientX,y:e.clientY};try{canvas.setPointerCapture(e.pointerId);}catch{/* Pointer lock can acquire the mouse before pointer capture completes. */}}
@@ -89,13 +90,16 @@ export function createWalkController(camera, canvas, onChange) {
   return {
     get enabled(){return enabled;},get paused(){return paused;},get nav(){return nav;},
     get yaw(){return yaw;},get pitch(){return pitch;},eyeHeight,
-    get driving(){return driving;},set driving(value){driving=value;if(!value)camera.rotation.set(pitch,yaw,0,'YXZ');},
+    get driving(){return driving;},set driving(value){driving=value;if(!value){feet=camera.position.y-eyeHeight;camera.rotation.set(pitch,yaw,0,'YXZ');}},
+    get feet(){return feet;},get careful(){return tightSpace();},
+    setLookOptions(options){if(options.sensitivity!==undefined)sensitivity=THREE.MathUtils.clamp(Number(options.sensitivity)||1,.3,1.5);if(options.captureMouse!==undefined){captureMouse=Boolean(options.captureMouse);if(!captureMouse&&document.pointerLockElement===canvas)document.exitPointerLock();}},
+    levelLook(){pitch=0;camera.rotation.set(0,yaw,0,'YXZ');},
     axis,floorAt,solidAt,inWater,
     // Moving props (vehicles) register oriented boxes in the same shape as the exported colliders.
     setDynamic(id,box){if(box)dynamic.set(id,box);else dynamic.delete(id);},
-    place(x,y,z,lookYaw=yaw,lookPitch=0){camera.position.set(x,y,z);yaw=lookYaw;pitch=lookPitch;camera.rotation.set(pitch,yaw,0,'YXZ');},
+    place(x,y,z,lookYaw=yaw,lookPitch=0){camera.position.set(x,y,z);feet=y-eyeHeight;yaw=lookYaw;pitch=lookPitch;camera.rotation.set(pitch,yaw,0,'YXZ');},
     standAt(x,z,feet){const height=floorAt(x,z,feet,.6);return height!==undefined&&!blocked(x,z,height)?height:undefined;},
-    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=0;camera.position.fromArray(nav.spawn);camera.rotation.set(0,yaw,0,'YXZ');camera.fov=70;camera.near=.05;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
+    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=0;camera.position.fromArray(nav.spawn);feet=camera.position.y-eyeHeight;camera.rotation.set(0,yaw,0,'YXZ');camera.fov=64;camera.near=.04;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
     exit(){enabled=false;driving=false;clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();onChange(false);},
     pause(value){paused=value;if(value){clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();}},
     input(direction,pressed){if(!enabled||paused)return;if(pressed)touches.add(direction);else touches.delete(direction);},
@@ -104,9 +108,10 @@ export function createWalkController(camera, canvas, onChange) {
       if(!enabled||paused||driving)return;
       const {forward,strafe,fast}=axis();
       const length=Math.hypot(forward,strafe);
-      if(!length)return;
-      const speed=(fast?3.8:2)*Math.min(dt,.1)/length;
-      move((strafe*Math.cos(yaw)-forward*Math.sin(yaw))*speed,(-forward*Math.cos(yaw)-strafe*Math.sin(yaw))*speed);
+      if(length){const speed=(tightSpace()?1.15:fast?3.8:2)*Math.min(dt,.1)/length;
+      move((strafe*Math.cos(yaw)-forward*Math.sin(yaw))*speed,(-forward*Math.cos(yaw)-strafe*Math.sin(yaw))*speed);}
+      // Collision follows the actual floor; the eye eases over stair treads and landings.
+      camera.position.y=THREE.MathUtils.damp(camera.position.y,feet+eyeHeight,14,Math.min(dt,.1));
     }
   };
 }

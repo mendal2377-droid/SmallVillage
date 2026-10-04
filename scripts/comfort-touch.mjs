@@ -1,0 +1,17 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync} from 'node:fs';
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const ctx=await browser.newContext({viewport:{width:390,height:740},isMobile:true,hasTouch:true,deviceScaleFactor:1});const page=await ctx.newPage();page.setDefaultTimeout(180000);
+const errors=[];page.on('pageerror',e=>errors.push(e.message));mkdirSync('artifacts/comfort',{recursive:true});
+try{
+ await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');assert.equal(await page.locator('[data-map-activity]:visible').count(),6);await page.screenshot({path:'artifacts/comfort/touch-plan.png'});
+ await page.locator('[data-entry=house]').tap();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');
+ const call=await page.locator('#chicken-call').boundingBox();assert.ok(call.x>=0&&call.y>=0&&call.x+call.width<=390);assert.equal(await page.locator('#chicken-call').evaluate(e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===e;}),true,'Fly button remains reachable');
+ await page.locator('#chicken-call').tap();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chicken==='held'&&!document.querySelector('#hud-flap').hidden);await page.locator('#chicken-call').tap();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.chicken==='');
+ await page.locator('#map-expand').tap();await page.locator('[data-map-activity=rabbit]').tap();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.mapTarget==='rabbit');
+ await page.locator('#walk-menu-toggle').tap();assert.equal(await page.locator('#walk-menu').evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+30,r.y+30));}),true,'Settings stay above the expanded map');await page.locator('#walk-resume').tap();await page.locator('#map-expand').tap();
+ const before=(await page.locator('#canvas-host').getAttribute('data-camera-position')).split(',').map(Number),cdp=await ctx.newCDPSession(page),b=await page.locator('[data-walk=back]').boundingBox();await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:b.x+b.width/2,y:b.y+b.height/2,id:1}]});await page.waitForFunction(z=>Number(document.querySelector('#canvas-host').dataset.cameraPosition.split(',')[2])>z+.3,before[2]);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ const old=await page.locator('#canvas-host').getAttribute('data-camera-look');await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:180,y:330,id:2}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:215,y:350,id:2}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await page.waitForFunction(s=>document.querySelector('#canvas-host').dataset.cameraLook!==s,old);
+ await page.screenshot({path:'artifacts/comfort/touch-walk.png'});assert.deepEqual(errors,[]);writeFileSync('artifacts/comfort/touch-result.json',JSON.stringify({pass:true,url:page.url(),errors},null,2));console.log('PASS: phone activity map, reachable flight button, hold/land, settings stacking, touch arrows and drag look.');
+}finally{await browser.close();}

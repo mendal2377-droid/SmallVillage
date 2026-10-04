@@ -26,3 +26,24 @@ export const ACTIVITY_SITES=[
   {id:'kite',kind:'kite',label:'Fly a kite',x:-480.8,z:241.25,radius:14},
   {id:'firework',kind:'firework',label:'Night fireworks',x:-472,z:242,radius:18},
 ];
+export const ACTIVITY_TYPES={
+  fish:{label:'Fishing',icon:'≈',color:'#7bc6c2',hint:'Spring, summer and autumn'},
+  potato:{label:'Roast potato',icon:'♨',color:'#d6ae79',hint:'Dry weather'},
+  melon:{label:'Watermelon',icon:'◒',color:'#add27a',hint:'Summer and autumn'},
+  rabbit:{label:'Chase rabbit',icon:'♧',color:'#e3c6ae',hint:'All seasons'},
+  kite:{label:'Fly kite',icon:'◇',color:'#cbadce',hint:'Dry weather'},
+  firework:{label:'Fireworks',icon:'✦',color:'#e5ca82',hint:'Dry nights'},
+};
+// Entry points must use traversable shore/field ground, never the water or a tree trunk.
+export function activitySpawn(nav,site){
+  const h=nav.ground??.1;
+  for(let ring=0;ring<9;ring++)for(let i=0;i<(ring?16:1);i++){
+    const x=site.x+Math.cos(i*Math.PI/8)*ring*.6,z=site.z+Math.sin(i*Math.PI/8)*ring*.6;
+    if(x<nav.bounds[0]+.2||x>nav.bounds[2]-.2||z<nav.bounds[1]+.2||z>nav.bounds[3]-.2)continue;
+    const bridge=nav.bridges.some(([a,b,c,d])=>x>=a&&x<=c&&z>=b&&z<=d);
+    if(!bridge&&nav.waterZones.some(w=>w.shape==='ellipse'?((x-w.center[0])/(w.radius[0]+.2))**2+((z-w.center[1])/(w.radius[1]+.2))**2<1:x>w.rect[0]-.2&&x<w.rect[2]+.2&&z>w.rect[1]-.2&&z<w.rect[3]+.2))continue;
+    if(nav.boxes.some(([cx,cz,hx,hz,a,low=-100,high=100])=>high>h+.04&&low<h+1.73&&Math.abs(Math.cos(a)*(x-cx)-Math.sin(a)*(z-cz))<hx+.2&&Math.abs(Math.sin(a)*(x-cx)+Math.cos(a)*(z-cz))<hz+.2))continue;
+    return {spawn:[x,h+1.65,z],yaw:0};
+  }
+  return null;
+}
