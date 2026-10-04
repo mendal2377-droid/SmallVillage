@@ -6,7 +6,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
   let weather='clear',season='green',nav,model,walking=false,sheltered=false,hour=14,daySpeed=0,flash=0,nextBolt=6;
   const listeners=new Set();
   const settings={
-    clear:{top:'#76afd2',horizon:'#dde8e3',light:2.6,ambient:2.8,fill:1.2,color:'#fff4dd',fog:1800,near:350,stars:1},
+    clear:{top:'#8abcc8',horizon:'#e0e7c9',light:2.6,ambient:2.8,fill:1.2,color:'#fff1ce',fog:1800,near:350,stars:1},
     overcast:{top:'#8d9ba6',horizon:'#c6cccd',light:.65,ambient:2.7,fill:.8,color:'#e3e8ec',fog:1100,near:350,stars:.15},
     rain:{top:'#637682',horizon:'#a1afb3',light:.4,ambient:2.3,fill:.7,color:'#dde7ed',fog:700,near:90,stars:0,drops:'rain',wind:.08,rate:11},
     storm:{top:'#5d6c7a',horizon:'#929ea4',light:.25,ambient:1.9,fill:.5,color:'#cfd9e2',fog:420,near:40,stars:0,drops:'rain',wind:.32,rate:15},
@@ -23,7 +23,7 @@ export function createEnvironment(scene,camera,sun,sky,fill,floor,host){
   dome.material.uniforms.time={value:0};dome.material.uniforms.cloud={value:.35};dome.material.uniforms.day={value:1};
   dome.material.fragmentShader=`uniform vec3 top;uniform vec3 horizon;uniform float time;uniform float cloud;uniform float day;varying vec3 v;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1)),f.x),f.y);}float fbm(vec2 p){return noise(p)*.5+noise(p*2.)*.25+noise(p*4.)*.125+noise(p*8.)*.0625;}
-void main(){vec3 n=normalize(v);float h=clamp(n.y,0.,1.);vec3 c=mix(horizon,top,smoothstep(0.,.45,h));vec2 p=n.xz/(max(n.y,.09))*3.+vec2(time*.002,0);float f=fbm(p);float clouds=smoothstep(.58-cloud*.28,.78-cloud*.25,f)*smoothstep(.015,.18,h);c=mix(c,mix(horizon*.8,vec3(.86,.89,.89),h)*(.25+.75*day),clouds*.65);gl_FragColor=vec4(c,1.);
+void main(){vec3 n=normalize(v);float h=clamp(n.y,0.,1.);vec3 c=mix(horizon,top,smoothstep(0.,.45,h));vec2 p=n.xz/(max(n.y,.09))*2.5+vec2(time*.002,0);float f=fbm(p);float clouds=smoothstep(.55-cloud*.28,.70-cloud*.25,f)*smoothstep(.015,.18,h);vec3 cloudPaint=mix(horizon*.88,vec3(.93,.92,.86),smoothstep(.25,.65,f));c=mix(c,cloudPaint*(.25+.75*day),clouds*.84);gl_FragColor=vec4(c,1.);
 #include <colorspace_fragment>
 }`;
   const starPositions=new Float32Array(900*3);

@@ -1,0 +1,22 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync} from 'node:fs';
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const page=await browser.newPage({viewport:{width:800,height:540}});page.setDefaultTimeout(180000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('ERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.log('ERROR',m.text());}});mkdirSync('artifacts/illustration',{recursive:true});
+try{
+  await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
+  let data=await page.locator('#canvas-host').evaluate(o=>({...o.dataset}));assert.equal(data.visualStyle,'painted-illustration');assert.ok(Number(data.forestTrees)>400);assert.ok(Number(data.grassBanks)>10);assert.ok(Number(data.chimneys)>10);assert.equal(Number(data.litWindows),0);
+  await page.screenshot({path:'artifacts/illustration/day-overview.png'});console.log('Painted overview and mixed forest',data.forestTrees,data.grassBanks,data.chimneys);
+  await page.locator('[data-entry=house]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');await page.screenshot({path:'artifacts/illustration/day-yard.png'});
+  if(await page.evaluate(()=>Boolean(window.__viewer))){
+    await page.evaluate(()=>{const v=window.__viewer;v.walk.place(-31,5.39,111.5,Math.PI/2,.05);v.atmosphere.update(.1,0);});await page.screenshot({path:'artifacts/illustration/painted-balcony.png'});
+    await page.evaluate(()=>{const v=window.__viewer;assertSafe(v,-275,170);v.walk.place(-275,1.75,170,-Math.PI/2,-.20);function assertSafe(v,x,z){if(v.walk.standAt(x,z,.1)===undefined)throw Error('Bank viewpoint is obstructed');}});await page.screenshot({path:'artifacts/illustration/grass-bank.png'});
+    const smoke=await page.evaluate(()=>{const a=window.__viewer.atmosphere;a.update(.1,0);const c=a.chimneys[0],p=c.sprites[1].position.clone();a.update(.1,4);return{visible:c.sprites.some(p=>p.visible),moved:p.distanceTo(c.sprites[1].position)>.05};});assert.ok(smoke.visible&&smoke.moved,'Smoke actually rises/drifts');
+    await page.evaluate(()=>window.__viewer.walk.place(-32,1.85,110.5,0,.07));
+  }
+  await page.locator('#walk-menu-toggle').click();await page.locator('#walk-summer-night').click();await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.litWindows)>100&&Number(document.querySelector('#canvas-host').dataset.yardLights)>3);await page.screenshot({path:'artifacts/illustration/night-yard.png'});console.log('Warm night lights',await page.locator('#canvas-host').getAttribute('data-lit-windows'));
+  if(await page.evaluate(()=>Boolean(window.__viewer))){assert.equal(await page.evaluate(()=>window.__viewer.atmosphere.practicals.some(l=>l.visible&&l.intensity>0)),true,'Home and upper floor have nearby actual lights');await page.evaluate(()=>window.__viewer.walk.place(-31,5.39,111.5,Math.PI/2,.05));await page.screenshot({path:'artifacts/illustration/night-balcony.png'});await page.evaluate(()=>window.__viewer.walk.place(-188,1.75,132.05,0,.02));await page.screenshot({path:'artifacts/illustration/night-village.png'});}
+  await page.locator('#walk-menu-toggle').click();await page.locator('#walk-season').selectOption('winter');await page.locator('#walk-weather').selectOption('snow');await page.locator('#walk-time').fill('14');await page.locator('#walk-time').dispatchEvent('input');await page.locator('#walk-resume').click();await page.waitForFunction(()=>Number(document.querySelector('#canvas-host').dataset.litWindows)===0);
+  await page.screenshot({path:'artifacts/illustration/winter.png'});await page.locator('#walk-exit').click();await page.locator('[data-entry=village]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');
+  assert.deepEqual(errors,[],'No illustration or instancing shader errors');writeFileSync('artifacts/illustration/result.json',JSON.stringify({pass:true,url:page.url(),errors},null,2));console.log('PASS: painted overview/house, mixed forest, grass banks, moving smoke, live night/day lights, winter, renderer reuse, no shader errors');
+}finally{await browser.close();}

@@ -1,10 +1,10 @@
 # SmallVillage
 
-Walk from the fields into the courtyard house, upstairs and onto its roof terrace in one connected Three.js world. Village roads, ponds, waterways and the starred house location follow the owner's sketch and photographs; dimensions and surrounding parcels are estimates.
+Wander through an illustrated village, from the fields into the courtyard house, upstairs and onto its roof terrace in one connected Three.js world. Painted colours, fine outlines, mixed woodland, grassy banks, drifting smoke and warm night lights set the visual mood. The current house shape and map follow the owner's sketch and photographs; dimensions and surrounding parcels are estimates.
 
 **Live:** https://small-village-eta.vercel.app/
 
-**Developers:** read [HANDOFF.md](HANDOFF.md), [level roads and living banks](docs/ROAD_REPAIR.md), [wandering systems](docs/WANDERING.md), and [the connected-world notes](docs/CONNECTED_WORLD.md).
+**Developers:** read [HANDOFF.md](HANDOFF.md), [illustration direction](docs/ILLUSTRATION.md), [level roads and living banks](docs/ROAD_REPAIR.md), [wandering systems](docs/WANDERING.md), and [the connected-world notes](docs/CONNECTED_WORLD.md).
 
 ## Enter and play
 
@@ -56,6 +56,7 @@ npm run test:touch        # Mobile arrows, real touch drag, live settings and sn
 npm run test:activities   # Dev server: garden/orchard views, fishing, kite and night fireworks
 npm run test:planting     # Exported road masks, every mapped poplar and all bridge routes
 npm run test:ecology      # Dev server: level roads, clear bridge, orchard and seasonal frogs
+npm run test:illustration # Painted overview/house, mixed forest, banks, smoke and night lighting
 ```
 
 Browser tests use installed Microsoft Edge and write ignored evidence to `artifacts/world/`. `BASE_URL` can point the same browser suite at production. Browser rendering on software WebGL is slower than normal GPU rendering.
@@ -68,12 +69,14 @@ Browser tests use installed Microsoft Edge and write ignored evidence to `artifa
 - `src/world.js`: surface textures, instanced vegetation, wind, water and distance-based crop detail.
 - `src/gardens.js`, `src/organic.js`: vegetable/fruit models, mature trees, banks, flowers, fish and fireflies.
 - `src/planting.js`, `src/wetland.js`: placement exclusions, frogs, ripples and wetland life.
+- `src/illustration.js`, `src/atmosphere.js`: shared painted rendering, forest, banks, smoke and house/yard lights.
 - `src/game/adventure.js`: energy, location encounters, minigames and rewards.
 - `src/game/`: vehicles, toys, animated creatures, chicken flight, sound and HUD.
 - `blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend`: authoritative editable architecture and map.
 - `blender/upgrade_connected_world.py`: repeatable close-roofscape refinement and vegetation metadata export.
 - `blender/repair_roads_and_planting.py`: saved-source level paving, poplar relocation and road-footprint export.
 - `scripts/export_web_models.py`, `scripts/export_navigation.py`: paired mesh/navigation exports.
+- `scripts/export_atmosphere.py`, `public/models/atmosphere.json`: actual window positions for artistic night lighting.
 - `public/models/world-details.json`: tree positions and field rectangles from the Blender source.
 
 Vercel builds `dist/` from GitHub `main`. Raw reference photos/videos and credentials stay outside Git. Existing rendered assets remain in the repository for historical reference, but the page never loads them. The legacy browser scripts for the former gallery are historical; use the commands above for current validation.

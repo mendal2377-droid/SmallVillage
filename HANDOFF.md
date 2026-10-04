@@ -1,6 +1,6 @@
 # SmallVillage — developer handoff
 
-Updated 4 October 2026. **Current application: wandering systems with level roads and living wetlands on `main`.** Read [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) for the latest source repair, planting guards, denser groves and pond life, then [docs/WANDERING.md](docs/WANDERING.md) for map entry, energy, activities and summer nights. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
+Updated 4 October 2026. **Current application: illustrated wandering village on `main`.** Read [docs/ILLUSTRATION.md](docs/ILLUSTRATION.md) for the current painted visual direction, mixed woodland, grassy banks, smoke and night lighting. [docs/ROAD_REPAIR.md](docs/ROAD_REPAIR.md) documents level roads, safe planting and pond life; [docs/WANDERING.md](docs/WANDERING.md) covers map entry, energy and activities. [docs/CONNECTED_WORLD.md](docs/CONNECTED_WORLD.md) retains the earlier roofscape/navigation/export contracts; its two-button entry and animal counts are historical. Earlier photo/play baseline: `065ea71`.
 
 - Repository: <https://github.com/mendal2377-droid/SmallVillage>
 - Production: <https://small-village-eta.vercel.app/>
@@ -15,6 +15,8 @@ SmallVillage presents an editable Blender reconstruction of a courtyard house an
 | --- | --- |
 | Entry | Interactive 3D village plan, five projected wandering pins including the yard; Summer night preset; no gallery/story |
 | 3D world | All entry points load the same full village containing the detailed house |
+| Visual direction | Painted palette/surfaces, fine depth outlines, fuller tree crowns, mixed distant woodland; existing house shape/map retained |
+| Village atmosphere | Grassy banks, intermittent neighbour chimney smoke, warm window and yard lights after dusk |
 | Navigation | Continuous full-screen walking; keyboard/mouse and mobile touch controls |
 | House access | Walk from the village lane through the red pedestrian gate, into the courtyard and rooms |
 | Upstairs | Climb two stair flights and the turning landing; walk the corridor and upper rooms; exit through the green door onto the roof terrace |
@@ -35,6 +37,7 @@ The supplied sketch controls roads, waterways, two ponds, fields and the school.
 - Production deploys from `main` (the owner asked for direct pushes to `main`).
 - Keep the Chinese village name removed from the page's village heading. The English location remains.
 - Follow the supplied house photos/videos; clear temporary clutter from the house reconstruction.
+- The latest art reference supersedes the goal of matching real surface appearance: use an illustrated village while retaining the current house shape and connected map. Preserve grassy banks, varied distant trees, occasional smoke and warm night lights including the owner's yard.
 - Preserve the quiet, focused walking interface and usable mobile controls.
 - Use the actual 3D village plan with wandering pins as the entry; every pin uses the full world. Chicken flight, energy, six activities and the Summer night preset are explicitly requested gameplay. G/J change weather/season during walking.
 - Keep continuous village-to-house-to-upstairs-to-terrace access.
@@ -90,6 +93,8 @@ flowchart LR
 | `src/entry.js` | Startup overview loading, map-pin entry spawn, settings, menu, keyboard/touch UI |
 | `src/world.css` | Full-viewport layout, quiet HUD and mobile controls |
 | `src/world.js` | Surface textures, crop/leaf instancing, wind and water shader |
+| `src/illustration.js` | Shared colour/depth rendering pass, fine ink contours, painted architecture palette and paper surface |
+| `src/atmosphere.js` | Mixed distant forest, grassy bank surfaces, chimney smoke, actual-window glow and yard lighting |
 | `src/planting.js` | Shared road/bridge/water/building exclusion rules and safe tree relocation |
 | `src/wetland.js` | Pond frogs and hop ripples, submerged grass, cattails, duckweed and dragonflies |
 | `src/game/creatures.js` | Animal anatomy/gaits, roaming, chicken holding/flight/landing |
@@ -114,6 +119,8 @@ flowchart LR
 | `blender/photo_village_inventory.json` | Estimated parcel inventory, landmarks, placement assumptions and village navigation configuration |
 | `scripts/export_web_models.py` | Both material-batched, Draco-compressed GLB exports |
 | `scripts/export_navigation.py` | Collision boxes, floor/stair surfaces, shelter footprints and scene configuration |
+| `scripts/export_atmosphere.py` | Reads current saved scene; exports window bounding boxes without changing geometry |
+| `public/models/atmosphere.json` | Actual window centres/sizes and detailed-house flag for the illustrated lighting layer |
 | `blender/render_photo_village.py` | Latest village, courtyard, kitchen, corridor and terrace gallery views |
 | `blender/video_revision/render_interiors.py` | Other interior views; supports a list of requested view names |
 | `scripts/finish_photo_assets.py` | Latest render PNGs to published WebPs |
@@ -146,6 +153,7 @@ Run from the repository root with `blender` on PATH:
 ```sh
 blender --background --threads 4 --python scripts/export_navigation.py
 blender --background --threads 4 --python scripts/export_web_models.py
+blender --background --threads 4 --python scripts/export_atmosphere.py
 npm run test:stairs
 npm run test:environment
 npm run build
@@ -256,6 +264,7 @@ npm run test:village
 npm run test:touch
 npm run test:activities   # Development server, uses development-only scene inspection
 npm run test:ecology      # Development server: repaired roads/bridge, orchard, frog hop and seasons
+npm run test:illustration # Dev or BASE_URL: painted world, forest/banks, smoke and day/night lights
 ```
 
 To check a deployment from PowerShell:
@@ -271,6 +280,8 @@ Remove-Item Env:BASE_URL
 Wandering release checks, 4 Oct 2026: build, connected walking/chicken flight, stairs, environment, vehicle/toy controllers and all six adventure controllers passed. Desktop browser checks passed for 3D pins, minimap/energy, fishing, home recovery, live settings and renderer reuse. Phone touch checks passed for map expansion, arrows/look, winter tools and the walking Summer night preset. The additional activity browser check passed fishing, kite and night fireworks, plus garden/orchard/fish captures, with no JavaScript or shader errors. These are functional and visual checks of a procedural scene, not a claim of photo fidelity.
 
 Road/wetland update: Blender repair and paired exports passed. Planting validation checked all 237 source poplars and eight bridge routes; connected walking and stairs passed again. The local ecology browser passed level roads, clear bridge, denser trees, actual frog movement and winter/summer visibility with no JavaScript or shader errors. Latest model counts: house 59 meshes / 97,569 triangles / 1,218,860 bytes; village 92 meshes / 410,080 triangles / 4,099,156 bytes. Navigation has 224 house and 1,397 village obstacles. See ROAD_REPAIR.md for scope and evidence.
+
+Illustration update: the saved house/map geometry and navigation are retained; art surfaces, crown masses, 667 distant trees, 34 bank segments, 21 decorative chimneys and day/night lighting are generated in the browser. The local illustration suite passed smoke movement, home lighting, winter/day changes and shader checks; walking, stairs, safe planting and environment checks passed again. See ILLUSTRATION.md for the reference, asset contracts and visual evidence.
 
 Historical evidence for baseline `065ea71` (run locally on 3 Oct 2026; sizes below precede UV/roofscape exports):
 
@@ -335,7 +346,7 @@ These scripts create a backup from the current source when their expected backup
 All requested features in the application baseline are implemented. These are development opportunities, not unfulfilled promises:
 
 - **Open items from the 3 Oct photo review.** Photo-faithful geometry was corrected only where it was clearly wrong. Still approximate: the stove front (arches are flat dark panels), wardrobe/furniture proportions in the rooms, and the village-side neighbouring walls seen from the courtyard. Check new work against `D:/blender/hometown/house/*.jpg` next to the matching browser screenshot.
-- Current map/energy/activities/gardens/ecology/night are in WANDERING.md; earlier connected-world architecture and flight are in CONNECTED_WORLD.md. Future ideas: persistence, fuller route planning and footstep/indoor-outdoor audio.
+- Current art direction is in ILLUSTRATION.md; map/energy/activities/gardens/ecology/night are in WANDERING.md; earlier connected-world architecture and flight are in CONNECTED_WORLD.md. Future ideas: persistence, fuller route planning and footstep/indoor-outdoor audio.
 
 - Village distances and parcels are estimated; orientation is assumed. A measured/georeferenced plan would improve accuracy.
 - Most neighboring houses are procedural exterior blocks; they do not have the detailed, enterable interior of the owner's house. Upper rooms in the detailed house remain sparsely furnished because footage is incomplete.
