@@ -20,7 +20,7 @@ export function bindToolInput({canvas,button,toys,allowed,locked=()=>document.po
   button.addEventListener('lostpointercapture',()=>{if(source?.kind==='button')cancel();});
   // Keyboard/screen-reader activation of the trigger is a single shot.
   button.addEventListener('click',e=>{if(e.detail===0&&allowed()){startAudio();toys.fire();}});
-  win.addEventListener('keydown',e=>{if(e.code!=='KeyP'||e.repeat||e.target.closest?.('input,textarea,select,button'))return;e.preventDefault();begin('key');});
+  win.addEventListener('keydown',e=>{if(e.code!=='KeyP'||e.repeat||e.target.closest?.('input,textarea,select'))return;e.preventDefault();begin('key');});
   win.addEventListener('keyup',e=>{if(e.code==='KeyP')end('key');});
   win.addEventListener('blur',cancel);doc.addEventListener('visibilitychange',cancel);doc.addEventListener('pointerlockchange',cancel);
   return {cancel};

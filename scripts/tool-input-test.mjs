@@ -14,5 +14,6 @@ event(button,'pointerdown',{...mouse,pointerType:'touch'});assert.equal(held,tru
 event(win,'keydown',{code:'KeyP',repeat:false});assert.equal(held,true,'P holds the trigger');event(win,'keyup',{code:'KeyP'});assert.equal(releases,4);
 event(win,'keydown',{code:'KeyP',repeat:false});event(win,'blur');assert.equal(held,false);event(win,'keyup',{code:'KeyP'});assert.equal(releases,4,'Blur cancels a draw without firing');
 usable=false;event(canvas,'pointerdown',mouse);event(win,'pointerup',mouse);event(button,'pointerdown',mouse);assert.equal(shots,1,'Menus, activities and flight block firing');
-usable=true;event(win,'keydown',{code:'KeyP',repeat:false});usable=false;event(win,'keyup',{code:'KeyP'});assert.equal(releases,4,'Entering a blocked state cancels rather than releasing a shot');assert.ok(cancels);input.cancel();
+usable=true;event(win,'keydown',{code:'KeyP',repeat:false});usable=false;event(win,'keyup',{code:'KeyP'});assert.equal(releases,4,'Entering a blocked state cancels rather than releasing a shot');assert.ok(cancels);
+usable=true;event(win,'keydown',{code:'KeyP',repeat:false,target:{closest:selector=>selector.includes('button')?button:null}});assert.equal(held,true,'P still fires after selecting a tool with a focused HUD button');event(win,'keyup',{code:'KeyP'});assert.equal(releases,5);input.cancel();
 console.log('PASS: click versus drag, right/captured hold, touch trigger, P, blur cancellation and activity/menu/flight guards.');
