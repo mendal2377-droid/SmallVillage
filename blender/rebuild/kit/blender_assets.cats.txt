@@ -1,0 +1,13 @@
+# Blender asset catalog definition file
+VERSION 1
+
+2031af6f-64ec-5f32-89e9-03ae646d6b84:SmallVillage/Crops/garlic:SmallVillage-Crops-garlic
+0c92e2c3-4575-5346-84f9-de6a48290841:SmallVillage/Crops/maize:SmallVillage-Crops-maize
+9371c1ca-8f54-5d10-a9e7-38c6d5c46c02:SmallVillage/Crops/soybean:SmallVillage-Crops-soybean
+49702236-2226-57d7-a91f-6c77942ad9aa:SmallVillage/Crops/wheat:SmallVillage-Crops-wheat
+b3f81760-dcdc-5d8b-90f4-573c3f1488c4:SmallVillage/Ground cover:SmallVillage-Ground cover
+f249c3b2-8ef7-54ee-8ad9-eefa771b962e:SmallVillage/Trees/broadleaf:SmallVillage-Trees-broadleaf
+36c1193a-ed45-51f0-b28e-d9fc31b0af11:SmallVillage/Trees/conifer:SmallVillage-Trees-conifer
+1aba7415-a589-5748-afa2-30ccff589d89:SmallVillage/Trees/hedge:SmallVillage-Trees-hedge
+899df639-1d19-585a-b1a5-e6ac59195189:SmallVillage/Trees/poplar:SmallVillage-Trees-poplar
+095ea7f5-fdd5-5565-92cb-0d68301af019:SmallVillage/Trees/willow:SmallVillage-Trees-willow

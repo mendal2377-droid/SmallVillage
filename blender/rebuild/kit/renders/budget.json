@@ -1,0 +1,665 @@
+{
+ "assets": [
+  {
+   "asset": "KIT poplar 0 leafy L0",
+   "tris": 11696,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 0 leafy L1",
+   "tris": 704,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 0 leafy L2",
+   "tris": 164,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 leafy L0",
+   "tris": 11720,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 leafy L1",
+   "tris": 704,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 leafy L2",
+   "tris": 164,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 2 leafy L0",
+   "tris": 11732,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 2 leafy L1",
+   "tris": 704,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 2 leafy L2",
+   "tris": 164,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 0 bare L0",
+   "tris": 3168,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 0 bare L1",
+   "tris": 544,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 0 bare L2",
+   "tris": 64,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 bare L0",
+   "tris": 3396,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 bare L1",
+   "tris": 576,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 bare L2",
+   "tris": 64,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 2 bare L0",
+   "tris": 3216,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 2 bare L1",
+   "tris": 552,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 2 bare L2",
+   "tris": 64,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar 1 bare nest L0",
+   "tris": 3416,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 0 leafy L0",
+   "tris": 3480,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 0 leafy L1",
+   "tris": 372,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 0 leafy L2",
+   "tris": 116,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 0 bare L0",
+   "tris": 1364,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 0 bare L1",
+   "tris": 132,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 0 bare L2",
+   "tris": 36,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 1 leafy L0",
+   "tris": 3480,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 1 leafy L1",
+   "tris": 404,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 1 leafy L2",
+   "tris": 116,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 1 bare L0",
+   "tris": 1384,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 1 bare L1",
+   "tris": 164,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 1 bare L2",
+   "tris": 36,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 2 leafy L0",
+   "tris": 3416,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 2 leafy L1",
+   "tris": 396,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 2 leafy L2",
+   "tris": 116,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 2 bare L0",
+   "tris": 1320,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 2 bare L1",
+   "tris": 156,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT broadleaf 2 bare L2",
+   "tris": 36,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 0 leafy L0",
+   "tris": 2956,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 0 leafy L1",
+   "tris": 548,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 0 leafy L2",
+   "tris": 116,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 0 bare L0",
+   "tris": 1356,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 0 bare L1",
+   "tris": 368,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 0 bare L2",
+   "tris": 36,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 1 leafy L0",
+   "tris": 2956,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 1 leafy L1",
+   "tris": 548,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 1 leafy L2",
+   "tris": 116,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 1 bare L0",
+   "tris": 1356,
+   "budget": 8000,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 1 bare L1",
+   "tris": 368,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT willow 1 bare L2",
+   "tris": 36,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT conifer 0 L0",
+   "tris": 200,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT conifer 0 L1",
+   "tris": 92,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT conifer 0 L2",
+   "tris": 52,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT conifer 1 L0",
+   "tris": 200,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT conifer 1 L1",
+   "tris": 92,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT conifer 1 L2",
+   "tris": 52,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT hedge ball 0 L0",
+   "tris": 1776,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT hedge ball 0 L1",
+   "tris": 156,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT hedge ball 0 L2",
+   "tris": 56,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT hedge ball 1 L0",
+   "tris": 1776,
+   "budget": 12000,
+   "ok": true
+  },
+  {
+   "asset": "KIT hedge ball 1 L1",
+   "tris": 156,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT hedge ball 1 L2",
+   "tris": 56,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat seedling L0",
+   "tris": 48,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat seedling L1",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat winter L0",
+   "tris": 66,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat winter L1",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat jointing L0",
+   "tris": 72,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat jointing L1",
+   "tris": 16,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat heading L0",
+   "tris": 306,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat heading L1",
+   "tris": 48,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat ripe L0",
+   "tris": 306,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat ripe L1",
+   "tris": 48,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat stubble L0",
+   "tris": 80,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT wheat stubble L1",
+   "tris": 24,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize seedling 0 L0",
+   "tris": 56,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize seedling 0 L1",
+   "tris": 20,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize seedling 1 L0",
+   "tris": 56,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize seedling 1 L1",
+   "tris": 20,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize knee 0 L0",
+   "tris": 86,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize knee 0 L1",
+   "tris": 26,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize knee 1 L0",
+   "tris": 86,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize knee 1 L1",
+   "tris": 26,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tall 0 L0",
+   "tris": 136,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tall 0 L1",
+   "tris": 44,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tall 1 L0",
+   "tris": 136,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tall 1 L1",
+   "tris": 44,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tasselled 0 L0",
+   "tris": 222,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tasselled 0 L1",
+   "tris": 44,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tasselled 1 L0",
+   "tris": 222,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize tasselled 1 L1",
+   "tris": 44,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize dry 0 L0",
+   "tris": 202,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize dry 0 L1",
+   "tris": 38,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize dry 1 L0",
+   "tris": 202,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize dry 1 L1",
+   "tris": 38,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize cut 0 L0",
+   "tris": 48,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize cut 0 L1",
+   "tris": 48,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize cut 1 L0",
+   "tris": 48,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT maize cut 1 L1",
+   "tris": 48,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT garlic L0",
+   "tris": 42,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT soybean L0",
+   "tris": 120,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT grass tuft 0",
+   "tris": 28,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT grass tuft 1",
+   "tris": 28,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT grass tuft 2",
+   "tris": 28,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT weed rosette",
+   "tris": 48,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT wildflower white",
+   "tris": 96,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT wildflower yellow",
+   "tris": 96,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT wildflower purple",
+   "tris": 96,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT wildflower pink",
+   "tris": 96,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT wildflower blue",
+   "tris": 96,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT reed clump",
+   "tris": 160,
+   "budget": 200,
+   "ok": true
+  },
+  {
+   "asset": "KIT cattail clump",
+   "tris": 180,
+   "budget": 200,
+   "ok": true
+  }
+ ],
+ "over_budget": []
+}
