@@ -61,9 +61,9 @@ Month ranges follow the crop calendar in `D:/blender/hometown/REBUILD_PLAN.md` Â
 
 ## Buildings: how they are put together
 
- writes every module into a  in its own frame (front facing -Y, ground at z = 0), so modules can be merged into one courtyard-plot mesh with the single palette material.
+`kit_buildings.py` writes every module into a `MeshWriter` in its own frame (front facing -Y, ground at z = 0), so modules can be merged into one courtyard-plot mesh with the single palette material.
 
-- **Courtyard plot frame:** the lane side is at y = 0, with the gate. The main house is at the back, facing the yard, the side wing runs along the east wall, and the shed stands against the west wall. The footprint is stored in , so Phase 3 can rotate each plot to its lane.
+- **Courtyard plot frame:** the lane side is at y = 0, with the gate. The main house is at the back, facing the yard, the side wing runs along the east wall, and the shed stands against the west wall. The footprint is stored in `sv_footprint`, so Phase 3 can rotate each plot to its lane.
 - **Detail from the photographs:**
   - Facades: white tile and grey render facades, with unfinished grey gable ends that carry a dark rain-streak band, and burgundy plinths.
   - Trim: gold, ochre and burgundy eave bands, and the glazed upper corridor over a white-tile parapet.
