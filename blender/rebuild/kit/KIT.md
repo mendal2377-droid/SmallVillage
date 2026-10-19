@@ -40,6 +40,7 @@ blender -b --factory-startup --python blender/rebuild/kit/build_kit.py -- --shee
 | Reed / cattail clump (sparse) | ≤ 200 | — | — |
 | House module | ≤ 3k | ≤ 600 | ≤ 60 |
 | Prop / vehicle | ≤ 2k | ≤ 400 | — |
+| Courtyard plot / school (merged modules) | ≤ 8k | ≤ 1.5k | ≤ 200 |
 
 The sheet render reports actual counts; anything over budget is flagged.
 
@@ -50,10 +51,25 @@ The sheet render reports actual counts; anything over budget is flagged.
 | 1 Trees | Poplar ×3 (leafy / bare + magpie-nest variant), willow ×2, broadleaf ×3, young conifer ×2, photinia hedge ball; LOD0–2 | done: 110 assets, all within budget (`renders/budget.json`) |
 | 1 Crops | Wheat: sown soil, seedling, winter, jointing, heading, ripe, stubble. Maize: seedling, knee-high, tall, tasselled, dry, cut stalks. Garlic, soybean/peanut | done: 110 assets, all within budget (`renders/budget.json`) |
 | 1 Ground | Grass tuft, weeds, wildflowers ×5, reeds, cattail | done: 110 assets, all within budget (`renders/budget.json`) |
-| 2 Buildings | Modular village houses (flat / tiled / pitched / red brick, 1–3 storeys), gates, courtyard walls, blue sheds, railings, grey gables, glazed balconies, school | next |
+| 2 Buildings | 8 courtyard-plot prefabs (home-like white tile with glazed corridor, grey render, white 3-storey, old brick pitched, pink pitched, cream, red brick, grey pitched), 6 standalone house blocks, flat and tiled side wings, blue shed, tiled and brick gates, 4 wall materials, primary school; LOD0-2 | done: 72 assets, all within budget |
 | 3 Infrastructure | Concrete road pieces, ditches, culvert bridge with balustrade, poles and wires, well hut, stakes | next |
 | 4 Props and vehicles | Stools, basins, laundry, pots, chilli strings, corn drying, straw stacks. Electric tricycle, scooter, combine harvester, tractor | next |
 | 5 Animals | Chicken, duck, goose, magpie, sparrow, cat, goat, the companion dog | with Phase 6 avatar |
 | 6 Sky | Painted cloud set, distant village and shelterbelt strips | next |
 
 Month ranges follow the crop calendar in `D:/blender/hometown/REBUILD_PLAN.md` §1.
+
+## Buildings: how they are put together
+
+ writes every module into a  in its own frame (front facing -Y, ground at z = 0), so modules can be merged into one courtyard-plot mesh with the single palette material.
+
+- **Courtyard plot frame:** the lane side is at y = 0, with the gate. The main house is at the back, facing the yard, the side wing runs along the east wall, and the shed stands against the west wall. The footprint is stored in , so Phase 3 can rotate each plot to its lane.
+- **Detail from the photographs:**
+  - Facades: white tile and grey render facades, with unfinished grey gable ends that carry a dark rain-streak band, and burgundy plinths.
+  - Trim: gold, ochre and burgundy eave bands, and the glazed upper corridor over a white-tile parapet.
+  - Doors: teal door screens, the spring-festival couplets and 福 squares.
+  - Roofs: flat roofs with steel railings, and gable roofs with alternating tile courses and a ridge cap.
+  - Fixtures: downpipes and AC units.
+  - Gates and sheds: red gates with gold studs and a sign board, and blue corrugated sheds.
+- Snow on roofs is planned as a shader effect on upward-facing surfaces (Phase 8), not as separate meshes.
+- Couplet and sign text is not modelled. A small decal texture can add the characters later.

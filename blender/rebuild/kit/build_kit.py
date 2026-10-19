@@ -15,12 +15,14 @@ from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [HERE, os.path.dirname(HERE)]
+import kit_buildings as KB  # noqa: E402
 import kit_lib as K  # noqa: E402
 import palette as PAL  # noqa: E402
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 SHEET = "--sheet" in argv
 PREVIEW = "--preview" in argv
+GROUPS = argv[argv.index("--groups") + 1].split(",") if "--groups" in argv else None
 OUT = os.path.join(HERE, "sv_kit.blend")
 RENDERS = os.path.join(HERE, "renders")
 
@@ -30,6 +32,8 @@ BUDGET = {  # (kind/family, state-group, lod) -> max triangles
     ("tree", "evergreen", 0): 12000, ("tree", "evergreen", 1): 2000, ("tree", "evergreen", 2): 300,
     ("crop", None, 0): 400, ("crop", None, 1): 60,
     ("ground", None, 0): 120,
+    ("building", None, 0): 3000, ("building", None, 1): 600, ("building", None, 2): 60,
+    ("plot", None, 0): 8000, ("plot", None, 1): 1500, ("plot", None, 2): 200,
 }
 
 
@@ -37,6 +41,8 @@ def budget_for(o):
     kind, lod = o["sv_kind"], o["sv_lod"]
     if o["sv_family"] in ("reed", "cattail"):
         return 200
+    if o["sv_family"] in ("courtyard plot", "school"):
+        return BUDGET.get(("plot", None, lod))
     if kind == "tree":
         return BUDGET.get((kind, o["sv_state"], lod))
     return BUDGET.get((kind, None, lod))
@@ -93,6 +99,23 @@ def build():
     row += [K.wildflower(ground, c) for c in ("white", "yellow", "purple", "pink", "blue")]
     row += [K.reeds(ground), K.reeds(ground, cattail=True)]
     rows["ground"] = row
+    # ---- buildings (batch 2)
+    bld = coll("KIT buildings", root)
+    rows["plots"] = [KB.courtyard_plot(bld, v, lod) for v in KB.PLOTS for lod in (0, 1, 2)]
+    rows["school"] = [KB.school(bld, lod) for lod in (0, 1, 2)]
+    row = []
+    for lod in (0, 1, 2):
+        row.append(KB.module(bld, "gate tiled", KB.gate, lod, style="tiled"))
+        row.append(KB.module(bld, "gate brick", KB.gate, lod, style="brick"))
+        for mat in ("brick", "plaster", "grey", "old"):
+            row.append(KB.module(bld, f"wall {mat} 4m", KB.wall_run, lod, length=4.0, material=mat))
+        row.append(KB.module(bld, "blue shed", KB.shed, lod))
+        row.append(KB.module(bld, "wing flat", KB.wing, lod, length=7.0, facade="white", roof="flat"))
+        row.append(KB.module(bld, "wing tiled", KB.wing, lod, length=7.0, facade="old_brick", roof="tile"))
+        for fac, fl, rf, gz in (("white_tile", 2, "flat", True), ("grey", 2, "flat", False), ("white", 3, "flat", False),
+                                ("brick", 1, "tile", False), ("pink", 1, "tile", False), ("cream", 2, "flat", False)):
+            row.append(KB.module(bld, f"house {fac} {fl}F {rf}", KB.house_block, lod, w=11.0, d=8.0, floors=fl, facade=fac, roof=rf, glazed=gz))
+    rows["building modules"] = row
 
     # ---- lay out, mark as assets
     y = 0.0
@@ -104,7 +127,8 @@ def build():
             o.location = (x + o.dimensions.x / 2, y, 0)
             x += o.dimensions.x + gap
             fam = o["sv_family"]
-            cat = {"tree": f"Trees/{fam}", "crop": f"Crops/{fam}", "ground": "Ground cover"}[o["sv_kind"]]
+            cat = {"tree": f"Trees/{fam}", "crop": f"Crops/{fam}", "ground": "Ground cover",
+                   "building": "Buildings/" + ("Plots" if fam == "courtyard plot" else "School" if fam == "school" else "Modules")}[o["sv_kind"]]
             tags = [o["sv_kind"], fam, str(o.get("sv_state", "")), f"LOD{o['sv_lod']}"]
             K.mark(o, "SmallVillage/" + cat, [t for t in tags if t], f"{fam} {o.get('sv_state', '')} LOD{o['sv_lod']}")
         y += max(o.dimensions.y for o in objs) + 12
@@ -135,6 +159,18 @@ def report(rows):
 
 
 # ---------------------------------------------------------------- review sheet
+
+
+def fit_camera(cam, objs, aspect=16 / 9, margin=1.08):
+    """Orthographic fit: project every bounding-box corner into the camera frame."""
+    bpy.context.view_layer.update()
+    rot = cam.rotation_euler.to_matrix()
+    inv = rot.inverted()
+    pts = [inv @ (o.matrix_world @ Vector(c)) for o in objs for c in o.bound_box]
+    xs, ys, zs = [p.x for p in pts], [p.y for p in pts], [p.z for p in pts]
+    cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+    cam.data.ortho_scale = max(max(xs) - min(xs), (max(ys) - min(ys)) * aspect) * margin
+    cam.location = rot @ Vector((cx, cy, max(zs) + 400))
 
 
 def sheet(rows):
@@ -176,10 +212,18 @@ def sheet(rows):
         "crops_wheat": lambda o: o["sv_family"] in ("wheat", "garlic", "soybean"),
         "crops_maize": lambda o: o["sv_family"] == "maize",
         "ground": lambda o: o["sv_kind"] == "ground",
+        "buildings_plots": lambda o: o["sv_family"] == "courtyard plot",
+        "buildings_houses": lambda o: o["sv_family"].startswith("house"),
+        "buildings_parts": lambda o: o["sv_kind"] == "building" and not o["sv_family"].startswith("house")
+        and o["sv_family"] not in ("courtyard plot", "school"),
+        "buildings_lod": lambda o: o["sv_family"] in ("courtyard plot", "school") and o.get("sv_variant", "home_like") == "home_like",
     }
     home = {o.name: o.location.copy() for o in allobjs}
     for gname, pick in groups.items():
-        objs = [o for o in allobjs if o["sv_lod"] == 0 and pick(o)]
+        if GROUPS and gname not in GROUPS:
+            continue
+        lod_any = gname == "buildings_lod"
+        objs = [o for o in allobjs if (lod_any or o["sv_lod"] == 0) and pick(o)]
         for o in allobjs:
             o.hide_render = o not in objs
         x = 0.0
@@ -193,12 +237,13 @@ def sheet(rows):
         cd.ortho_scale = max(width, height * 1.15 * 16 / 9) * 1.06
         cam = bpy.data.objects.new("cam " + gname, cd)
         sc.collection.objects.link(cam)
-        cam.location = (width / 2, -200, height * 0.5 + 200 * math.tan(math.radians(6)))
-        cam.rotation_euler = (math.radians(84), 0, 0)
-        cd.clip_end = 1000
+        angled = gname.startswith("buildings")
+        cam.rotation_euler = (math.radians(62 if angled else 84), 0, math.radians(-28 if angled else 0))
+        cd.clip_end = 2000
+        fit_camera(cam, objs)
         sc.camera = cam
         for season in PAL.SEASONS:
-            if gname.startswith("crops") and season != "summer":
+            if (gname.startswith("crops") or gname.startswith("buildings")) and season != "summer":
                 continue  # crop stages do not depend on the palette season
             K.set_season(season)
             sc.render.filepath = os.path.join(RENDERS, f"{gname}_{season}.png")

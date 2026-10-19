@@ -1,6 +1,9 @@
 # Blender asset catalog definition file
 VERSION 1
 
+03a8d5f2-7742-5b1e-b394-e88271005d84:SmallVillage/Buildings/Modules:SmallVillage-Buildings-Modules
+514af1bc-6366-5450-97df-7e0f7c115867:SmallVillage/Buildings/Plots:SmallVillage-Buildings-Plots
+802f2781-7bf7-5990-8041-8f7509dad724:SmallVillage/Buildings/School:SmallVillage-Buildings-School
 2031af6f-64ec-5f32-89e9-03ae646d6b84:SmallVillage/Crops/garlic:SmallVillage-Crops-garlic
 0c92e2c3-4575-5346-84f9-de6a48290841:SmallVillage/Crops/maize:SmallVillage-Crops-maize
 9371c1ca-8f54-5d10-a9e7-38c6d5c46c02:SmallVillage/Crops/soybean:SmallVillage-Crops-soybean
