@@ -139,6 +139,13 @@ _S = {  # name: constant colour or {season: colour}
     "tractor_red": (0.70, 0.08, 0.05),
     "tractor_blue": (0.10, 0.26, 0.56),
     "engine_grey": (0.30, 0.31, 0.32),
+    # sky set (clouds, horizon strips)
+    "cloud": (0.98, 0.97, 0.94),
+    "cloud_base": (0.80, 0.82, 0.90),
+    "cloud_storm": (0.42, 0.45, 0.52),
+    "far_house": (0.78, 0.78, 0.76),
+    "far_house_d": (0.56, 0.57, 0.58),
+    "far_roof": (0.50, 0.30, 0.24),
 }
 
 SLOTS = list(_S.keys())

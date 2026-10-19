@@ -57,7 +57,7 @@ The sheet render reports actual counts; anything over budget is flagged.
 | 3 Infrastructure | Concrete roads (4.5 / 3.0 / 2.4 m) and junction, herringbone brick alley, rutted field path; wet and dry ditch, river with banks; culvert bridge and river bridge with balustrades; utility pole (plain / with lamp), solar street lamp, transformer platform, well huts ×2, wellhead, field stakes ×2; `catenary()` wire helper; LOD0–2 | done: 56 assets, all within budget |
 | 4 Props and vehicles | **Courtyard:** stools, kid chair, basins ×3, bucket, twin-tub washing machine, laundry line, umbrellas (2 open, 1 closed), potted plants ×2, chilli string, bamboo broom, X drying rack, low table, urns, satellite dish, green bin. **Farm:** corn drying mat, cob pile, straw stacks ×2, stalk piles ×2, firewood, brick stack, bamboo basket. **Vehicles** (LOD0–1): electric tricycle, e-scooter, walking tractor with trailer, tractor, combine harvester, handcart | done: 42 assets, all within budget |
 | 5 Animals | Chicken, duck, goose, magpie, sparrow, cat, goat, the companion dog | with Phase 6 avatar |
-| 6 Sky | Painted cloud set, distant village and shelterbelt strips | next |
+| 6 Sky | Clouds: cumulus ×3, towering cumulus ×2, fair-weather puffs ×3, thunderhead, stratus layer, cirrus ×2. Horizon: shelterbelts (leafy / bare ×2), poplar clumps (leafy / bare ×2), distant village strips ×4. Ten time-of-day and weather presets in `sky.py` | done: 24 assets, all within budget |
 
 Month ranges follow the crop calendar in `D:/blender/hometown/REBUILD_PLAN.md` §1.
 
@@ -92,3 +92,34 @@ Month ranges follow the crop calendar in `D:/blender/hometown/REBUILD_PLAN.md` �
 ## Vehicles and moving parts
 
 `kit_props.py` vehicles keep their wheels in the merged mesh, so they work as parked props. They also tag the wheel vertices in a `wheels` vertex group (the combine's reel goes in a `reel` group) and store wheel centres and radii in `sv_wheels` (`x,y,z,r;...`). The Phase 4 exporter can split those vertices into separate spinning meshes for the vehicles the visitor can ride.
+
+## Sky set and light presets
+
+`kit_sky.py` builds clouds in real metres, so they can be placed 1–3 km out and 250–600 m up. Each cloud has a flattened base and a cooler underside band. Stratus and cirrus are meant to be seen from below.
+
+Horizon strips run along local +X up to `sv_length`, with their front facing -Y, so they can be turned toward the village. They recreate the flat skyline in the photographs: thin grey-white neighbouring villages, poplar shelterbelts on every horizon and isolated poplar clumps in the open wheat.
+
+`sky.py` holds ten presets:
+
+- winter haze morning
+- winter sunrise frost
+- spring clear
+- summer afternoon
+- overcast
+- golden sunset
+- summer storm
+- snow day
+- dusk
+- night
+
+Each preset sets:
+
+- sky colours (horizon, mid, zenith)
+- sun angle, colour and strength (for latitude about 33.4°N)
+- ambient light
+- toon `lit` / `shadow` tints, which also act as exposure, so night and storm darken through them
+- fog colour and density (applied on the web only)
+- the cloud kinds that suit the weather
+- a palette season
+
+`renders/sky_presets.jpg` shows one small scene under every preset. This is the shared data the Phase 8 climate system will interpolate between. Snow cover and window glow are not part of these renders yet.

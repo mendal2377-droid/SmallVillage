@@ -1609,6 +1609,150 @@
    "ok": true
   },
   {
+   "asset": "KIT cloud cumulus 0",
+   "tris": 1920,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud cumulus 1",
+   "tris": 1920,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud cumulus 2",
+   "tris": 1920,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud tower 0",
+   "tris": 2400,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud tower 1",
+   "tris": 2400,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud small 0",
+   "tris": 720,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud small 1",
+   "tris": 720,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud small 2",
+   "tris": 720,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud thunderhead",
+   "tris": 2800,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud stratus 0",
+   "tris": 3200,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud cirrus 0",
+   "tris": 112,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT cloud cirrus 1",
+   "tris": 112,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT shelterbelt leafy 0",
+   "tris": 4288,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT shelterbelt leafy 1",
+   "tris": 4192,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT shelterbelt bare 0",
+   "tris": 4788,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT shelterbelt bare 1",
+   "tris": 4824,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar clump leafy 0",
+   "tris": 288,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar clump leafy 1",
+   "tris": 192,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar clump bare 0",
+   "tris": 216,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT poplar clump bare 1",
+   "tris": 324,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT distant village 0 leafy",
+   "tris": 3680,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT distant village 1 leafy",
+   "tris": 3624,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT distant village 2 leafy",
+   "tris": 3404,
+   "budget": 6000,
+   "ok": true
+  },
+  {
+   "asset": "KIT distant village 0 bare",
+   "tris": 3724,
+   "budget": 6000,
+   "ok": true
+  },
+  {
    "asset": "KIT electric tricycle L0",
    "tris": 480,
    "budget": 2000,

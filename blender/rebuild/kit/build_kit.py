@@ -18,6 +18,8 @@ sys.path[:0] = [HERE, os.path.dirname(HERE)]
 import kit_buildings as KB  # noqa: E402
 import kit_infra as KI  # noqa: E402
 import kit_props as KP  # noqa: E402
+import kit_sky as KS  # noqa: E402
+import sky as SKY  # noqa: E402
 import kit_lib as K  # noqa: E402
 import palette as PAL  # noqa: E402
 
@@ -41,6 +43,7 @@ BUDGET = {  # (kind/family, state-group, lod) -> max triangles
     ("prop", None, 0): 2000,
     ("vehicle", None, 0): 2000, ("vehicle", None, 1): 400,
     ("large vehicle", None, 0): 4000, ("large vehicle", None, 1): 800,
+    ("sky", None, 0): 6000,
 }
 FARM_PROPS = ("straw stack", "stalk pile", "firewood", "brick stack", "basket", "corn cob pile", "corn drying")
 
@@ -153,6 +156,13 @@ def build():
            KP.stalk_pile(pr, "maize_dry", 1), KP.firewood_bundle(pr), KP.brick_stack(pr), KP.bamboo_basket(pr)]
     rows["props"] = row
     vh = coll("KIT vehicles", root)
+    sk = coll("KIT sky set", root)
+    row = [KS.cumulus(sk, v) for v in range(3)] + [KS.cumulus(sk, v, width=520, height=360, tower=True) for v in range(2)]
+    row += [KS.cumulus_small(sk, v) for v in range(3)] + [KS.thunderhead(sk), KS.stratus(sk), KS.cirrus(sk, 0), KS.cirrus(sk, 1)]
+    row += [KS.shelterbelt(sk, leafy=lf, variant=v) for lf in (True, False) for v in range(2)]
+    row += [KS.poplar_clump(sk, leafy=lf, variant=v) for lf in (True, False) for v in range(2)]
+    row += [KS.distant_village(sk, variant=v) for v in range(3)] + [KS.distant_village(sk, variant=0, leafy=False)]
+    rows["sky"] = row
     rows["vehicles"] = [f(vh, lod) for f in (KP.tricycle, KP.scooter, KP.walking_tractor, KP.tractor, KP.combine, KP.handcart) for lod in (0, 1)]
 
     # ---- lay out, mark as assets
@@ -169,6 +179,7 @@ def build():
                    "building": "Buildings/" + ("Plots" if fam == "courtyard plot" else "School" if fam == "school" else "Modules"),
                    "prop": "Props/" + ("Farm" if fam in FARM_PROPS else "Courtyard"),
                    "vehicle": "Vehicles",
+                   "sky": "Sky/" + ("Clouds" if fam in ("cumulus", "cumulus tower", "cumulus small", "thunderhead", "stratus", "cirrus") else "Horizon"),
                    "infra": "Infrastructure/" + ("Roads" if fam.startswith("road") or fam in ("brick alley", "field path") else
                                                  "Water" if fam in ("ditch", "river", "culvert bridge", "river bridge") else "Utilities")}[o["sv_kind"]]
             tags = [o["sv_kind"], fam, str(o.get("sv_state", "")), f"LOD{o['sv_lod']}"]
@@ -265,13 +276,16 @@ def sheet(rows):
         "props_courtyard": lambda o: o["sv_kind"] == "prop" and o["sv_family"] not in FARM_PROPS,
         "props_farm": lambda o: o["sv_kind"] == "prop" and o["sv_family"] in FARM_PROPS,
         "vehicles": lambda o: o["sv_kind"] == "vehicle",
+        "sky_clouds": lambda o: o["sv_family"] in ("cumulus", "cumulus tower", "cumulus small"),
+        "sky_weather": lambda o: o["sv_family"] in ("thunderhead", "stratus", "cirrus"),
+        "sky_horizon": lambda o: o["sv_kind"] == "sky" and o["sv_family"] in ("shelterbelt", "poplar clump", "distant village"),
         "buildings_lod": lambda o: o["sv_family"] in ("courtyard plot", "school") and o.get("sv_variant", "home_like") == "home_like",
     }
     home = {o.name: o.location.copy() for o in allobjs}
     for gname, pick in groups.items():
         if GROUPS and gname not in GROUPS:
             continue
-        gp.hide_render = gname == "infra_water"  # channels sit below ground; show them against the backdrop
+        gp.hide_render = gname == "infra_water" or gname.startswith("sky")  # below-ground channels and sky pieces read better on the backdrop
         lod_any = gname == "buildings_lod"
         objs = [o for o in allobjs if (lod_any or o["sv_lod"] == 0) and pick(o)]
         for o in allobjs:
@@ -287,13 +301,14 @@ def sheet(rows):
         cd.ortho_scale = max(width, height * 1.15 * 16 / 9) * 1.06
         cam = bpy.data.objects.new("cam " + gname, cd)
         sc.collection.objects.link(cam)
-        angled = gname.startswith(("buildings", "infra", "props", "vehicles"))
+        angled = gname.startswith(("buildings", "infra", "props", "vehicles", "sky"))
         cam.rotation_euler = (math.radians(62 if angled else 84), 0, math.radians(-28 if angled else 0))
         cd.clip_end = 2000
         fit_camera(cam, objs)
         sc.camera = cam
         for season in PAL.SEASONS:
-            if (gname.startswith(("crops", "buildings", "infra_roads", "infra_utilities", "vehicles"))) and season != "summer":
+            if gname.startswith(("crops", "buildings", "infra_roads", "infra_utilities", "vehicles", "sky_clouds", "sky_weather")) \
+                    and season != "summer":
                 continue  # crop stages do not depend on the palette season
             K.set_season(season)
             sc.render.filepath = os.path.join(RENDERS, f"{gname}_{season}.png")
@@ -302,6 +317,106 @@ def sheet(rows):
     for o in allobjs:
         o.location = home[o.name]
         o.hide_render = False
+    if not GROUPS or "presets" in GROUPS:
+        presets_sheet(rows, sc, sun, gp)
+
+
+def presets_sheet(rows, sc, sun, gp):
+    """One small village scene rendered under every sky/light preset in sky.py (fog is web-only)."""
+    import style_lib as SL
+    allobjs = [o for objs in rows.values() for o in objs]
+    for o in allobjs:
+        o.hide_render = True
+    gp.hide_render = False
+    byname = {o.name: o for o in allobjs}
+    base = Vector((6000, 0, 0))
+
+    def dup(name, loc, rot=0.0, scale=1.0):
+        src = byname[name]
+        o = bpy.data.objects.new(name + " preset", src.data)
+        sc.collection.objects.link(o)
+        o.location = base + Vector(loc)
+        o.rotation_euler = (0, 0, rot)
+        o.scale = (scale, scale, scale)
+        return o
+
+    # seasonal grass ground: one plane UV-mapped to the palette's seasonal "grass" cell
+    import bmesh
+    bm = bmesh.new()
+    vs = [bm.verts.new(base + Vector(p)) for p in ((-3000, -3000, -0.02), (3000, -3000, -0.02), (3000, 3000, -0.02), (-3000, 3000, -0.02))]
+    bm.faces.new(vs)
+    K.finish("preset ground", bm, ["grass"], sc.collection, {"sv_kind": "preview"})
+    dup("KIT plot home_like L0", (-7, 6, 0))
+    dup("KIT plot grey_two L0", (8, 9, 0))
+    for k in range(9):
+        dup("KIT road main L0", (-24 + k * 5, -2, 0), -math.pi / 2)
+    leafy = [dup(f"KIT poplar {k % 3} leafy L0", (-22 + k * 4.4, -6, 0), k) for k in range(10)]
+    bare = [dup(f"KIT poplar {k % 3} bare L0", (-22 + k * 4.4, -6, 0), k) for k in range(10)]
+    dup("KIT shelterbelt leafy 0", (-150, 260, 0))
+    dup("KIT distant village 0 leafy", (-60, 420, 0))
+    clouds = {"cumulus": dup("KIT cloud cumulus 0", (-300, 1500, 280)), "cumulus tower": dup("KIT cloud tower 0", (500, 1900, 250)),
+              "cumulus small": dup("KIT cloud small 0", (150, 900, 300)), "thunderhead": dup("KIT cloud thunderhead", (200, 2600, 150)),
+              "stratus": dup("KIT cloud stratus 0", (0, 900, 520)), "cirrus": dup("KIT cloud cirrus 0", (0, 1400, 900))}
+    m = bpy.data.materials.new("preset sky")
+    N, Ln = m.node_tree.nodes, m.node_tree.links
+    N.clear()
+    mo = N.new("ShaderNodeOutputMaterial")
+    tc = N.new("ShaderNodeTexCoord")
+    nrm = N.new("ShaderNodeVectorMath")
+    nrm.operation = "NORMALIZE"
+    sep = N.new("ShaderNodeSeparateXYZ")
+    ramp = N.new("ShaderNodeValToRGB")
+    ramp.color_ramp.interpolation = "EASE"
+    ramp.color_ramp.elements.new(0.5)
+    em = N.new("ShaderNodeEmission")
+    Ln.new(tc.outputs["Object"], nrm.inputs[0])
+    Ln.new(nrm.outputs["Vector"], sep.inputs[0])
+    Ln.new(sep.outputs["Z"], ramp.inputs[0])
+    Ln.new(ramp.outputs["Color"], em.inputs["Color"])
+    Ln.new(em.outputs[0], mo.inputs["Surface"])
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=4000)
+    dome = bpy.context.object
+    dome.data.materials.append(m)
+    dome.visible_shadow = False
+    cd = bpy.data.cameras.new("cam presets")
+    cd.lens = 24
+    cd.clip_end = 6000
+    cam = bpy.data.objects.new("cam presets", cd)
+    sc.collection.objects.link(cam)
+    cam.location = base + Vector((4, -26, 2.2))
+    d = (base + Vector((-4, 20, 6))) - cam.location
+    cam.rotation_mode = "QUATERNION"
+    cam.rotation_quaternion = d.to_track_quat("-Z", "Y")
+    dome.location = cam.location
+    sc.camera = cam
+    sc.render.resolution_x, sc.render.resolution_y = (640, 360) if PREVIEW else (960, 540)
+    ng = SL.toon_group()
+    bg = sc.world.node_tree.nodes["Background"]
+    for name, P in SKY.PRESETS.items():
+        e = ramp.color_ramp.elements
+        e[0].position, e[0].color = 0.0, (*P["horizon"], 1)
+        e[1].position, e[1].color = 0.12, (*P["mid"], 1)
+        e[2].position, e[2].color = 0.62, (*P["zenith"], 1)
+        bg.inputs["Color"].default_value = (*P["ambient"], 1)
+        bg.inputs["Strength"].default_value = P["ambient_strength"]
+        el, az = math.radians(P["sun_el"]), math.radians(P["sun_az"])
+        sv = Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), math.sin(el)))
+        sun.rotation_mode = "QUATERNION"
+        sun.rotation_quaternion = sv.to_track_quat("Z", "Y")
+        sun.data.color = P["sun"]
+        sun.data.energy = P["sun_strength"]
+        ng.nodes["global lit"].outputs[0].default_value = (*P["lit"], 1)
+        ng.nodes["global shadow"].inputs["B"].default_value = (*P["shadow"], 1)
+        K.set_season(P["season"])
+        for o in leafy:
+            o.hide_render = P["season"] == "winter"
+        for o in bare:
+            o.hide_render = P["season"] != "winter"
+        for cname, o in clouds.items():
+            o.hide_render = cname not in P["clouds"]
+        sc.render.filepath = os.path.join(RENDERS, f"preset_{name.replace(' ', '_')}.png")
+        bpy.ops.render.render(write_still=True)
+        print("RENDERED", sc.render.filepath)
 
 
 rows = build()

@@ -14,6 +14,8 @@ fa4e0419-7d15-5dcb-88bc-03cc8f9f6eba:SmallVillage/Infrastructure/Utilities:Small
 7d5fd696-b459-5af5-9573-60afc6ef338e:SmallVillage/Infrastructure/Water:SmallVillage-Infrastructure-Water
 3d818b43-515f-5c8f-a60c-a192b3e661e7:SmallVillage/Props/Courtyard:SmallVillage-Props-Courtyard
 75cbd844-0445-5720-b401-2ec338726376:SmallVillage/Props/Farm:SmallVillage-Props-Farm
+f7d2941e-7c8f-5cea-8a1c-6a65f2a623f5:SmallVillage/Sky/Clouds:SmallVillage-Sky-Clouds
+f05efc13-27b3-5b2e-8a21-dd0929369860:SmallVillage/Sky/Horizon:SmallVillage-Sky-Horizon
 f249c3b2-8ef7-54ee-8ad9-eefa771b962e:SmallVillage/Trees/broadleaf:SmallVillage-Trees-broadleaf
 36c1193a-ed45-51f0-b28e-d9fc31b0af11:SmallVillage/Trees/conifer:SmallVillage-Trees-conifer
 1aba7415-a589-5748-afa2-30ccff589d89:SmallVillage/Trees/hedge:SmallVillage-Trees-hedge
