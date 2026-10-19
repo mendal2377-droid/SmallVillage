@@ -12,8 +12,11 @@ b3f81760-dcdc-5d8b-90f4-573c3f1488c4:SmallVillage/Ground cover:SmallVillage-Grou
 ea8feef7-5e21-540c-b95d-e2683865d471:SmallVillage/Infrastructure/Roads:SmallVillage-Infrastructure-Roads
 fa4e0419-7d15-5dcb-88bc-03cc8f9f6eba:SmallVillage/Infrastructure/Utilities:SmallVillage-Infrastructure-Utilities
 7d5fd696-b459-5af5-9573-60afc6ef338e:SmallVillage/Infrastructure/Water:SmallVillage-Infrastructure-Water
+3d818b43-515f-5c8f-a60c-a192b3e661e7:SmallVillage/Props/Courtyard:SmallVillage-Props-Courtyard
+75cbd844-0445-5720-b401-2ec338726376:SmallVillage/Props/Farm:SmallVillage-Props-Farm
 f249c3b2-8ef7-54ee-8ad9-eefa771b962e:SmallVillage/Trees/broadleaf:SmallVillage-Trees-broadleaf
 36c1193a-ed45-51f0-b28e-d9fc31b0af11:SmallVillage/Trees/conifer:SmallVillage-Trees-conifer
 1aba7415-a589-5748-afa2-30ccff589d89:SmallVillage/Trees/hedge:SmallVillage-Trees-hedge
 899df639-1d19-585a-b1a5-e6ac59195189:SmallVillage/Trees/poplar:SmallVillage-Trees-poplar
 095ea7f5-fdd5-5565-92cb-0d68301af019:SmallVillage/Trees/willow:SmallVillage-Trees-willow
+01c51f4c-91f1-5374-ac4e-0ea847d02a73:SmallVillage/Vehicles:SmallVillage-Vehicles

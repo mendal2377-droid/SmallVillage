@@ -55,7 +55,7 @@ The sheet render reports actual counts; anything over budget is flagged.
 | 1 Ground | Grass tuft, weeds, wildflowers ×5, reeds, cattail | done: 110 assets, all within budget (`renders/budget.json`) |
 | 2 Buildings | 8 courtyard-plot prefabs (home-like white tile with glazed corridor, grey render, white 3-storey, old brick pitched, pink pitched, cream, red brick, grey pitched), 6 standalone house blocks, flat and tiled side wings, blue shed, tiled and brick gates, 4 wall materials, primary school; LOD0-2 | done: 72 assets, all within budget |
 | 3 Infrastructure | Concrete roads (4.5 / 3.0 / 2.4 m) and junction, herringbone brick alley, rutted field path; wet and dry ditch, river with banks; culvert bridge and river bridge with balustrades; utility pole (plain / with lamp), solar street lamp, transformer platform, well huts ×2, wellhead, field stakes ×2; `catenary()` wire helper; LOD0–2 | done: 56 assets, all within budget |
-| 4 Props and vehicles | Stools, basins, laundry, pots, chilli strings, corn drying, straw stacks. Electric tricycle, scooter, combine harvester, tractor | next |
+| 4 Props and vehicles | **Courtyard:** stools, kid chair, basins ×3, bucket, twin-tub washing machine, laundry line, umbrellas (2 open, 1 closed), potted plants ×2, chilli string, bamboo broom, X drying rack, low table, urns, satellite dish, green bin. **Farm:** corn drying mat, cob pile, straw stacks ×2, stalk piles ×2, firewood, brick stack, bamboo basket. **Vehicles** (LOD0–1): electric tricycle, e-scooter, walking tractor with trailer, tractor, combine harvester, handcart | done: 42 assets, all within budget |
 | 5 Animals | Chicken, duck, goose, magpie, sparrow, cat, goat, the companion dog | with Phase 6 avatar |
 | 6 Sky | Painted cloud set, distant village and shelterbelt strips | next |
 
@@ -88,3 +88,7 @@ Month ranges follow the crop calendar in `D:/blender/hometown/REBUILD_PLAN.md` �
   - Bridges: white balustraded culvert bridges (photo 13).
   - Utilities: poles with white-painted bases and meter boxes, and solar street lamps.
   - Fields: small white well huts with peaked roofs and white field stakes.
+
+## Vehicles and moving parts
+
+`kit_props.py` vehicles keep their wheels in the merged mesh, so they work as parked props. They also tag the wheel vertices in a `wheels` vertex group (the combine's reel goes in a `reel` group) and store wheel centres and radii in `sv_wheels` (`x,y,z,r;...`). The Phase 4 exporter can split those vertices into separate spinning meshes for the vehicles the visitor can ride.

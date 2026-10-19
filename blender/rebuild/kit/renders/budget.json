@@ -1427,6 +1427,258 @@
    "tris": 28,
    "budget": 1500,
    "ok": true
+  },
+  {
+   "asset": "KIT stool red",
+   "tris": 76,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT stool green",
+   "tris": 76,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT kid chair green",
+   "tris": 112,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT basin red",
+   "tris": 164,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT basin pink",
+   "tris": 164,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT basin blue",
+   "tris": 164,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT bucket red",
+   "tris": 100,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT washing machine",
+   "tris": 132,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT laundry line",
+   "tris": 144,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT umbrella open",
+   "tris": 36,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT umbrella open.001",
+   "tris": 36,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT umbrella closed",
+   "tris": 40,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT potted plant 0",
+   "tris": 228,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT potted plant 1",
+   "tris": 308,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT chilli string",
+   "tris": 448,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT bamboo broom",
+   "tris": 112,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT drying rack",
+   "tris": 92,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT low table",
+   "tris": 60,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT urns",
+   "tris": 396,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT satellite dish",
+   "tris": 76,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT trash bin",
+   "tris": 80,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT corn drying",
+   "tris": 464,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT corn cob pile",
+   "tris": 520,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT straw stack 0",
+   "tris": 440,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT straw stack 1",
+   "tris": 440,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT stalk pile 0",
+   "tris": 420,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT stalk pile 1",
+   "tris": 420,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT firewood bundle",
+   "tris": 272,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT brick stack",
+   "tris": 576,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT bamboo basket",
+   "tris": 208,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT electric tricycle L0",
+   "tris": 480,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT electric tricycle L1",
+   "tris": 232,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT e-scooter L0",
+   "tris": 280,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT e-scooter L1",
+   "tris": 136,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT walking tractor L0",
+   "tris": 560,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT walking tractor L1",
+   "tris": 240,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT tractor L0",
+   "tris": 568,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT tractor L1",
+   "tris": 248,
+   "budget": 400,
+   "ok": true
+  },
+  {
+   "asset": "KIT combine harvester L0",
+   "tris": 588,
+   "budget": 4000,
+   "ok": true
+  },
+  {
+   "asset": "KIT combine harvester L1",
+   "tris": 232,
+   "budget": 800,
+   "ok": true
+  },
+  {
+   "asset": "KIT handcart L0",
+   "tris": 264,
+   "budget": 2000,
+   "ok": true
+  },
+  {
+   "asset": "KIT handcart L1",
+   "tris": 108,
+   "budget": 400,
+   "ok": true
   }
  ],
  "over_budget": []

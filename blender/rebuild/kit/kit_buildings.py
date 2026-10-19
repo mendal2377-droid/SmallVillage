@@ -60,12 +60,31 @@ class MeshWriter:
         f.material_index = self.i(slot)
         return f
 
-    def finish(self, name, coll, meta):
+    def blob(self, center, radius, slot, rng, sub=1, squash=(1, 1, 1), jitter=0.1):
+        return self._xf(SL.add_blob(self.bm, center, radius, rng, sub=sub, squash=squash, jitter=jitter, mat_index=self.i(slot)))
+
+    def tag(self, verts, group):
+        """Remember vertices for a named vertex group (e.g. 'wheels' so the web can spin them)."""
+        if not hasattr(self, "groups"):
+            self.groups = {}
+        self.groups.setdefault(group, []).extend(verts)
+        return verts
+
+    def finish(self, name, coll, meta, smooth=False):
+        names = list(getattr(self, "groups", {}))
+        if names:
+            dl = self.bm.verts.layers.deform.verify()
+            for gi, g in enumerate(names):
+                for v in self.groups[g]:
+                    if v.is_valid:
+                        v[dl][gi] = 1.0
         for f in self.bm.faces:
-            f.smooth = False
+            f.smooth = smooth
         o = K.finish(name, self.bm, self.slots, coll, meta)
+        for g in names:
+            o.vertex_groups.new(name=g)
         for p in o.data.polygons:
-            p.use_smooth = False
+            p.use_smooth = smooth
         return o
 
 

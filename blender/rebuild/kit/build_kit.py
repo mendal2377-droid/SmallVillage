@@ -17,6 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [HERE, os.path.dirname(HERE)]
 import kit_buildings as KB  # noqa: E402
 import kit_infra as KI  # noqa: E402
+import kit_props as KP  # noqa: E402
 import kit_lib as K  # noqa: E402
 import palette as PAL  # noqa: E402
 
@@ -37,13 +38,19 @@ BUDGET = {  # (kind/family, state-group, lod) -> max triangles
     ("plot", None, 0): 8000, ("plot", None, 1): 1500, ("plot", None, 2): 200,
     ("infra", None, 0): 1500, ("infra", None, 1): 300, ("infra", None, 2): 60,
     ("bridge", None, 0): 3000, ("bridge", None, 1): 600, ("bridge", None, 2): 120,
+    ("prop", None, 0): 2000,
+    ("vehicle", None, 0): 2000, ("vehicle", None, 1): 400,
+    ("large vehicle", None, 0): 4000, ("large vehicle", None, 1): 800,
 }
+FARM_PROPS = ("straw stack", "stalk pile", "firewood", "brick stack", "basket", "corn cob pile", "corn drying")
 
 
 def budget_for(o):
     kind, lod = o["sv_kind"], o["sv_lod"]
     if o["sv_family"] in ("reed", "cattail"):
         return 200
+    if o["sv_family"] == "combine harvester":
+        return BUDGET.get(("large vehicle", None, lod))
     if o["sv_family"] in ("culvert bridge", "river bridge"):
         return BUDGET.get(("bridge", None, lod))
     if o["sv_family"] in ("courtyard plot", "school"):
@@ -135,6 +142,18 @@ def build():
                 KI.wellhead(inf, lod=lod)]
     row += [KI.field_stake(inf, 0), KI.field_stake(inf, 1)]
     rows["infrastructure"] = row
+    # ---- props and vehicles (batch 4)
+    pr = coll("KIT props", root)
+    row = [KP.stool(pr, "plastic_red"), KP.stool(pr, "plastic_green"), KP.stool(pr, "plastic_green", kid_chair=True),
+           KP.basin(pr, "plastic_red"), KP.basin(pr, "plastic_pink", 0.24), KP.basin(pr, "plastic_blue", 0.3), KP.bucket(pr),
+           KP.washing_machine(pr), KP.laundry_line(pr), KP.umbrella(pr, True), KP.umbrella(pr, True, "plastic_blue", "cloth_cream"),
+           KP.umbrella(pr, False), KP.potted_plant(pr, 0), KP.potted_plant(pr, 1), KP.chilli_string(pr), KP.broom(pr),
+           KP.drying_rack(pr), KP.low_table(pr), KP.urns(pr), KP.satellite_dish(pr), KP.trash_bin(pr),
+           KP.corn_drying(pr), KP.corn_cob_pile(pr), KP.straw_stack(pr, 0), KP.straw_stack(pr, 1), KP.stalk_pile(pr, "husk", 0),
+           KP.stalk_pile(pr, "maize_dry", 1), KP.firewood_bundle(pr), KP.brick_stack(pr), KP.bamboo_basket(pr)]
+    rows["props"] = row
+    vh = coll("KIT vehicles", root)
+    rows["vehicles"] = [f(vh, lod) for f in (KP.tricycle, KP.scooter, KP.walking_tractor, KP.tractor, KP.combine, KP.handcart) for lod in (0, 1)]
 
     # ---- lay out, mark as assets
     y = 0.0
@@ -148,6 +167,8 @@ def build():
             fam = o["sv_family"]
             cat = {"tree": f"Trees/{fam}", "crop": f"Crops/{fam}", "ground": "Ground cover",
                    "building": "Buildings/" + ("Plots" if fam == "courtyard plot" else "School" if fam == "school" else "Modules"),
+                   "prop": "Props/" + ("Farm" if fam in FARM_PROPS else "Courtyard"),
+                   "vehicle": "Vehicles",
                    "infra": "Infrastructure/" + ("Roads" if fam.startswith("road") or fam in ("brick alley", "field path") else
                                                  "Water" if fam in ("ditch", "river", "culvert bridge", "river bridge") else "Utilities")}[o["sv_kind"]]
             tags = [o["sv_kind"], fam, str(o.get("sv_state", "")), f"LOD{o['sv_lod']}"]
@@ -241,6 +262,9 @@ def sheet(rows):
         "infra_water": lambda o: o["sv_family"] in ("ditch", "river", "culvert bridge", "river bridge"),
         "infra_utilities": lambda o: o["sv_kind"] == "infra" and o["sv_family"] in ("utility pole", "utility pole lamp", "solar lamp",
                                                                                    "transformer", "well hut", "wellhead", "field stake"),
+        "props_courtyard": lambda o: o["sv_kind"] == "prop" and o["sv_family"] not in FARM_PROPS,
+        "props_farm": lambda o: o["sv_kind"] == "prop" and o["sv_family"] in FARM_PROPS,
+        "vehicles": lambda o: o["sv_kind"] == "vehicle",
         "buildings_lod": lambda o: o["sv_family"] in ("courtyard plot", "school") and o.get("sv_variant", "home_like") == "home_like",
     }
     home = {o.name: o.location.copy() for o in allobjs}
@@ -263,13 +287,13 @@ def sheet(rows):
         cd.ortho_scale = max(width, height * 1.15 * 16 / 9) * 1.06
         cam = bpy.data.objects.new("cam " + gname, cd)
         sc.collection.objects.link(cam)
-        angled = gname.startswith("buildings") or gname.startswith("infra")
+        angled = gname.startswith(("buildings", "infra", "props", "vehicles"))
         cam.rotation_euler = (math.radians(62 if angled else 84), 0, math.radians(-28 if angled else 0))
         cd.clip_end = 2000
         fit_camera(cam, objs)
         sc.camera = cam
         for season in PAL.SEASONS:
-            if (gname.startswith(("crops", "buildings", "infra_roads", "infra_utilities"))) and season != "summer":
+            if (gname.startswith(("crops", "buildings", "infra_roads", "infra_utilities", "vehicles"))) and season != "summer":
                 continue  # crop stages do not depend on the palette season
             K.set_season(season)
             sc.render.filepath = os.path.join(RENDERS, f"{gname}_{season}.png")
