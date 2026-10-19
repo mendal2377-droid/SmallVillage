@@ -94,6 +94,22 @@ _S = {  # name: constant colour or {season: colour}
     "school_cream": (0.86, 0.76, 0.56),
     "flag_red": (0.85, 0.06, 0.05),
     "sign_red": (0.62, 0.05, 0.05),
+    # infrastructure (roads, water, utilities)
+    "concrete_joint": (0.34, 0.33, 0.30),
+    "dirt": (0.48, 0.36, 0.22),
+    "dirt_dark": (0.36, 0.26, 0.16),
+    "paving_brick": (0.40, 0.24, 0.16),
+    "paving_brick_d": (0.28, 0.17, 0.11),
+    "moss": (0.22, 0.34, 0.12),
+    "water": (0.10, 0.22, 0.22),
+    "water_light": (0.30, 0.46, 0.46),
+    "balustrade": (0.80, 0.80, 0.76),
+    "pole": (0.58, 0.57, 0.53),
+    "insulator": (0.86, 0.86, 0.83),
+    "steel_dark": (0.12, 0.13, 0.14),
+    "solar": (0.05, 0.10, 0.24),
+    "lamp": (0.95, 0.92, 0.80),
+    "transformer": (0.46, 0.50, 0.50),
 }
 
 SLOTS = list(_S.keys())

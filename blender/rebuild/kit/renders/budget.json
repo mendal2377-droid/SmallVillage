@@ -1091,6 +1091,342 @@
    "tris": 24,
    "budget": 60,
    "ok": true
+  },
+  {
+   "asset": "KIT road main L0",
+   "tris": 56,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT road lane L0",
+   "tris": 54,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT road field L0",
+   "tris": 54,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT road junction L0",
+   "tris": 36,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT brick alley L0",
+   "tris": 972,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT field path L0",
+   "tris": 18,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT ditch wet L0",
+   "tris": 16,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT ditch dry L0",
+   "tris": 14,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT river L0",
+   "tris": 30,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT culvert bridge L0",
+   "tris": 796,
+   "budget": 3000,
+   "ok": true
+  },
+  {
+   "asset": "KIT river bridge L0",
+   "tris": 2436,
+   "budget": 3000,
+   "ok": true
+  },
+  {
+   "asset": "KIT utility pole L0",
+   "tris": 160,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT utility pole lamp L0",
+   "tris": 200,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT solar lamp L0",
+   "tris": 104,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT transformer L0",
+   "tris": 236,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT well hut 0 L0",
+   "tris": 60,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT well hut 1 L0",
+   "tris": 60,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT wellhead L0",
+   "tris": 116,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT road main L1",
+   "tris": 28,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT road lane L1",
+   "tris": 28,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT road field L1",
+   "tris": 28,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT road junction L1",
+   "tris": 12,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT brick alley L1",
+   "tris": 24,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT field path L1",
+   "tris": 2,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT ditch wet L1",
+   "tris": 8,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT ditch dry L1",
+   "tris": 6,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT river L1",
+   "tris": 16,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT culvert bridge L1",
+   "tris": 156,
+   "budget": 600,
+   "ok": true
+  },
+  {
+   "asset": "KIT river bridge L1",
+   "tris": 300,
+   "budget": 600,
+   "ok": true
+  },
+  {
+   "asset": "KIT utility pole L1",
+   "tris": 28,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT utility pole lamp L1",
+   "tris": 68,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT solar lamp L1",
+   "tris": 80,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT transformer L1",
+   "tris": 56,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT well hut 0 L1",
+   "tris": 28,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT well hut 1 L1",
+   "tris": 28,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT wellhead L1",
+   "tris": 40,
+   "budget": 300,
+   "ok": true
+  },
+  {
+   "asset": "KIT road main L2",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT road lane L2",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT road field L2",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT road junction L2",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT brick alley L2",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT field path L2",
+   "tris": 2,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT ditch wet L2",
+   "tris": 8,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT ditch dry L2",
+   "tris": 6,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT river L2",
+   "tris": 16,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT culvert bridge L2",
+   "tris": 36,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT river bridge L2",
+   "tris": 60,
+   "budget": 120,
+   "ok": true
+  },
+  {
+   "asset": "KIT utility pole L2",
+   "tris": 12,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT utility pole lamp L2",
+   "tris": 52,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT solar lamp L2",
+   "tris": 36,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT transformer L2",
+   "tris": 48,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT well hut 0 L2",
+   "tris": 16,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT well hut 1 L2",
+   "tris": 16,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT wellhead L2",
+   "tris": 40,
+   "budget": 60,
+   "ok": true
+  },
+  {
+   "asset": "KIT field stake 0",
+   "tris": 16,
+   "budget": 1500,
+   "ok": true
+  },
+  {
+   "asset": "KIT field stake 1",
+   "tris": 28,
+   "budget": 1500,
+   "ok": true
   }
  ],
  "over_budget": []

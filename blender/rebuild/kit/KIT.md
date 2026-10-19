@@ -41,6 +41,8 @@ blender -b --factory-startup --python blender/rebuild/kit/build_kit.py -- --shee
 | House module | ≤ 3k | ≤ 600 | ≤ 60 |
 | Prop / vehicle | ≤ 2k | ≤ 400 | — |
 | Courtyard plot / school (merged modules) | ≤ 8k | ≤ 1.5k | ≤ 200 |
+| Infrastructure module (road, ditch, pole, hut) | ≤ 1.5k | ≤ 300 | ≤ 60 |
+| Bridge | ≤ 3k | ≤ 600 | ≤ 120 |
 
 The sheet render reports actual counts; anything over budget is flagged.
 
@@ -52,7 +54,7 @@ The sheet render reports actual counts; anything over budget is flagged.
 | 1 Crops | Wheat: sown soil, seedling, winter, jointing, heading, ripe, stubble. Maize: seedling, knee-high, tall, tasselled, dry, cut stalks. Garlic, soybean/peanut | done: 110 assets, all within budget (`renders/budget.json`) |
 | 1 Ground | Grass tuft, weeds, wildflowers ×5, reeds, cattail | done: 110 assets, all within budget (`renders/budget.json`) |
 | 2 Buildings | 8 courtyard-plot prefabs (home-like white tile with glazed corridor, grey render, white 3-storey, old brick pitched, pink pitched, cream, red brick, grey pitched), 6 standalone house blocks, flat and tiled side wings, blue shed, tiled and brick gates, 4 wall materials, primary school; LOD0-2 | done: 72 assets, all within budget |
-| 3 Infrastructure | Concrete road pieces, ditches, culvert bridge with balustrade, poles and wires, well hut, stakes | next |
+| 3 Infrastructure | Concrete roads (4.5 / 3.0 / 2.4 m) and junction, herringbone brick alley, rutted field path; wet and dry ditch, river with banks; culvert bridge and river bridge with balustrades; utility pole (plain / with lamp), solar street lamp, transformer platform, well huts ×2, wellhead, field stakes ×2; `catenary()` wire helper; LOD0–2 | done: 56 assets, all within budget |
 | 4 Props and vehicles | Stools, basins, laundry, pots, chilli strings, corn drying, straw stacks. Electric tricycle, scooter, combine harvester, tractor | next |
 | 5 Animals | Chicken, duck, goose, magpie, sparrow, cat, goat, the companion dog | with Phase 6 avatar |
 | 6 Sky | Painted cloud set, distant village and shelterbelt strips | next |
@@ -73,3 +75,16 @@ Month ranges follow the crop calendar in `D:/blender/hometown/REBUILD_PLAN.md` �
   - Gates and sheds: red gates with gold studs and a sign board, and blue corrugated sheds.
 - Snow on roofs is planned as a shader effect on upward-facing surfaces (Phase 8), not as separate meshes.
 - Couplet and sign text is not modelled. A small decal texture can add the characters later.
+
+## Infrastructure: how it fits together
+
+`kit_infra.py` builds linear modules (roads, alley, field path, ditches, river) that run along local +Y from y = 0 to `sv_length` and are centred on x = 0, so Phase 3 can chain them end to end. Junctions are square slabs.
+
+- **Water sits below ground.** Ditch and river channels are cut below z = 0, so the Phase 3 terrain must be lowered or opened along their footprint. Grass flanges on the modules overlap the terrain edge to hide the seam.
+- **Water surfaces use the `water` palette slot.** The web exporter can split those faces onto the animated water shader.
+- **Wires are not meshes in the kit.** Poles store their insulator positions in `sv_wire_attach`, and `catenary()` returns the sagging points between two poles. The layout phase builds wire curves, or the browser draws them as lines.
+- **From the photographs:**
+  - Roads: concrete slab roads with dark joints, hairline cracks and dirt shoulders, plus the herringbone brick alley beside the house.
+  - Bridges: white balustraded culvert bridges (photo 13).
+  - Utilities: poles with white-painted bases and meter boxes, and solar street lamps.
+  - Fields: small white well huts with peaked roofs and white field stakes.

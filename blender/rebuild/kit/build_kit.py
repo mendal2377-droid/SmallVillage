@@ -16,6 +16,7 @@ from mathutils import Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [HERE, os.path.dirname(HERE)]
 import kit_buildings as KB  # noqa: E402
+import kit_infra as KI  # noqa: E402
 import kit_lib as K  # noqa: E402
 import palette as PAL  # noqa: E402
 
@@ -34,6 +35,8 @@ BUDGET = {  # (kind/family, state-group, lod) -> max triangles
     ("ground", None, 0): 120,
     ("building", None, 0): 3000, ("building", None, 1): 600, ("building", None, 2): 60,
     ("plot", None, 0): 8000, ("plot", None, 1): 1500, ("plot", None, 2): 200,
+    ("infra", None, 0): 1500, ("infra", None, 1): 300, ("infra", None, 2): 60,
+    ("bridge", None, 0): 3000, ("bridge", None, 1): 600, ("bridge", None, 2): 120,
 }
 
 
@@ -41,6 +44,8 @@ def budget_for(o):
     kind, lod = o["sv_kind"], o["sv_lod"]
     if o["sv_family"] in ("reed", "cattail"):
         return 200
+    if o["sv_family"] in ("culvert bridge", "river bridge"):
+        return BUDGET.get(("bridge", None, lod))
     if o["sv_family"] in ("courtyard plot", "school"):
         return BUDGET.get(("plot", None, lod))
     if kind == "tree":
@@ -116,6 +121,20 @@ def build():
                                 ("brick", 1, "tile", False), ("pink", 1, "tile", False), ("cream", 2, "flat", False)):
             row.append(KB.module(bld, f"house {fac} {fl}F {rf}", KB.house_block, lod, w=11.0, d=8.0, floors=fl, facade=fac, roof=rf, glazed=gz))
     rows["building modules"] = row
+    # ---- infrastructure (batch 3)
+    inf = coll("KIT infrastructure", root)
+    row = []
+    for lod in (0, 1, 2):
+        for w in (4.5, 3.0, 2.4):
+            row.append(KI.concrete_road(inf, width=w, lod=lod))
+        row += [KI.road_junction(inf, lod=lod), KI.brick_alley(inf, lod=lod), KI.field_path(inf, lod=lod)]
+        row += [KI.ditch(inf, water=True, lod=lod), KI.ditch(inf, water=False, lod=lod), KI.river_bank(inf, lod=lod)]
+        row += [KI.culvert_bridge(inf, lod=lod), KI.river_bridge(inf, lod=lod)]
+        row += [KI.utility_pole(inf, lod=lod), KI.utility_pole(inf, lod=lod, lamp=True), KI.solar_lamp(inf, lod=lod),
+                KI.transformer(inf, lod=lod), KI.well_hut(inf, lod=lod, variant=0), KI.well_hut(inf, lod=lod, variant=1),
+                KI.wellhead(inf, lod=lod)]
+    row += [KI.field_stake(inf, 0), KI.field_stake(inf, 1)]
+    rows["infrastructure"] = row
 
     # ---- lay out, mark as assets
     y = 0.0
@@ -128,7 +147,9 @@ def build():
             x += o.dimensions.x + gap
             fam = o["sv_family"]
             cat = {"tree": f"Trees/{fam}", "crop": f"Crops/{fam}", "ground": "Ground cover",
-                   "building": "Buildings/" + ("Plots" if fam == "courtyard plot" else "School" if fam == "school" else "Modules")}[o["sv_kind"]]
+                   "building": "Buildings/" + ("Plots" if fam == "courtyard plot" else "School" if fam == "school" else "Modules"),
+                   "infra": "Infrastructure/" + ("Roads" if fam.startswith("road") or fam in ("brick alley", "field path") else
+                                                 "Water" if fam in ("ditch", "river", "culvert bridge", "river bridge") else "Utilities")}[o["sv_kind"]]
             tags = [o["sv_kind"], fam, str(o.get("sv_state", "")), f"LOD{o['sv_lod']}"]
             K.mark(o, "SmallVillage/" + cat, [t for t in tags if t], f"{fam} {o.get('sv_state', '')} LOD{o['sv_lod']}")
         y += max(o.dimensions.y for o in objs) + 12
@@ -216,12 +237,17 @@ def sheet(rows):
         "buildings_houses": lambda o: o["sv_family"].startswith("house"),
         "buildings_parts": lambda o: o["sv_kind"] == "building" and not o["sv_family"].startswith("house")
         and o["sv_family"] not in ("courtyard plot", "school"),
+        "infra_roads": lambda o: o["sv_kind"] == "infra" and (o["sv_family"].startswith("road") or o["sv_family"] in ("brick alley", "field path")),
+        "infra_water": lambda o: o["sv_family"] in ("ditch", "river", "culvert bridge", "river bridge"),
+        "infra_utilities": lambda o: o["sv_kind"] == "infra" and o["sv_family"] in ("utility pole", "utility pole lamp", "solar lamp",
+                                                                                   "transformer", "well hut", "wellhead", "field stake"),
         "buildings_lod": lambda o: o["sv_family"] in ("courtyard plot", "school") and o.get("sv_variant", "home_like") == "home_like",
     }
     home = {o.name: o.location.copy() for o in allobjs}
     for gname, pick in groups.items():
         if GROUPS and gname not in GROUPS:
             continue
+        gp.hide_render = gname == "infra_water"  # channels sit below ground; show them against the backdrop
         lod_any = gname == "buildings_lod"
         objs = [o for o in allobjs if (lod_any or o["sv_lod"] == 0) and pick(o)]
         for o in allobjs:
@@ -237,13 +263,13 @@ def sheet(rows):
         cd.ortho_scale = max(width, height * 1.15 * 16 / 9) * 1.06
         cam = bpy.data.objects.new("cam " + gname, cd)
         sc.collection.objects.link(cam)
-        angled = gname.startswith("buildings")
+        angled = gname.startswith("buildings") or gname.startswith("infra")
         cam.rotation_euler = (math.radians(62 if angled else 84), 0, math.radians(-28 if angled else 0))
         cd.clip_end = 2000
         fit_camera(cam, objs)
         sc.camera = cam
         for season in PAL.SEASONS:
-            if (gname.startswith("crops") or gname.startswith("buildings")) and season != "summer":
+            if (gname.startswith(("crops", "buildings", "infra_roads", "infra_utilities"))) and season != "summer":
                 continue  # crop stages do not depend on the palette season
             K.set_season(season)
             sc.render.filepath = os.path.join(RENDERS, f"{gname}_{season}.png")
