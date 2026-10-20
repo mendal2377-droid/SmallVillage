@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="SmallVillage 2.0 preview: the rebuilt painted village.">
+  <title>SmallVillage 2.0</title>
+  <link rel="icon" href="/favicon.svg">
+</head>
+<body>
+  <div id="v2-canvas"></div>
+  <section class="v2-panel" aria-label="Village preview controls">
+    <h1>SmallVillage 2.0</h1>
+    <p>Preview of the rebuilt village · Phase 4</p>
+    <div class="v2-row">
+      <label>Month <select id="v2-month">
+        <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+        <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+        <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+        <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+      </select></label>
+      <label>Sky <select id="v2-preset"></select></label>
+    </div>
+    <div class="v2-row">
+      <label>View <select id="v2-view"></select></label>
+      <button id="v2-walk" type="button">Walk</button>
+    </div>
+    <span id="v2-status" role="status"></span>
+    <span id="v2-info"></span>
+  </section>
+  <p class="v2-hint">Orbit: drag, scroll · Walk: WASD, drag to look, Shift to run</p>
+  <script type="module" src="/src/v2/main.js"></script>
+</body>
+</html>

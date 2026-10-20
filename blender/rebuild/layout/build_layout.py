@@ -45,6 +45,7 @@ MONTH = int(arg("--month", 8))
 PRESET = arg("--preset", "summer afternoon")
 RENDER = arg("--render", "")
 PREVIEW = "--preview" in argv
+EXPORT = "--export" in argv  # web export build: keep every seasonal prop (tagged with months), skip Blender-only scatter
 SEASON = {12: "winter", 1: "winter", 2: "winter", 3: "spring", 4: "spring", 5: "spring",
           6: "summer", 7: "summer", 8: "summer", 9: "summer", 10: "autumn", 11: "autumn"}[MONTH]  # poplars turn in Oct-Nov
 LEAFY = MONTH in (4, 5, 6, 7, 8, 9, 10)
@@ -777,13 +778,16 @@ def home_dressing(c):
     bpy.context.view_layer.update()
     n = 0
     for name, x, y, rot, months, top in HOME_PROPS:
-        if months and MONTH not in months:
+        if months and MONTH not in months and not EXPORT:
             continue
-        place(name, (x, y, floor_at(x, y, top)), rot, (1, 1, 1), c)
+        o = place(name, (x, y, floor_at(x, y, top)), rot, (1, 1, 1), c)
+        if months:
+            o["sv_months"] = ",".join(str(m) for m in months)
         n += 1
-    if MONTH in (9, 10, 11, 12, 1, 2):  # strings of chillies drying under the eaves
+    if MONTH in (9, 10, 11, 12, 1, 2) or EXPORT:  # strings of chillies drying under the eaves
         for k, x in enumerate((-32.3, -31.9)):
-            place("KIT chilli string", (x, -106.3, 1.75), 0.0, (1, 1, 1), c)
+            o = place("KIT chilli string", (x, -106.3, 1.75), 0.0, (1, 1, 1), c)
+            o["sv_months"] = "9,10,11,12,1,2"
             n += 1
     return n
 
@@ -1056,7 +1060,7 @@ c_hor.objects.link(dream)
 c_life = coll("home life", root)
 nl = home_dressing(c_life)
 c_scatter = coll("near-view scatter", root)
-ns = scatter_near(c_scatter, parcels)
+ns = 0 if EXPORT else scatter_near(c_scatter, parcels)
 print("PASS2 grove trees", ng, "home props", nl, "scatter groups", ns)
 dome = sky(sc)
 cams = cameras(home_cams)

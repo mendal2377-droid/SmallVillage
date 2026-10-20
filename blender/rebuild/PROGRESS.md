@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 20 October 2026: Phases 1–3 done; next is Phase 4 (web export). Resume from here.
+Saved 20 October 2026: Phases 1–3 done, Phase 4 first version done (preview page village-2027.html). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -80,9 +80,38 @@ Cameras: `overview`, `plan`, `satellite`, `main road`, `north pond`, `avenue`, `
   - The winter-haze exposure is lowered so white walls don't clip.
 - **Dream area:** the `DREAM AREA anchor` empty sits 6 km east of the village centre, far beyond the horizon ring. It marks where the web build loads the coast, beach and forest lakes after a deliberate transition.
 
-### Next: Phase 4, web export
+## Phase 4, web export — first version done (20 Oct 2026)
 
-Tiles, instancing, LOD, KTX2, and splitting `water` faces and `wheels` groups.
+```sh
+"D:/soft/blender/blender.exe" -b --factory-startup --python blender/rebuild/layout/build_layout.py -- --export --month 8
+"D:/soft/blender/blender.exe" -b blender/rebuild/layout/village_layout.blend --python blender/rebuild/export/export_web.py
+npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue&month=1&sky=winter%20haze%20morning)
+```
+
+- **Export** (`blender/rebuild/export/export_web.py`) → `public/models/v2/`, 2.6 MB in total, Draco-compressed:
+  - `assets.glb` (1.3 MB): every kit mesh once, with no materials.
+  - `static.glb` (0.85 MB): terrain, ponds, fields and the merged home quarter (104k triangles, materials named).
+  - `village.json` (0.45 MB): 7,994 instances under 63 asset keys with leafy/bare states and LODs, seasonal props with their months, the palette, the crop calendar, sky presets, wires, viewpoints, and the home and dream anchors.
+- **Web preview** (`village-2027.html`, `src/v2/`). The original app is unchanged; `vite.config.js` builds both pages.
+  - `toon.js` ports the painted toon shader onto `MeshLambertMaterial`, giving matching light, ramp and tints.
+    - Lighting matches Blender: three.js light intensity equals the Blender sun strength, ambient is π × world strength, and there's no tone mapping.
+    - The palette's water cell, the ponds and the fields have their own shader branches: animated water with algae, and crop stripes coloured from the crop calendar.
+  - `village.js` builds `InstancedMesh` tiles of 300 m. Full detail is per instance within 70 m of the camera (re-split every 10 m), with LOD1 to 450 m and LOD2 beyond. Distant tiles cast no shadows.
+  - Seasons swap the palette texture, leafy/bare geometry, crop colours and seasonal props.
+  - Sky dome, sun, ambient light and fog come from `sky.py`; clouds come per preset.
+  - `main.js` has orbit and simple eye-height walking (no collisions yet), plus month, sky and viewpoint selectors.
+  - `window.__sv2` is a test hook that renders one frame on demand and returns draw calls and triangles.
+- **Measured** (hidden pane, shadow pass included): 1.4–3.0 M triangles and 200–400 draw calls per view, 8–14 ms per frame. The build passes.
+
+### Next
+
+1. Phase 4 follow-ups:
+   - crop scatter near the player at run time;
+   - walking collisions, by exporting navigation from the layout;
+   - a mobile quality tier;
+   - splitting `wheels` for rideable vehicles.
+2. Phase 5: the main page, with the 2D painted map, the 3D map and the paraglider landing.
+3. Phase 6: the avatar, the dog, and the kit animals (batch 5).
 
 Phases 5–9 are unchanged from the plan: main page map modes and paraglider, avatar and dog with animals, activity polish, climate and seasons, then deploy.
 
