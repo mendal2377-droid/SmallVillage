@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 20 October 2026: Phases 1–2 done, Phase 3 first and second passes done. Resume from here.
+Saved 20 October 2026: Phases 1–3 done; next is Phase 4 (web export). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -72,10 +72,13 @@ Cameras: `overview`, `plan`, `satellite`, `main road`, `north pond`, `avenue`, `
   - Verge grass, plus wildflowers in April–September.
 - **Current counts:** 432 plots, 51 gardens, 15 infill blocks, 459 grove trees, about 11.9k objects. A build takes about 1.5 minutes plus renders.
 
-### Still open for Phase 3
+### Phase 3 closed (20 Oct 2026)
 
-- Dream-area placeholder beyond the horizon.
-- Review renders for other months: May (harvest), October and January.
+- **Season check:** `renders/seasons_*.jpg` compare May (golden sunset, ripe wheat), August, October (golden poplars, sown wheat) and January (bare poplars over green winter wheat in haze) for the avenue, overview, home aerial and courtyard.
+- **Fixes from that check:**
+  - September now uses the summer palette; poplars turn only in October–November.
+  - The winter-haze exposure is lowered so white walls don't clip.
+- **Dream area:** the `DREAM AREA anchor` empty sits 6 km east of the village centre, far beyond the horizon ring. It marks where the web build loads the coast, beach and forest lakes after a deliberate transition.
 
 ### Next: Phase 4, web export
 

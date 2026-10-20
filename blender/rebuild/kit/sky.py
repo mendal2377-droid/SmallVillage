@@ -11,7 +11,7 @@ PRESETS = {
     "winter haze morning": dict(  # photos 02, 09, 10: pale disc of a sun in grey-cream haze
         horizon=(0.80, 0.76, 0.70), mid=(0.70, 0.70, 0.72), zenith=(0.55, 0.60, 0.68),
         sun_el=15, sun_az=135, sun=(1.0, 0.92, 0.80), sun_strength=2.6,
-        ambient=(0.62, 0.62, 0.66), ambient_strength=0.62, lit=(1.04, 1.0, 0.94), shadow=(1.0, 0.98, 1.0),
+        ambient=(0.62, 0.62, 0.66), ambient_strength=0.62, lit=(0.94, 0.92, 0.88), shadow=(0.94, 0.93, 0.97),
         fog=(0.78, 0.76, 0.72), fog_density=0.0040, clouds=["cirrus"], season="winter"),
     "winter sunrise frost": dict(  # photo 16: orange sunrise over frosted wheat
         horizon=(1.0, 0.62, 0.32), mid=(0.74, 0.60, 0.62), zenith=(0.30, 0.38, 0.62),

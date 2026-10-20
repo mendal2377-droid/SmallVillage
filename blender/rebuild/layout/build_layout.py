@@ -46,7 +46,7 @@ PRESET = arg("--preset", "summer afternoon")
 RENDER = arg("--render", "")
 PREVIEW = "--preview" in argv
 SEASON = {12: "winter", 1: "winter", 2: "winter", 3: "spring", 4: "spring", 5: "spring",
-          6: "summer", 7: "summer", 8: "summer", 9: "autumn", 10: "autumn", 11: "autumn"}[MONTH]
+          6: "summer", 7: "summer", 8: "summer", 9: "summer", 10: "autumn", 11: "autumn"}[MONTH]  # poplars turn in Oct-Nov
 LEAFY = MONTH in (4, 5, 6, 7, 8, 9, 10)
 rng = random.Random(2027)
 
@@ -1043,6 +1043,16 @@ nf = len(parcels)
 nw = utilities(c_util)
 nh = horizon(c_hor)
 ng = groves(c_tree)
+# the separate "dream area" (coast, beach, forest lakes kept from the old app) lives far beyond the horizon ring,
+# out of sight of the real village; this empty marks where the web build loads it on a deliberate transition
+dream = bpy.data.objects.new("DREAM AREA anchor", None)
+dream.empty_display_type = "SPHERE"
+dream.empty_display_size = 600
+dream.location = (W((330, 330)).x + 6000, W((330, 330)).y, 0)
+dream["sv_kind"] = "dream_anchor"
+dream["sv_radius"] = 600.0
+dream["sv_note"] = "Coast, beach and forest lakes (owner decision 2026-10-17): reached only by a deliberate transition"
+c_hor.objects.link(dream)
 c_life = coll("home life", root)
 nl = home_dressing(c_life)
 c_scatter = coll("near-view scatter", root)
