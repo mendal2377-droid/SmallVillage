@@ -119,5 +119,24 @@ TREE_BELTS = [  # (map polyline, kind, rows)
 ]
 AVENUES = ["east road", "main road", "south road", "west road"]  # whitewashed poplars both sides outside the village
 
+# ---------------------------------------------------------------- places on the main page maps (landing spots)
+
+PLACES = [
+    # (id, Chinese, English, map point where the paraglider lands, kind)
+    ("home", "家", "Home", (563.3, 413.5), "home"),               # the house lane start tested in the original app
+    ("north-pond", "北坑塘", "North pond", (404, 131), "water"),
+    ("avenue", "杨树大道", "Poplar avenue", (599, 760), "road"),
+    ("main-road", "村中大路", "Village road", (300, 258), "road"),
+    ("school", "学校 · 文化大院", "School", (565, 118), "school"),
+    ("wheat", "麦田", "Wheat fields", (380, 520), "field"),
+    ("south-pond", "南坑塘", "South pond", (395, 392), "water"),
+    ("west-pond", "西坑塘", "West pond", (132, 292), "water"),
+    ("xiaowangzhuang", "小王庄", "Xiaowangzhuang", (180, 450), "village"),
+    ("canal", "南渠", "South canal", (300, 645), "water"),
+]
+
+# square of the illustrated 2D map (map metres): covers the village, its fields and the near avenues
+MAP_SHEET = dict(center=(330.0, 380.0), size=1100.0)
+
 FIELD_EXTENT = (-900, -700, 1500, 1500)  # map rectangle filled with field strips
 FIELD_STRIP = (36.0, 300.0)  # typical parcel width x length (N-S strips, satellite)

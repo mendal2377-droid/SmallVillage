@@ -1012,6 +1012,10 @@ def cameras(home_cams):
     # orthographic top view matching the traced satellite crop (map x 0..685.6, y 0..610), for fit checks
     sat_c = W((685.6 / 2, 610.0 / 2))
     cams["satellite"] = camera("CAM satellite", (sat_c.x, sat_c.y, 1500), (sat_c.x, sat_c.y + 0.01, 0), ortho=685.6)
+    # the illustrated 2D map: orthographic top view of the MAP_SHEET square
+    ms = D.MAP_SHEET
+    mc = W(ms["center"])
+    cams["mapsheet"] = camera("CAM mapsheet", (mc.x, mc.y, 1500), (mc.x, mc.y + 0.01, 0), ortho=ms["size"])
     cams["home aerial"] = camera("CAM home aerial", tuple(W((640, 470), 70)), tuple(W((560, 395), 0)), lens=30)
     for n, o in home_cams.items():
         if n.startswith("VIDEO A"):
@@ -1076,6 +1080,11 @@ if RENDER:
         dome.location = cam.location if cam.data.type != "ORTHO" else (cam.location.x, cam.location.y, 0)
         if n == "satellite":
             sc.render.resolution_x, sc.render.resolution_y = 1180, 1050
+        clouds_hidden = n == "mapsheet"
+        for o in bpy.data.collections["clouds"].objects:
+            o.hide_render = clouds_hidden
+        if n == "mapsheet":
+            sc.render.resolution_x = sc.render.resolution_y = 2048 if PREVIEW else 4096
         sc.render.filepath = os.path.join(RENDERS, f"{n.replace(' ', '_')}_m{MONTH}{'_preview' if PREVIEW else ''}.png")
         bpy.ops.render.render(write_still=True)
         print("RENDERED", sc.render.filepath)

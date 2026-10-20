@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 20 October 2026: Phases 1–4 done (preview page village-2027.html); next is Phase 5. Resume from here.
+Saved 20 October 2026: Phases 1–4 done (preview page village-2027.html); Phase 5 started (see its section). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -130,10 +130,42 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - phone: 230–290 calls (207 at phone size on the avenue), 0.7–2.0 M triangles.
 - **Remaining performance work (Phase 9):** merge per-tile variants with `BatchedMesh`, and atlas the 89 home-quarter materials. Rideable vehicles (splitting `wheels`) wait for the activities phase.
 
-### Next
+## Phase 5, main page — in progress (paused 20 Oct 2026)
 
-1. Phase 5: the main page, with the 2D painted map, the 3D map and the paraglider landing.
-2. Phase 6: the avatar, the dog, and the kit animals (batch 5).
+**Done:**
+
+- `layout_data.py` has `PLACES` (10 landing spots with Chinese and English names: home, ponds, avenue, village road, school, wheat fields, 小王庄, canal) and `MAP_SHEET` (an 1100 m square centred on map 330, 380).
+  - The home landing spot is the house lane start tested in the original app.
+- `build_layout.py` has an orthographic `mapsheet` camera (4096 px; 2048 with `--preview`) that hides the clouds.
+
+**Render the map sheets** (the renders may not have finished when the session paused; just rerun):
+
+```sh
+"D:/soft/blender/blender.exe" -b --factory-startup --python blender/rebuild/layout/build_layout.py -- --export --month 4 --preset "summer afternoon" --render mapsheet
+```
+
+Repeat for month 8 ("summer afternoon"), 10 ("spring clear") and 1 ("winter haze morning"). Output goes to `layout/renders/mapsheet_m{month}.png`.
+
+**Remaining steps:**
+
+1. `paint_map.py` (Pillow): turn each map sheet into a picture-book map, with soft posterising, light ink edges, paper grain and a warm vignette. Write `public/images/v2/map_{season}.webp` at 2048 px, maybe also 4096 for zoom.
+2. Exporter: add `places` (converted with `to_world`, three.js coordinates) and `mapSheet` (centre and size in three.js coordinates) to `village.json`.
+3. Web 2D map mode (`src/v2/landing.js`):
+   - pan and zoom the painted map;
+   - HTML labels and pins from `places` in both languages;
+   - clicking anywhere converts to world coordinates and lands there;
+   - the dream coast appears as a faded inset pin ("later").
+4. Web 3D map mode: the orbit overview with projected DOM pins; a Map/3D toggle.
+5. Paraglider landing (`src/v2/glide.js`):
+   - a Bezier path from about 300 m behind the target down to eye height, about 11 s (6 s on repeat visits, tracked in localStorage);
+   - banking and gentle sway;
+   - a striped canopy and lines attached to the camera;
+   - a flare in the last 1.5 s, then `startWalking` at the target;
+   - any key or tap skips.
+
+### Then
+
+- Phase 6: the avatar, the dog, and the kit animals (batch 5).
 
 Phases 5–9 are unchanged from the plan: main page map modes and paraglider, avatar and dog with animals, activity polish, climate and seasons, then deploy.
 
