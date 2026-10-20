@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 20 October 2026, at the end of Phase 2. Resume from here.
+Saved 20 October 2026: Phases 1–2 done, Phase 3 first pass done. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -37,20 +37,33 @@ Regenerate the kit (`sv_kit.blend` is ignored by git):
 
 Use `--groups <name,...>` to render only some review sheets. `presets` renders the sky preset scene.
 
-## Next: Phase 3, village layout in Blender
+## Phase 3, village layout — first pass done (20 Oct 2026)
 
-1. A new `blender/rebuild/layout/` script that links or instances kit assets from `kit/sv_kit.blend`.
-2. Ground terrain with channels cut for the ditches and river; kit water sits below z = 0.
-3. Roads and lanes:
-   - Follow the satellite map (`D:/blender/hometown/village photos/map.png`) and the plan sketch (`village plan.pptx`).
-   - One main east–west road, north–south roads on the east and west edges.
-   - Three ponds: a large algae-green north pond, a west pond, and an elongated pond south of the centre.
-   - The school in the north-east.
-4. Courtyard plots along the lanes, rotated to face them using `sv_footprint`.
-5. The detailed home quarter: reuse the authoritative house (VIDEO collections in `blender/video_revision/Yanlaozhai_Video_House_and_Lane.blend`) at the confirmed star position.
-6. Fields with crops by month (`sv_months`), poplar avenues and shelterbelts, poles with wires (`catenary()`), well huts and stakes.
-7. Horizon ring of distant villages and poplar clumps; the dream area placed beyond it.
-8. Review renders, then Phase 4: web export (tiles, instancing, LOD, KTX2, splitting `water` faces and `wheels` groups).
+`blender/rebuild/layout/` builds `village_layout.blend` (ignored by git) from the kit and the authoritative house:
+
+```sh
+"D:/soft/blender/blender.exe" -b --factory-startup --python blender/rebuild/layout/build_layout.py -- --month 8 --preset "summer afternoon" --render overview,plan --preview
+```
+
+Cameras: `overview`, `plan`, `main road`, `north pond`, `avenue`, `home aerial`, `home courtyard`. Underscores also work in names.
+
+- **`layout_data.py`:** the satellite trace in map metres, with scale bar 86 px = 50 m. `to_world()` puts the star (map 565, 400) on the existing house origin (−37, −109), so the old house and walk coordinates still hold. It covers roads and lanes, three ponds, ditches, the south canal, bridges, housing regions, exclusions, tree belts and the field extent.
+- **`build_layout.py`:**
+  - appends the kit;
+  - builds the terrain as an adaptive quadtree with holes for water (21k cells merged to about 400 faces), replacing the earlier boolean approach, which failed;
+  - chains road, ditch and canal modules;
+  - generates courtyard rows facing south onto lanes (515 plots, 46 gardens) and places the school;
+  - brings in the toon-converted home quarter (house plus photographed neighbours), with the plots kept clear of it;
+  - adds poplar avenues, pond willows, the west shelterbelt, field parcels by month, well huts and stakes, poles with catenary wires, solar lamps and the transformer;
+  - adds the horizon ring and clouds from the sky preset.
+- **Review images:** `layout/renders/*.jpg`.
+
+### Next for Phase 3 (second pass)
+
+1. Fill the empty land east of the home and dress the home quarter with courtyard props.
+2. Crop scatter near the cameras (kit wheat and maize by month), verge grass and flowers.
+3. Check plot fit against the satellite, lane spacing and plots crossing the main road; add the dream-area placeholder beyond the horizon.
+4. Then Phase 4: web export (tiles, instancing, LOD, KTX2, splitting `water` faces and `wheels` groups).
 
 Phases 5–9 are unchanged from the plan: main page map modes and paraglider, avatar and dog with animals, activity polish, climate and seasons, then deploy.
 

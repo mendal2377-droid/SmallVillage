@@ -17,3 +17,4 @@ artifacts/
 blender/rebuild/**/*.blend
 blender/rebuild/renders/*.png
 blender/rebuild/kit/renders/*.png
+blender/rebuild/layout/renders/*.png
