@@ -99,7 +99,17 @@ EXCLUDE = [  # map rectangles kept free of generated plots
     (288, 50, 452, 134),   # north pond and banks
     (92, 246, 175, 294),   # west pond
     (340, 350, 452, 386),  # south pond
+    (448, 18, 522, 118),   # fields between the north pond and the school (satellite: no houses)
 ]
+
+# dense tree canopy seen on the satellite inside the village: planted as groves, kept free of plots
+GROVES = [
+    (238, 300, 300, 470),  # east side of 小王庄
+    (300, 340, 352, 384),  # west of the south pond
+    (452, 322, 598, 366),  # strip between the south-middle rows and the pond line
+    (266, 128, 292, 228),  # beside the lane west of the north village centre
+]
+EXCLUDE += GROVES
 
 # ---------------------------------------------------------------- vegetation
 

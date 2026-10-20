@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 20 October 2026: Phases 1–2 done, Phase 3 first pass done. Resume from here.
+Saved 20 October 2026: Phases 1–2 done, Phase 3 first and second passes done. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -45,7 +45,7 @@ Use `--groups <name,...>` to render only some review sheets. `presets` renders t
 "D:/soft/blender/blender.exe" -b --factory-startup --python blender/rebuild/layout/build_layout.py -- --month 8 --preset "summer afternoon" --render overview,plan --preview
 ```
 
-Cameras: `overview`, `plan`, `main road`, `north pond`, `avenue`, `home aerial`, `home courtyard`. Underscores also work in names.
+Cameras: `overview`, `plan`, `satellite`, `main road`, `north pond`, `avenue`, `home aerial`, `home courtyard`. Underscores also work in names.
 
 - **`layout_data.py`:** the satellite trace in map metres, with scale bar 86 px = 50 m. `to_world()` puts the star (map 565, 400) on the existing house origin (−37, −109), so the old house and walk coordinates still hold. It covers roads and lanes, three ponds, ditches, the south canal, bridges, housing regions, exclusions, tree belts and the field extent.
 - **`build_layout.py`:**
@@ -58,12 +58,28 @@ Cameras: `overview`, `plan`, `main road`, `north pond`, `avenue`, `home aerial`,
   - adds the horizon ring and clouds from the sky preset.
 - **Review images:** `layout/renders/*.jpg`.
 
-### Next for Phase 3 (second pass)
+### Phase 3 second pass — done (20 Oct 2026)
 
-1. Fill the empty land east of the home and dress the home quarter with courtyard props.
-2. Crop scatter near the cameras (kit wheat and maize by month), verge grass and flowers.
-3. Check plot fit against the satellite, lane spacing and plots crossing the main road; add the dream-area placeholder beyond the horizon.
-4. Then Phase 4: web export (tiles, instancing, LOD, KTX2, splitting `water` faces and `wheels` groups).
+- **Fit check:**
+  - The `satellite` camera renders an orthographic top view exactly matching the traced crop. `renders/satellite_overlay.jpg` blends it 50/50 with the gridded satellite image.
+  - Roads, ponds and house rows line up. The block between the north pond and the school is now fields, as on the satellite.
+  - Four `GROVES` traced from the satellite canopy are planted with trees instead of plots.
+- **Home quarter:**
+  - 18 photo-based props in the courtyard, alley and terrace, at real positions on the courtyard slab. They are seasonal: corn drying in September–October and chillies in September–February.
+  - 15 standalone house blocks fill the spots next to the house, ponds and groves where a full courtyard plot does not fit.
+- **Near the views** (avenue, home, main road, north pond):
+  - Kit crops at the month's growth stage: full detail within 60 m, LOD1 to 110 m, kept clear of road corridors.
+  - Verge grass, plus wildflowers in April–September.
+- **Current counts:** 432 plots, 51 gardens, 15 infill blocks, 459 grove trees, about 11.9k objects. A build takes about 1.5 minutes plus renders.
+
+### Still open for Phase 3
+
+- Dream-area placeholder beyond the horizon.
+- Review renders for other months: May (harvest), October and January.
+
+### Next: Phase 4, web export
+
+Tiles, instancing, LOD, KTX2, and splitting `water` faces and `wheels` groups.
 
 Phases 5–9 are unchanged from the plan: main page map modes and paraglider, avatar and dog with animals, activity polish, climate and seasons, then deploy.
 

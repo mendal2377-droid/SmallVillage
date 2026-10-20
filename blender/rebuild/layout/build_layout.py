@@ -391,6 +391,17 @@ def housing(c, trees):
                     Wd = PLOTS[v]["W"]
                 rect = (x, yl - 1.5 - Dp, x + Wd, yl - 1.5)
                 why = blocked(rect)
+                if why in ("home", "exclude", "pond"):
+                    # shallow infill: a standalone 11 x 8 m house block straight onto the lane
+                    small = (x, yl - 1.5 - 8.0, x + 11.0, yl - 1.5)
+                    if not blocked(small):
+                        fac = rng.choice(["grey 2F flat", "white 3F flat", "cream 2F flat", "brick 1F tile", "pink 1F tile"])
+                        p = W((x, yl - 1.5))
+                        place(f"KIT house {fac} L{min(1, lod_for(p))}", p, 0.0, (1, 1, 1), c)
+                        stats["infill"] = stats.get("infill", 0) + 1
+                        row_x.append((x, x + 11.0))
+                        x += 11.0 + rng.uniform(0.5, 2.0)
+                        continue
                 if why:
                     x += 3.0
                     continue
@@ -617,9 +628,11 @@ def fields(c, huts):
                 cells += [(x0, y0, x1, my), (x0, my, x1, y1)]
             else:
                 cells += [(x0, y0, mx, my), (mx, y0, x1, my), (x0, my, mx, y1), (mx, my, x1, y1)]
+    parcels = []
     for r in kept:
         u = rng.random()
         kind = "wheat-maize" if u < 0.85 else ("soybean" if u < 0.93 else "vegetables")
+        parcels.append((r, kind))
         x0, y0, x1, y1 = r
         a, b = W((x0 + 0.3, y1 - 0.3)), W((x1 - 0.3, y0 + 0.3))
         bm = bmesh.new()
@@ -640,7 +653,7 @@ def fields(c, huts):
             for k in range(2):
                 sp = W((x0 + rng.uniform(2, sw - 2), y0 + rng.uniform(10, sl - 10)))
                 place(f"KIT field stake {rng.randrange(2)}", sp, 0.0, (1, 1, 1), huts)
-    return len(kept)
+    return parcels
 
 
 def utilities(c):
@@ -708,6 +721,198 @@ def horizon(c):
             continue
         place(f"KIT poplar clump {'leafy' if LEAFY else 'bare'} {rng.randrange(2)}", p, rng.uniform(0, 6.28), (1, 1, 1), c)
     return n
+
+
+# ---------------------------------------------------------------- second pass: groves, home dressing, near scatter
+
+def groves(trees):
+    n = 0
+    for (x0, y0, x1, y1) in D.GROVES:
+        count = int((x1 - x0) * (y1 - y0) / 45)
+        for k in range(count):
+            q = (rng.uniform(x0 + 2, x1 - 2), rng.uniform(y0 + 2, y1 - 2))
+            if any(G.poly_dist(q, R["pts"]) < R["width"] / 2 + 2 for R in D.ROADS.values()):
+                continue
+            p = W(q)
+            fam = "broadleaf" if rng.random() < 0.7 else "poplar"
+            place(tree_name(fam, lod=lod_for(p)), p, rng.uniform(0, 6.28), rng.uniform(0.8, 1.25), trees)
+            n += 1
+    return n
+
+
+def floor_at(x, y, top=2.6):
+    dg = bpy.context.evaluated_depsgraph_get()
+    hit, loc, *_ = bpy.context.scene.ray_cast(dg, Vector((x, y, top)), Vector((0, 0, -1)))
+    return loc.z if hit else 0.19
+
+
+# the courtyard slab spans x -37.2..-24.8, y -117.3..-101.8: house to the north, kitchen and entry to the west,
+# blue shed to the east. Props follow the courtyard photos and videos (tidy, but lived in).
+HOME_PROPS = [
+    # (kit asset, world x, world y, rotation, months or None, ray start height)
+    ("KIT washing machine", -33.2, -107.7, 0.0, None, 2.6),
+    ("KIT stool red", -31.0, -108.7, 0.3, None, 2.6),
+    ("KIT stool green", -30.3, -109.3, 1.1, None, 2.6),
+    ("KIT kid chair green", -32.6, -109.1, 2.6, None, 2.6),
+    ("KIT basin red", -29.4, -110.6, 0.0, None, 2.6),
+    ("KIT basin pink", -29.0, -111.3, 0.0, None, 2.6),
+    ("KIT basin blue", -32.9, -112.3, 0.0, None, 2.6),
+    ("KIT laundry line", -31.7, -114.6, 0.0, None, 2.6),
+    ("KIT drying rack", -29.6, -113.4, 0.4, None, 2.6),
+    ("KIT umbrella open", -33.1, -110.6, 0.6, None, 2.6),
+    ("KIT potted plant 0", -28.7, -107.5, 0.0, None, 2.6),
+    ("KIT potted plant 1", -28.7, -108.4, 0.0, None, 2.6),
+    ("KIT bamboo broom", -34.0, -112.9, 1.57, None, 2.6),
+    ("KIT stalk pile 0", -29.1, -116.3, 0.3, None, 2.6),
+    ("KIT electric tricycle L0", -26.5, -110.6, 1.5708, None, 2.6),
+    ("KIT e-scooter L0", -38.9, -115.6, 0.05, None, 2.6),
+    ("KIT corn drying", -31.2, -112.0, 0.0, (9, 10), 2.6),
+    ("KIT corn cob pile", -29.3, -115.6, 0.0, (9, 10, 11), 2.6),
+    ("KIT urns", -35.8, -109.8, 0.0, None, 6.5),
+    ("KIT satellite dish", -35.3, -108.2, 2.2, None, 6.5),
+]
+
+
+def home_dressing(c):
+    bpy.context.view_layer.update()
+    n = 0
+    for name, x, y, rot, months, top in HOME_PROPS:
+        if months and MONTH not in months:
+            continue
+        place(name, (x, y, floor_at(x, y, top)), rot, (1, 1, 1), c)
+        n += 1
+    if MONTH in (9, 10, 11, 12, 1, 2):  # strings of chillies drying under the eaves
+        for k, x in enumerate((-32.3, -31.9)):
+            place("KIT chilli string", (x, -106.3, 1.75), 0.0, (1, 1, 1), c)
+            n += 1
+    return n
+
+
+def crop_src(kind, lod):
+    m = MONTH
+    wheat_maize = {10: "wheat seedling", 11: "wheat seedling", 12: "wheat winter", 1: "wheat winter", 2: "wheat winter",
+                   3: "wheat jointing", 4: "wheat jointing", 5: "wheat ripe", 6: "maize seedling 0", 7: "maize knee 0",
+                   8: "maize tall 0", 9: "maize dry 0"}
+    if kind == "soybean" and m in (6, 7, 8, 9):
+        return "KIT soybean L0", (4.0, 2.0)
+    if kind == "vegetables":
+        return "KIT garlic L0", (10.0, 4.0)
+    st = wheat_maize[m]
+    dens = (2.5, 1.5) if st.startswith("maize") else (10.0, 4.0)
+    return f"KIT {st} L{lod}", dens
+
+
+HOTSPOTS = [(599, 700), (565, 400), (250, 266), (404, 131)]  # avenue, home, main road, north pond (map)
+
+
+def _clip(r, q):
+    x0, y0 = max(r[0], q[0]), max(r[1], q[1])
+    x1, y1 = min(r[2], q[2]), min(r[3], q[3])
+    return (x0, y0, x1, y1) if x1 - x0 > 0.5 and y1 - y0 > 0.5 else None
+
+
+def _plane(name, rects_map, c, z=0.02):
+    bm = bmesh.new()
+    for (x0, y0, x1, y1) in rects_map:
+        a, b = W((x0, y1)), W((x1, y0))
+        vs = [bm.verts.new((a.x, a.y, z)), bm.verts.new((b.x, a.y, z)), bm.verts.new((b.x, b.y, z)), bm.verts.new((a.x, b.y, z))]
+        bm.faces.new(vs)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    o["sv_kind"] = "scatter"
+    c.objects.link(o)
+    return o
+
+
+def _quads_plane(name, quads_map, c, z=0.03):
+    bm = bmesh.new()
+    for quad in quads_map:
+        vs = [bm.verts.new((*W(q)[:2], z)) for q in quad]
+        f = bm.faces.new(vs)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    o["sv_kind"] = "scatter"
+    c.objects.link(o)
+    return o
+
+
+def clear_of_roads(rect, min_size=2.0):
+    """Split a map rectangle into pieces that keep clear of every road corridor (road, shoulder and tree line)."""
+    out, stack = [], [rect]
+    while stack:
+        r = stack.pop()
+        near = min(G.rect_poly_dist(r, R["pts"], samples=2) - (R["width"] / 2 + 2.4) for R in D.ROADS.values())
+        if near > 0:
+            out.append(r)
+            continue
+        x0, y0, x1, y1 = r
+        if max(x1 - x0, y1 - y0) <= min_size:
+            continue
+        mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+        if (x1 - x0) > 2 * (y1 - y0):
+            stack += [(x0, y0, mx, y1), (mx, y0, x1, y1)]
+        elif (y1 - y0) > 2 * (x1 - x0):
+            stack += [(x0, y0, x1, my), (x0, my, x1, y1)]
+        else:
+            stack += [(x0, y0, mx, my), (mx, y0, x1, my), (x0, my, mx, y1), (mx, my, x1, y1)]
+    return out
+
+
+def scatter_near(c, parcels):
+    """Crops at the month's growth stage and verge grass/flowers around the ground-level views only
+    (the web build scatters crops at run time; these make the Blender review renders readable)."""
+    seed = 100
+    count = 0
+    for hx, hy in HOTSPOTS:
+        inner = (hx - 60, hy - 60, hx + 60, hy + 60)
+        outer = (hx - 110, hy - 110, hx + 110, hy + 110)
+        ring = [(outer[0], outer[1], outer[2], inner[1]), (outer[0], inner[3], outer[2], outer[3]),
+                (outer[0], inner[1], inner[0], inner[3]), (inner[2], inner[1], outer[2], inner[3])]
+        groups = {}
+        for r, kind in parcels:
+            ci = _clip(r, inner)
+            if ci:
+                groups.setdefault((kind, 0), []).extend(clear_of_roads(ci))
+            for q in ring:
+                co = _clip(r, q)
+                if co:
+                    groups.setdefault((kind, 1), []).extend(clear_of_roads(co, min_size=4.0))
+        for (kind, lod), rects in groups.items():
+            src, dens = crop_src(kind, lod)
+            pl = _plane(f"crop scatter {kind} L{lod}", rects, c)
+            SL.scatter(pl, SRC[src], dens[lod], seed=seed, scale=(0.85, 1.15), tilt=0.08)
+            seed += 7
+            count += 1
+        # grass and flowers on the road verges near the view
+        quads = []
+        for R in D.ROADS.values():
+            if R["width"] < 3:
+                continue
+            pts = list(G.walk(R["pts"], 8.0))
+            for (x0, y0, a0), (x1, y1, a1) in zip(pts, pts[1:]):
+                if math.hypot(x0 - hx, y0 - hy) > 110 or in_housing((x0, y0), margin=-2):
+                    continue
+                for side in (-1, 1):
+                    o0, o1 = side * (R["width"] / 2 + 0.85), side * (R["width"] / 2 + 3.0)
+                    nx0, ny0 = -math.sin(a0), math.cos(a0)
+                    nx1, ny1 = -math.sin(a1), math.cos(a1)
+                    quads.append([(x0 + nx0 * o0, y0 + ny0 * o0), (x1 + nx1 * o0, y1 + ny1 * o0),
+                                  (x1 + nx1 * o1, y1 + ny1 * o1), (x0 + nx0 * o1, y0 + ny0 * o1)])
+        if quads:
+            for k in range(3):
+                v = _quads_plane(f"verge grass {k}", quads, c)
+                SL.scatter(v, SRC[f"KIT grass tuft {k}"], 7.0, seed=seed + k, scale=(0.8, 1.5))
+            if MONTH in (4, 5, 6, 7, 8, 9):
+                for k, col in enumerate(("white", "yellow", "purple")):
+                    v = _quads_plane(f"verge flowers {col}", quads, c)
+                    SL.scatter(v, SRC[f"KIT wildflower {col}"], (0.5, 0.35, 0.12)[k], seed=seed + 10 + k, scale=(0.8, 1.2))
+            seed += 31
+            count += 1
+    return count
 
 
 # ---------------------------------------------------------------- sky, cameras, renders
@@ -800,6 +1005,9 @@ def cameras(home_cams):
     cams["main road"] = camera("CAM main road", tuple(W((250, 266), 1.65)), tuple(W((420, 245), 3.0)), lens=28)
     cams["north pond"] = camera("CAM north pond", tuple(W((404, 131), 1.8)), tuple(W((372, 82), 1.0)), lens=24)
     cams["avenue"] = camera("CAM avenue", tuple(W((599, 760), 1.65)), tuple(W((597, 560), 4.0)), lens=28)
+    # orthographic top view matching the traced satellite crop (map x 0..685.6, y 0..610), for fit checks
+    sat_c = W((685.6 / 2, 610.0 / 2))
+    cams["satellite"] = camera("CAM satellite", (sat_c.x, sat_c.y, 1500), (sat_c.x, sat_c.y + 0.01, 0), ortho=685.6)
     cams["home aerial"] = camera("CAM home aerial", tuple(W((640, 470), 70)), tuple(W((560, 395), 0)), lens=30)
     for n, o in home_cams.items():
         if n.startswith("VIDEO A"):
@@ -822,7 +1030,7 @@ c_field = coll("fields", root)
 c_util = coll("poles wires lamps", root)
 c_hor = coll("horizon", root)
 home_cams = home_quarter()
-print("HOME rects", len(HOME_RECTS))
+print("HOME rects", len(HOME_RECTS), "map extent", [round(f(r[i] for r in HOME_RECTS)) for f, i in ((min, 0), (min, 1), (max, 2), (max, 3))])
 terrain_and_water(c_ter)
 roads(c_road)
 bridges(c_road)
@@ -830,9 +1038,16 @@ st = housing(c_house, c_tree)
 school(c_house)
 na = avenues(c_tree)
 nv = village_trees(c_tree)
-nf = fields(c_field, c_util)
+parcels = fields(c_field, c_util)
+nf = len(parcels)
 nw = utilities(c_util)
 nh = horizon(c_hor)
+ng = groves(c_tree)
+c_life = coll("home life", root)
+nl = home_dressing(c_life)
+c_scatter = coll("near-view scatter", root)
+ns = scatter_near(c_scatter, parcels)
+print("PASS2 grove trees", ng, "home props", nl, "scatter groups", ns)
 dome = sky(sc)
 cams = cameras(home_cams)
 print("LAYOUT", st, "avenue trees", na, "village trees", nv, "fields", nf, "wire spans", nw, "objects", len(bpy.data.objects))
@@ -845,6 +1060,8 @@ if RENDER:
         cam = cams[n]
         sc.camera = cam
         dome.location = cam.location if cam.data.type != "ORTHO" else (cam.location.x, cam.location.y, 0)
+        if n == "satellite":
+            sc.render.resolution_x, sc.render.resolution_y = 1180, 1050
         sc.render.filepath = os.path.join(RENDERS, f"{n.replace(' ', '_')}_m{MONTH}{'_preview' if PREVIEW else ''}.png")
         bpy.ops.render.render(write_still=True)
         print("RENDERED", sc.render.filepath)
