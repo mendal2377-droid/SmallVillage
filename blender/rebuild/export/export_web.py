@@ -248,8 +248,149 @@ CROPS["vegetables"] = {m: (("garlic", "soil") if m in (10, 11, 12, 1, 2, 3, 4, 5
 SEASON_OF = {12: "winter", 1: "winter", 2: "winter", 3: "spring", 4: "spring", 5: "spring",
              6: "summer", 7: "summer", 8: "summer", 9: "summer", 10: "autumn", 11: "autumn"}
 
+# ---------------------------------------------------------------- 6. walking navigation, field parcels, road corridors
+
+import layout_data as LD  # noqa: E402
+import layout_geo as LG  # noqa: E402
+
+
+def map_to3(p):
+    x, y = LD.to_world(p)
+    return x, -y
+
+
+nav_boxes = []
+
+
+def add_box(cx, cz, hx, hz, a=0.0, low=-100.0, high=100.0):
+    nav_boxes.append([round(cx, 3), round(cz, 3), round(hx, 3), round(hz, 3), round(a, 4), low, high])
+
+
+def kit_prop(src, prop, default=None):
+    o = bpy.data.objects.get(src)
+    return o.get(prop, default) if o else default
+
+
+SOLID = {  # family -> (local centre x, local centre y, half x, half y, height) for single-footprint colliders
+    "school": (17.0, 12.0, 19.0, 12.0, 8.0),
+    "electric tricycle": (0.0, 0.4, 0.6, 1.1, 2.0), "walking tractor": (0.0, -0.4, 0.7, 2.0, 1.6),
+    "tractor": (0.0, 0.2, 0.75, 1.3, 2.3), "combine harvester": (0.0, -0.8, 2.4, 3.6, 4.0), "handcart": (0.0, 0.9, 0.6, 1.9, 1.0),
+    "transformer": (0.0, 0.0, 1.8, 0.5, 9.0), "well hut": (0.0, 0.0, 0.62, 0.62, 2.0), "wellhead": (0.0, 0.0, 0.35, 0.35, 0.7),
+    "washing machine": (0.0, 0.0, 0.4, 0.25, 0.9), "laundry line": (0.0, 0.0, 1.85, 0.08, 1.9),
+}
+TRUNK = {"poplar": 0.22, "broadleaf": 0.3, "willow": 0.45, "conifer": 0.3, "hedge": 0.55,
+         "utility pole": 0.18, "utility pole lamp": 0.18, "solar lamp": 0.15}
+for o in bpy.data.objects:
+    src = o.get("sv_src")
+    if not src or o.name in lib.objects or any(c.name in skip_cols for c in o.users_collection):
+        continue
+    fam = kit_prop(src, "sv_family", "")
+    a = o.rotation_euler.z
+    ca, sa = math.cos(a), math.sin(a)
+    sx = o.scale.x
+
+    def local_to3(lx, ly):
+        lx *= sx
+        X = o.location.x + ca * lx - sa * ly
+        Y = o.location.y + sa * lx + ca * ly
+        return X, -Y
+
+    if fam == "courtyard plot":
+        W_, D_ = [float(v) for v in str(kit_prop(src, "sv_footprint", "12,18")).split(",")]
+        cx, cz = local_to3(W_ / 2, D_ / 2)
+        add_box(cx, cz, W_ / 2, D_ / 2, a, -100, 100)
+    elif fam.startswith("house "):
+        cx, cz = local_to3(5.5, 4.0)
+        add_box(cx, cz, 5.5, 4.0, a, -100, 100)
+    elif fam in SOLID:
+        lx, ly, hx, hy, h = SOLID[fam]
+        cx, cz = local_to3(lx, ly)
+        add_box(cx, cz, hx, hy, a, -100, o.location.z + h)
+    elif fam in TRUNK:
+        r = TRUNK[fam]
+        add_box(o.location.x, -o.location.y, r, r, 0.0, -100, 100)
+
+# water: ditches and the canal as boxes along their lines, ponds as a grid inside the banks,
+# leaving gaps wherever a road or a bridge crosses
+roads3 = {n: {"width": R["width"], "pts": [list(map_to3(p)) for p in R["pts"]]} for n, R in LD.ROADS.items()}
+bridges3 = [map_to3(p) for p, _ in LD.BRIDGES]
+
+
+def crossing(x, z):
+    if any(math.hypot(x - bx, z - bz) < 6 for bx, bz in bridges3):
+        return True
+    return any(LG.poly_dist((x, z), [tuple(q) for q in R["pts"]]) < R["width"] / 2 + 1.2 for R in roads3.values())
+
+
+for lines, half in ((LD.DITCHES, 1.2), (LD.RIVERS, 5.0)):
+    for L in lines.values():
+        pts = [map_to3(p) for p in L["pts"]]
+        for a3, b3 in zip(pts, pts[1:]):
+            dx, dz = b3[0] - a3[0], b3[1] - a3[1]
+            seg = math.hypot(dx, dz)
+            n = max(1, int(seg / 4))
+            ang = math.atan2(dz, dx)  # rotate the box's local X onto the segment direction
+            for k in range(n):
+                t = (k + 0.5) / n
+                x, z = a3[0] + dx * t, a3[1] + dz * t
+                if crossing(x, z):
+                    continue
+                # walk.js box: localX = c*dx - s*dz with a = -ang aligns local X with the segment
+                add_box(x, z, seg / n / 2 + 0.3, half, -ang, -100, 0.6)
+for P in LD.PONDS.values():
+    ring = [map_to3(p) for p in P["pts"]]
+    ring = LG.offset_poly(ring, 1.5)
+    xs, zs = [p[0] for p in ring], [p[1] for p in ring]
+    x = min(xs)
+    while x < max(xs):
+        z = min(zs)
+        while z < max(zs):
+            if LG.point_in_poly((x + 2, z + 2), ring):
+                add_box(x + 2, z + 2, 2.2, 2.2, 0.0, -100, 0.6)
+            z += 4
+        x += 4
+
+# the family house: reuse the original walk data (same coordinates) inside the home quarter
+old = json.load(open(os.path.join(REPO, "public", "models", "navigation.json"), encoding="utf8"))["village"]
+home_rects = []
+for ob in home_objs:
+    bb = [ob.matrix_world @ Vector(c) for c in ob.bound_box]
+    if max(ob.dimensions) > 60:
+        continue
+    home_rects.append((min(v.x for v in bb) - 0.3, min(-v.y for v in bb) - 0.3, max(v.x for v in bb) + 0.3, max(-v.y for v in bb) + 0.3))
+
+
+def in_home(x, z):
+    return any(r[0] <= x <= r[2] and r[1] <= z <= r[3] for r in home_rects)
+
+
+nav_boxes = [b for b in nav_boxes if not in_home(b[0], b[1])]
+kept_old = [b for b in old["boxes"] if in_home(b[0], b[1])]
+nav_boxes += kept_old
+vc = map_to3((330, 330))
+nav = {
+    "boxes": nav_boxes,
+    "surfaces": [s for s in old.get("surfaces", []) if in_home((s["rect"][0] + s["rect"][2]) / 2, (s["rect"][1] + s["rect"][3]) / 2)],
+    "shelters": [s for s in old.get("shelters", []) if in_home((s["rect"][0] + s["rect"][2]) / 2, (s["rect"][1] + s["rect"][3]) / 2)],
+    "ground": old.get("ground", 0.1),  # same base level as the original house walk data (steps stay reachable)
+    "bounds": [round(vc[0] - 1500), round(vc[1] - 1500), round(vc[0] + 1500), round(vc[1] + 1500)],
+    "spawn": [-31.0, 1.85, 110.0],
+    "yaw": 0.0,
+}
+print("NAV boxes", len(nav_boxes), "old house boxes", len(kept_old), "surfaces", len(nav["surfaces"]))
+
+field_rects = []
+for o in bpy.data.objects:
+    if o.get("sv_kind") == "field":
+        bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+        field_rects.append([round(min(v.x for v in bb), 2), round(min(-v.y for v in bb), 2), round(max(v.x for v in bb), 2),
+                            round(max(-v.y for v in bb), 2), o.get("sv_crop", "wheat-maize")])
+
 data = {
-    "version": "village-2027-phase4-1",
+    "version": "village-2027-phase4-2",
+    "nav": nav,
+    "fields": field_rects,
+    "roads": roads3,
     "units": "metres, three.js Y-up",
     "assets": assets,
     "instances": inst,

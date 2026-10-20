@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 20 October 2026: Phases 1–3 done, Phase 4 first version done (preview page village-2027.html). Resume from here.
+Saved 20 October 2026: Phases 1–4 done (preview page village-2027.html); next is Phase 5. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -103,15 +103,37 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - `window.__sv2` is a test hook that renders one frame on demand and returns draw calls and triangles.
 - **Measured** (hidden pane, shadow pass included): 1.4–3.0 M triangles and 200–400 draw calls per view, 8–14 ms per frame. The build passes.
 
+### Phase 4 completed (20 Oct 2026)
+
+- **Walking with collisions:** the preview reuses the app's `src/walk.js` (sliding, stairs, drag-to-look, touch input).
+  - `export_web.py` writes `village.json.nav` with 5,743 oriented boxes:
+    - one per courtyard plot and house block, plus the school;
+    - trunks, poles and huts;
+    - water as boxes along the ditches, canal and pond interiors, with gaps wherever a road or bridge crosses.
+  - It also includes the original house boxes and stair/floor surfaces inside the home quarter (same coordinates), so the house walk and stairs work as before.
+  - **Tested:**
+    - from the main road, walking north stops at the first row of courtyard plots;
+    - on the pond bank, the player stops at the water;
+    - in the courtyard, the player stops at the house front and at the laundry line.
+- **Run-time crops** (`src/v2/crops.js`):
+  - Kit crops at the month's stage around the player, from the exported field parcels, kept off road corridors.
+  - Placement is stable (world grid with hash jitter) and refreshes every 6 m.
+  - Ranges: full detail within 25 m and LOD1 to 60 m on high; 12 m and 30 m on phones.
+  - Crops are hidden when the camera is above 40 m.
+- **Quality tiers:** `high` / `low` ("Phone"), with `auto` picking low for touch devices, small screens or weak CPUs. A selector and `?quality=` set it by hand.
+  - The phone tier lowers pixel ratio, shadow map size and extent, near-detail and LOD distances, and crop radius.
+  - It sets a 900 m view distance with stronger fog, casts shadows only from full-detail tiles, and shows fewer clouds.
+  - Small field details (stakes, well huts, wellheads) are distance-culled on both tiers.
+  - Phone layout: the touch D-pad appears while walking, and the control panel folds to its title.
+- **Measured** (shadow pass included):
+  - high: 310–390 draw calls, 1.4–4.1 M triangles;
+  - phone: 230–290 calls (207 at phone size on the avenue), 0.7–2.0 M triangles.
+- **Remaining performance work (Phase 9):** merge per-tile variants with `BatchedMesh`, and atlas the 89 home-quarter materials. Rideable vehicles (splitting `wheels`) wait for the activities phase.
+
 ### Next
 
-1. Phase 4 follow-ups:
-   - crop scatter near the player at run time;
-   - walking collisions, by exporting navigation from the layout;
-   - a mobile quality tier;
-   - splitting `wheels` for rideable vehicles.
-2. Phase 5: the main page, with the 2D painted map, the 3D map and the paraglider landing.
-3. Phase 6: the avatar, the dog, and the kit animals (batch 5).
+1. Phase 5: the main page, with the 2D painted map, the 3D map and the paraglider landing.
+2. Phase 6: the avatar, the dog, and the kit animals (batch 5).
 
 Phases 5–9 are unchanged from the plan: main page map modes and paraglider, avatar and dog with animals, activity polish, climate and seasons, then deploy.
 

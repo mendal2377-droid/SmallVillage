@@ -11,3 +11,15 @@ html, body { margin: 0; height: 100%; background: #e9e4d6; font-family: system-u
 .v2-row select, .v2-row button { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid #b9b3a2; background: #fffdf6; }
 #v2-info, #v2-status { font-size: 12px; opacity: 0.7; }
 .v2-hint { position: fixed; bottom: 14px; left: 16px; font-size: 12px; opacity: 0.7; }
+
+.v2-pad { position: fixed; right: 18px; bottom: 18px; display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); gap: 6px; touch-action: none; }
+.v2-pad button { font-size: 20px; border-radius: 14px; border: 0; background: rgba(250, 247, 238, 0.85); box-shadow: 0 3px 12px rgba(30, 40, 30, 0.2); touch-action: none; }
+.v2-pad [data-dir="forward"] { grid-column: 2; grid-row: 1; }
+.v2-pad [data-dir="left"] { grid-column: 1; grid-row: 2; }
+.v2-pad [data-dir="back"] { grid-column: 2; grid-row: 2; }
+.v2-pad [data-dir="right"] { grid-column: 3; grid-row: 2; }
+@media (max-width: 640px) { .v2-panel { top: 8px; left: 8px; right: 8px; padding: 8px 10px; } .v2-panel p { display: none; } .v2-hint { display: none; } }
+
+.v2-panel h1 button { all: unset; cursor: pointer; }
+.v2-controls { display: grid; gap: 8px; }
+.v2-panel.collapsed .v2-controls { display: none; }

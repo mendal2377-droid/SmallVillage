@@ -10,7 +10,8 @@
 <body>
   <div id="v2-canvas"></div>
   <section class="v2-panel" aria-label="Village preview controls">
-    <h1>SmallVillage 2.0</h1>
+    <h1><button id="v2-toggle" type="button" aria-expanded="true" aria-controls="v2-controls">SmallVillage 2.0</button></h1>
+    <div id="v2-controls" class="v2-controls">
     <p>Preview of the rebuilt village · Phase 4</p>
     <div class="v2-row">
       <label>Month <select id="v2-month">
@@ -24,10 +25,18 @@
     <div class="v2-row">
       <label>View <select id="v2-view"></select></label>
       <button id="v2-walk" type="button">Walk</button>
+      <label>Quality <select id="v2-quality"><option value="auto">Auto</option><option value="high">High</option><option value="low">Phone</option></select></label>
     </div>
     <span id="v2-status" role="status"></span>
     <span id="v2-info"></span>
+    </div>
   </section>
+  <div id="v2-pad" class="v2-pad" hidden aria-label="Walk controls">
+    <button data-dir="forward" type="button" aria-label="Forward">▲</button>
+    <button data-dir="left" type="button" aria-label="Left">◀</button>
+    <button data-dir="back" type="button" aria-label="Back">▼</button>
+    <button data-dir="right" type="button" aria-label="Right">▶</button>
+  </div>
   <p class="v2-hint">Orbit: drag, scroll · Walk: WASD, drag to look, Shift to run</p>
   <script type="module" src="/src/v2/main.js"></script>
 </body>

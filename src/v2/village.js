@@ -10,8 +10,13 @@ import {makeToon, toonUniforms} from './toon.js';
 const BASE = '/models/v2/';
 const TILE = 300;
 // distance from the camera to the nearest edge of a tile: inside/next to the tile LOD0, < 450 m LOD1, beyond LOD2
-const LOD_DIST = [40, 450];
-const SMALL_CULL = 320;       // assets with a single LOD (props) disappear beyond this
+let LOD_DIST = [40, 450];
+let SMALL_CULL = 320;         // assets with a single LOD (props) disappear beyond this
+let VIEW_DIST = Infinity;
+// small details culled at a fraction of SMALL_CULL (props default to 1)
+const SMALL_FAMILIES = {'field stake': 0.4, 'wellhead': 0.5, 'solar lamp': 1.0, 'well hut': 1.4};
+let SHADOW_LOD = 2;           // tiles below this LOD cast shadows (phone tier: only full-detail tiles)
+//     // phone tier: drop tiles beyond this (fog hides them), except horizon and sky pieces
 
 function srgbByte(v) {
   v = Math.max(0, Math.min(1, v));
@@ -128,7 +133,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   }
 
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), p = new THREE.Vector3(), s = new THREE.Vector3();
-  const NEAR = 70;        // instances closer than this (in tiles next to the camera) use full detail
+  let NEAR = 70;          // instances closer than this (in tiles next to the camera) use full detail
   const REPARTITION = 10; // re-split near/far instances after the camera moves this far
 
   function hidden(gp, i) {
@@ -201,7 +206,9 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
       const lod = d < LOD_DIST[0] ? 0 : d < LOD_DIST[1] ? 1 : 2;
       const a = asset(gp.key);
       const single = a && Object.values(a.lods).every(l => l.length === 1);
-      const cull = single && !['sky', 'building', 'infra', 'tree'].includes(a.kind) && d > SMALL_CULL;
+      const smallFactor = SMALL_FAMILIES[a?.family] ?? (single && !['sky', 'building', 'infra', 'tree'].includes(a?.kind) ? 1 : null);
+      const cull = (smallFactor !== null && d > SMALL_CULL * smallFactor) ||
+        (d > VIEW_DIST && a?.kind !== 'sky');
       if (cull) {
         if (gp.mesh) gp.mesh.visible = false;
         if (gp.near) gp.near.visible = false;
@@ -209,7 +216,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
         continue;
       }
       update(gp, lod, camera, force);
-      const shadows = lod < 2 && !isCloud(gp.key);  // distant tiles skip the shadow pass
+      const shadows = lod < SHADOW_LOD && !isCloud(gp.key);  // distant tiles skip the shadow pass
       if (gp.mesh) gp.mesh.castShadow = shadows;
       if (gp.near) gp.near.castShadow = shadows;
     }
@@ -240,7 +247,16 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   wires.name = 'power wires';
   scene.add(wires);
 
-  return {data, groups, updateLod, setMonth, kitMat, geometryByName: (n) => geom[n],
+  function setQuality(qs) {
+    NEAR = qs.near;
+    LOD_DIST = [40, qs.lod1];
+    SMALL_CULL = qs.smallCull;
+    VIEW_DIST = qs.viewDist ?? Infinity;
+    SHADOW_LOD = qs.shadowLod ?? 2;
+    if (lastCamera) updateLod(lastCamera, true);
+  }
+
+  return {data, groups, updateLod, setMonth, setQuality, kitMat, geometryByName: (n) => geom[n],
     stats: () => ({groups: groups.length, live: groups.filter(g => g.mesh?.visible).length})};
 }
 
@@ -304,7 +320,7 @@ export function createSky(scene, data) {
   return {apply, follow, dome, sun};
 }
 
-export function placeClouds(scene, village, presetName) {
+export function placeClouds(scene, village, presetName, density = 1) {
   const old = scene.getObjectByName('clouds');
   if (old) scene.remove(old);
   const P = village.data.sky[presetName];
@@ -322,7 +338,7 @@ export function placeClouds(scene, village, presetName) {
     return a && a.lods[''] ? a.lods[''][0] : null;
   };
   for (const kind of P.clouds) {
-    const n = ['thunderhead', 'stratus'].includes(kind) ? 1 : 7;
+    const n = ['thunderhead', 'stratus'].includes(kind) ? 1 : Math.max(2, Math.round(7 * density));
     for (let i = 0; i < n; i++) {
       const key = names[kind][Math.floor(rnd() * names[kind].length)];
       const g = village.geometryByName(geomOf(key));
