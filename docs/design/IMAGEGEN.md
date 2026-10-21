@@ -38,4 +38,4 @@ Use case: stylized-concept. Asset type: tileable ground albedo texture for a pai
 
 The concept establishes the palette and density; it is not a literal image replacement of the world. Existing measured house silhouettes, rooms, gates, stairs, village streets and seasonal/game controls remain. Painted foliage cards overlap through three-dimensional crowns, replacing opaque stacked spheres. Amber night windows, smoke, water movement, fish, frogs, live weather and summer stars continue. The new forest uses five tree forms and two ponds (86 by 64 metres and 92 by 68 metres), with joined, flush paths and seasonal meadow edges.
 
-Generated meadow flowers are a decorative illustration mix, not a botanical survey of Yanlaozhai. The new woodland and lakes are an imaginative addition east of the village; the reference sketch's existing waterways are retained.
+Generated meadow flowers are a decorative illustration mix, not a botanical survey of the village. The new woodland and lakes are an imaginative addition east of the village; the reference sketch's existing waterways are retained.

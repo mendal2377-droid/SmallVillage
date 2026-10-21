@@ -399,29 +399,34 @@ function lerpAngle(a, b, t) {
 /** Third-person follow camera with a boom that shortens against walls (uses the walk controller's collisions). */
 export function createFollowCamera(camera, walk) {
   const want = new THREE.Vector3(), look = new THREE.Vector3();
-  let boom = 3.2;
+  let boom = 3.2, tight = false;
   return {
     /** true while the camera is too boxed in to sit behind the child (it then looks through the child's eyes) */
-    tight: false,
+    get tight() { return tight; },
     update(player, dt, snap = false) {
       const yaw = walk.yaw, pitch = THREE.MathUtils.clamp(walk.pitch, -0.6, 0.5);
+      // on stairs and upstairs (narrow, low ceilings) the camera comes in closer and higher, over the shoulder
+      const careful = walk.careful;
+      const maxBoom = careful ? 2.1 : 3.2, lift = careful ? 0.5 : 0.28;
       const head = new THREE.Vector3(player.position.x, (walk.feet ?? 0) + 1.25, player.position.z);
-      const back = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch) + 0.28, Math.cos(yaw) * Math.cos(pitch)).normalize();
+      const back = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch) + lift, Math.cos(yaw) * Math.cos(pitch)).normalize();
       // shorten the boom where a wall or tree is behind the child
-      let len = 3.2;
-      for (let d = 0.6; d <= 3.2; d += 0.2) {
+      let len = maxBoom;
+      for (let d = 0.6; d <= maxBoom; d += 0.2) {
         const p = head.clone().addScaledVector(back, d);
         if (walk.solidAt(p.x, p.z, p.y - 0.2, p.y + 0.2, 0.2)) { len = Math.max(0.6, d - 0.3); break; }
       }
-      boom = snap ? len : THREE.MathUtils.damp(boom, len, len < boom ? 20 : 4, dt);
-      this.tight = boom < 1.1;
-      if (this.tight) {
+      // ease in and out (no snapping): pulling in is quicker than letting out
+      boom = snap ? len : THREE.MathUtils.damp(boom, len, len < boom ? 9 : 2.5, dt);
+      // hysteresis, so the view does not flicker between behind and eyes at the threshold
+      tight = tight ? boom < 1.35 : boom < 0.95;
+      if (tight) {
         camera.position.copy(player.position);
         camera.quaternion.copy(player.quaternion);
         return;
       }
       want.copy(head).addScaledVector(back, boom);
-      if (snap) camera.position.copy(want); else camera.position.lerp(want, 1 - Math.exp(-12 * dt));
+      if (snap) camera.position.copy(want); else camera.position.lerp(want, 1 - Math.exp(-8 * dt));
       look.copy(head).add(new THREE.Vector3(-Math.sin(yaw), Math.sin(pitch), -Math.cos(yaw)).multiplyScalar(2));
       camera.lookAt(look);
     },

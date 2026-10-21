@@ -302,7 +302,7 @@ def text_obj(name,body,loc,size,m,rotation=(math.pi/2,0,0)):
     cv.materials.append(m);o=bpy.data.objects.new(name,cv);DETAIL.objects.link(o);o.location=loc;o.rotation_euler=rotation;return o
 text_obj('便民商店字样','便 民 商 店',(24,-26.81,3.0),.4,white)
 box('村名石牌',(-10,-139,1.1),(5,.55,2.2),plasters[2])
-text_obj('场景主题村名','闫 老 寨',(-10,-139.3,1.25),.76,white)
+text_obj('场景主题村名','小 村',(-10,-139.3,1.25),.76,white)
 text_obj('推定标识说明','豫东村落风貌参考重建',(-10,-139.3,.65),.2,white)
 for x,y in [(31,-28),(-13,-132),(56,49)]:
     box('垃圾桶',(x,y,.52),(.62,.68,1),green[2]);box('垃圾桶盖',(x,y,1.04),(.7,.74,.1),dark)
@@ -332,12 +332,18 @@ street=camera('02 村口人视',(1.4,-151,2.7),(0,-72,3.2),38)
 detail=camera('03 院落近景',(-45,-147,22),(-45,-100,2.2),48)
 top=camera('04 总平面',(0,0,500),(0,0,0),45,370)
 S.camera=hero
-S['RECONSTRUCTION_STATUS']='Interpretive Henan rural scene; exact Yanlaozhai road and building footprints were NOT verified.'
-S['LOCATION']='河南省周口市项城市贾岭镇闫老寨村（阎老寨）'
+S['RECONSTRUCTION_STATUS']='Interpretive Henan plain village; road and building footprints are modelled, not surveyed.'
+S['LOCATION']='豫东平原村庄（示意）'
 S['UNITS']='meters; dimensions are modelling assumptions'
 S['SEASON']='初夏麦收季节的艺术设定，非拍摄日期'
 readme=bpy.data.texts.new('READ ME | 重建范围与参考来源')
-readme.write('闫老寨村风貌参考重建\n\n已核实：村名与贾岭镇行政归属。\n未核实：精确坐标、村界、道路走向、逐栋建筑、坑塘位置。所有几何布局均为推定，不能用于测绘、导航或土地边界判断。\n允许按河南同类村庄参考进行建模。模型为约260米见方的村落核心与外围田地；住宅数量和尺寸是场景设计参数。\n全部材质与几何为程序创建，无外部贴图依赖。各宅院可在同名集合中编辑。\n参考及访问限制详见同目录 REFERENCES.md。\n')
+readme.write('小村风貌参考重建
+
+未核实：精确坐标、村界、道路走向、逐栋建筑、坑塘位置。所有几何布局均为推定，不能用于测绘、导航或土地边界判断。
+允许按河南同类村庄参考进行建模。模型为约260米见方的村落核心与外围田地；住宅数量和尺寸是场景设计参数。
+全部材质与几何为程序创建，无外部贴图依赖。各宅院可在同名集合中编辑。
+参考及访问限制详见同目录 REFERENCES.md。
+')
 for screen in bpy.data.screens:
     for area in screen.areas:
         if area.type=='VIEW_3D':

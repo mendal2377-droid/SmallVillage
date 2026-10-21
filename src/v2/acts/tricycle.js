@@ -18,9 +18,10 @@ export function createTricycle(api) {
   const S = {phase: 'off', pos: new THREE.Vector3(rec ? rec[0] : -26.5, 0, rec ? rec[2] : 110.6), yaw: rec ? rec[3] : Math.PI / 2,
     speed: 0, steer: 0, lean: new Set(), go: false, brake: false, reverse: false, km: 0, top: 0, taken: false, motor: null, bumpT: 0};
   const cam = smoothCamera();
-  // the layout stores it inside the gatehouse room, whose door is too narrow to drive through:
-  // it waits in the lane along the east side of the courtyard instead
-  if (rec && Math.hypot(rec[0] + 26.5, rec[2] - 110.6) < 1) { S.pos.set(-22.5, 0, 108); S.yaw = 0; }
+  // it lives in the blue shed in the courtyard, as in the photos; the entry is too narrow to ride through, so a
+  // ride from home starts with the child wheeling it out into the lane, and it is wheeled back when you get off nearby
+  const HOME = {x: S.pos.x, z: S.pos.z, yaw: S.yaw}, LANE = {x: -22.5, z: 108, yaw: 0};
+  const atHome = () => Math.hypot(S.pos.x - HOME.x, S.pos.z - HOME.z) < 0.5;
 
   function takeOver() {
     // the first ride replaces the static courtyard instance with a mesh of our own that can move and park anywhere
@@ -64,6 +65,10 @@ export function createTricycle(api) {
     },
     start() {
       takeOver();
+      if (atHome()) {
+        S.pos.set(LANE.x, 0, LANE.z); S.yaw = LANE.yaw; place();
+        api.toast('🛺 推出大门 · Wheeled out into the lane', 2.5);
+      }
       // boxed in front and back (it is parked across the gatehouse)? wheel it round by hand to face the longest open run
       const run = (yaw) => {
         const f = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
@@ -87,6 +92,8 @@ export function createTricycle(api) {
     stop() {
       S.motor = api.sounds.hum(false);
       S.speed = 0;
+      // back near the gate: wheel it home into the shed
+      if (Math.hypot(S.pos.x - LANE.x, S.pos.z - LANE.z) < 12) { S.pos.set(HOME.x, 0, HOME.z); S.yaw = HOME.yaw; place(); }
       parkCollider(true);
       // step off on the left, somewhere with room
       const fw = fwd(), side = new THREE.Vector3(-fw.z, 0, fw.x);

@@ -153,7 +153,7 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - The glide lasts 11 s the first time and 6.5 s on repeat visits (localStorage `sv2-glides`). Any key or tap skips it.
   - A flat-celled red, yellow and white wing with lines frames the top of the view.
   - Landing calls `startWalking`. "↩ 地图 Map" returns to the chosen map mode.
-- **UI:** The title is bilingual (闫老寨 · 小村). The developer panel (month, sky, view, quality) starts folded and hides while gliding. `?view=` still jumps straight to a view for tests. The test hook `window.__sv2` adds `land`, `glider`, `landing` and `backToMap`.
+- **UI:** The title is bilingual (小村 · SmallVillage). The developer panel (month, sky, view, quality) starts folded and hides while gliding. `?view=` still jumps straight to a view for tests. The test hook `window.__sv2` adds `land`, `glider`, `landing` and `backToMap`.
 - **Regenerate:** render the map sheets (`build_layout.py -- --export --month N --render mapsheet`), then run `python blender/rebuild/layout/paint_map.py`. For data, run the export layout (`--export --month 8`) and then `export_web.py`.
 
 ## Phase 6, child, dog and animals — done (21 Oct 2026)
@@ -300,4 +300,4 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
 - On the owner's instruction, `index.html` is now the rebuilt village and the original app moved to `classic.html`. `vercel.json` redirects `/village-2027.html` to `/` (307). Vite builds `index.html` and `classic.html`.
 - The original app's browser tests now default to `http://127.0.0.1:4173/classic.html` (`BASE_URL` must point at the classic page).
 - `npm run test` (world-browser) fails on the animal count ('25' vs '24'). This happens with the old `walk.js` too, so it is not caused by this work; the classic app's test expectation is out of date.
-- Live checks: `/` has the title "SmallVillage · 闫老寨", is ready in 0.8 s and has no console errors; `/classic.html` serves the original app.
+- Live checks: `/` has the title "SmallVillage · 小村", is ready in 0.8 s and has no console errors; `/classic.html` serves the original app.

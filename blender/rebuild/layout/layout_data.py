@@ -88,7 +88,7 @@ HOUSING = {
     # region: (x0, y0, x1, y1) map rectangle; plots fill rows facing lanes to their south
     "north village": (52, 66, 560, 296),
     "north east": (592, 110, 645, 290),
-    "xiaowangzhuang": (64, 300, 300, 600),  # 小王庄 in the south-west
+    "next-village": (64, 300, 300, 600),  # the neighbouring village in the south-west
     "south middle": (300, 262, 590, 352),
     "south east": (470, 384, 594, 505),  # the family house's strip
 }
@@ -104,7 +104,7 @@ EXCLUDE = [  # map rectangles kept free of generated plots
 
 # dense tree canopy seen on the satellite inside the village: planted as groves, kept free of plots
 GROVES = [
-    (238, 300, 300, 470),  # east side of 小王庄
+    (238, 300, 300, 470),  # east side of the neighbouring village
     (300, 340, 352, 384),  # west of the south pond
     (452, 322, 598, 366),  # strip between the south-middle rows and the pond line
     (266, 128, 292, 228),  # beside the lane west of the north village centre
@@ -131,7 +131,7 @@ PLACES = [
     ("wheat", "麦田", "Wheat fields", (380, 520), "field", (380, 380)),
     ("south-pond", "南坑塘", "South pond", (395, 392), "water", (395, 368)),
     ("west-pond", "西坑塘", "West pond", (132, 292), "water", (132, 268)),
-    ("xiaowangzhuang", "小王庄", "Xiaowangzhuang", (180, 450), "village", (180, 380)),
+    ("next-village", "邻村", "Next village", (180, 450), "village", (180, 380)),
     ("canal", "南渠", "South canal", (300, 645), "water", (450, 650)),
 ]
 

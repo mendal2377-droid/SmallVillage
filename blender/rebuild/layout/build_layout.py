@@ -760,7 +760,6 @@ HOME_PROPS = [
     ("KIT basin blue", -32.9, -112.3, 0.0, None, 2.6),
     ("KIT laundry line", -31.7, -114.6, 0.0, None, 2.6),
     ("KIT drying rack", -29.6, -113.4, 0.4, None, 2.6),
-    ("KIT umbrella open", -33.1, -110.6, 0.6, None, 2.6),
     ("KIT potted plant 0", -28.7, -107.5, 0.0, None, 2.6),
     ("KIT potted plant 1", -28.7, -108.4, 0.0, None, 2.6),
     ("KIT bamboo broom", -34.0, -112.9, 1.57, None, 2.6),
