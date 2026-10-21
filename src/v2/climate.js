@@ -350,6 +350,7 @@ export function createClimate({scene, camera, village, sky, quality, onMonth, so
     updateCard();
   }
   resolveWeather();
+  S.sun = sunAt(S.month, S.hour);  // so the card reads right before the first sky is applied
 
   // ---------------------------------------------------------------- per frame
   let skyT = 0;
