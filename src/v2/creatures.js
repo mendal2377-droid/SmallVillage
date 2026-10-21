@@ -96,14 +96,15 @@ export const POSE = {
 // ---------------------------------------------------------------- a herd: many animals of one species, instanced by part
 
 class Herd {
-  constructor(scene, template, capacity) {
+  constructor(scene, template, capacity, shadows = true) {
+    this.shown = true;
     this.rig = wrap(template.clone(true));
     this.rig.root.updateMatrixWorld(true);
     this.meshes = [];
     this.rig.root.traverse((o) => {
       if (!o.isMesh) return;
       const im = new THREE.InstancedMesh(o.geometry, o.material, capacity);
-      im.castShadow = true;
+      im.castShadow = shadows;  // little birds and cats: their shadows are too small to matter
       im.receiveShadow = true;
       im.frustumCulled = false;
       im.count = 0;
@@ -123,9 +124,9 @@ class Herd {
       for (const [o, im] of this.meshes) im.setMatrixAt(k, o.matrixWorld);
       k++;
     }
-    for (const [, im] of this.meshes) { im.count = k; im.instanceMatrix.needsUpdate = true; }
+    for (const [, im] of this.meshes) { im.count = k; im.instanceMatrix.needsUpdate = true; im.visible = k > 0 && this.shown; }
   }
-  set visible(v) { for (const [, im] of this.meshes) im.visible = v; }
+  set visible(v) { this.shown = v; for (const [, im] of this.meshes) im.visible = v; }
 }
 
 // ---------------------------------------------------------------- the child, the dog and the village animals
@@ -221,7 +222,7 @@ export function createLife({scene, templates, walk, player, data, getMonth}) {
     goose: {count: 4, pose: 'swim'}, goat: {count: 3, pose: 'quad'}, cat: {count: 3, pose: 'quad'},
     magpie: {count: 4, pose: 'bird'}, sparrow: {count: 10, pose: 'bird'},
   };
-  for (const [sp, conf] of Object.entries(SPECIES)) herds[sp] = new Herd(scene, templates[sp], conf.count);
+  for (const [sp, conf] of Object.entries(SPECIES)) herds[sp] = new Herd(scene, templates[sp], conf.count, sp === 'goat' || sp === 'goose');
 
   // habitats from the exported data
   const plots = [];

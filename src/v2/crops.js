@@ -114,7 +114,7 @@ export function createCrops(scene, village) {
         buckets.get(a.name).push(x, z, hash(i, j, 5) * 6.283, 0.85 + hash(i, j, 6) * 0.3);
       }
     }
-    for (const m of pools.values()) m.count = 0;
+    for (const m of pools.values()) { m.count = 0; m.visible = false; }  // empty pools cost no draw call
     for (const [name, arr] of buckets) {
       const m = pool(name, arr.length / 4);
       if (!m) continue;
@@ -126,6 +126,7 @@ export function createCrops(scene, village) {
         m.setMatrixAt(k++, m4.compose(p, q, s));
       }
       m.count = k;
+      m.visible = k > 0;
       m.instanceMatrix.needsUpdate = true;
     }
     at = {x: cx, z: cz};

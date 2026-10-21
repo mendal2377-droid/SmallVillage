@@ -59,6 +59,9 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
           #ifdef USE_INSTANCING
             svBase = instanceMatrix[3].xyz;
           #endif
+          #ifdef USE_BATCHING
+            svBase = batchingMatrix[3].xyz;
+          #endif
           float svH = max(position.y, 0.0);
           float svPh = uTime * (1.3 + uWind * 1.6) + svBase.x * 0.21 + svBase.z * 0.17;
           float svWave = sin(svPh) + 0.45 * sin(svPh * 2.3 + 1.7);
@@ -70,6 +73,9 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
         vec4 svW = vec4(transformed, 1.0);
         #ifdef USE_INSTANCING
           svW = instanceMatrix * svW;
+        #endif
+        #ifdef USE_BATCHING
+          svW = batchingMatrix * svW;
         #endif
         vToonPos = (modelMatrix * svW).xyz;`);
     shader.fragmentShader = shader.fragmentShader

@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–8 done (Phase 8: calendar, weather, wetness, snow, wind, soundscape); next is Phase 9 (performance and deploy). Resume from here.
+Saved 21 October 2026: Phases 1–9 done locally; the deploy waits for the owner (push the branch for a Vercel preview, then decide about index.html). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -267,3 +267,16 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
 - Empty particle pools are hidden, so they cost no draw calls.
 - **Tested:** rain, storm, snow (lane and roofs), fog, dusk and night views; the calendar card; no console errors. About 500 draw calls in the home courtyard (high tier, shadows included), to be reduced in Phase 9.
 - **Next:** Phase 9: BatchedMesh and a material atlas for the home quarter, draw-call budget, mobile checks, then deploy (ask the owner before switching `index.html` or pushing).
+
+## Phase 9, performance and deploy preparation — done locally (21 Oct 2026)
+
+- **Far tiles batched** (`village.js`): LOD 1 and LOD 2 instances go into four `THREE.BatchedMesh` objects (LOD 1 or 2, plain or sway material) instead of one InstancedMesh per key and tile. Only the near (LOD 0) tiles and clouds stay instanced. Geometries with an odd attribute layout stay on the instanced path. The toon shader supports `USE_BATCHING`.
+- **Home quarter merged:** about 70 plain-coloured static meshes became one merged mesh per opacity, with vertex colours.
+- **No calls for empty things:** empty herds, crop pools and particle pools are hidden. Only goats and geese cast shadows (small birds and cats do not).
+- **Collision grid** (`src/walk.js`, shared with the original app): an 8 m grid over the 5,743 boxes. `solidAt` takes 0.01 ms; life update 3.9 → 0.27 ms; a whole step 5.1 → 0.5 ms. The original app's checks pass (`test:walk`, `test:stairs`, `test:comfort`, `test:game`).
+- **Draw calls (high tier, shadows included):** home 501 → 191, avenue 396 → 91, pond 266 → 157, overview 354 → 92. Phone tier: home 179, avenue 88, pond 150.
+- **Production build:** `npm run build` makes both pages. `village-2027.html` transfers about 2.6 MB (assets.glb 1.3 MB, static.glb 0.8 MB, village.json 150 KB compressed, map 0.2 MB) and is ready in 0.8 s locally, with no console errors. The launch entry `smallvillage-dist` serves `dist` on port 4174.
+- **Deploy (waits for the owner):**
+  - Vercel builds `dist/` from GitHub `main`. Pushing `rebuild-2027` should give a Vercel preview URL for that branch, leaving the live site unchanged.
+  - Making the new village the main page means merging into `main`, plus either renaming `village-2027.html` to `index.html` or adding a link or redirect. This needs the owner's agreement.
+- **Possible later:** a smaller assets.glb (texture-free already, so geometry quantisation), one shared Draco loader, and code-splitting the 700 KB three.js chunk.

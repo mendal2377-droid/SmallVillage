@@ -40,11 +40,15 @@ export function createWalkController(camera, canvas, onChange) {
     });
   }
   // Solid geometry between world heights low and high within r of (x,z); water and bounds count as solid.
+  // A coarse grid over the static boxes so a query only tests the boxes nearby (thousands in the 2027 village).
+  const CELL=8;let grid=new Map(),stamp=0;
+  function indexBoxes(){grid=new Map();for(const b of boxes){const R=Math.hypot(b.hx,b.hz);for(let gx=Math.floor((b.cx-R)/CELL);gx<=Math.floor((b.cx+R)/CELL);gx++)for(let gz=Math.floor((b.cz-R)/CELL);gz<=Math.floor((b.cz+R)/CELL);gz++){const k=gx*100003+gz;let c=grid.get(k);if(!c)grid.set(k,c=[]);c.push(b);}}}
+  function nearBoxes(x,z,r){stamp++;const out=[];for(let gx=Math.floor((x-r)/CELL);gx<=Math.floor((x+r)/CELL);gx++)for(let gz=Math.floor((z-r)/CELL);gz<=Math.floor((z+r)/CELL);gz++){const c=grid.get(gx*100003+gz);if(c)for(const b of c)if(b.q!==stamp){b.q=stamp;out.push(b);}}return out;}
   function solidAt(x,z,low,high,r=radius,skip){
     const [xmin,zmin,xmax,zmax]=nav.bounds;
     if(x<xmin+r||x>xmax-r||z<zmin+r||z>zmax-r)return true;
     if(low<(nav.ground??.2)+.5&&inWater(x,z,r))return true;
-    return Boolean(hitBox(boxes,x,z,low,high,r,skip)||hitBox([...dynamic.values()],x,z,low,high,r,skip));
+    return Boolean(hitBox(nearBoxes(x,z,r),x,z,low,high,r,skip)||(dynamic.size&&hitBox([...dynamic.values()],x,z,low,high,r,skip)));
   }
   function blocked(x,z,height){return solidAt(x,z,height+.04,height+eyeHeight+.08);}
   function move(dx,dz){
@@ -102,7 +106,7 @@ export function createWalkController(camera, canvas, onChange) {
     setDynamic(id,box){if(box)dynamic.set(id,box);else dynamic.delete(id);},
     place(x,y,z,lookYaw=yaw,lookPitch=0){camera.position.set(x,y,z);feet=y-eyeHeight;yaw=lookYaw;pitch=lookPitch;camera.rotation.set(pitch,yaw,0,'YXZ');},
     standAt(x,z,feet){const height=floorAt(x,z,feet,.6);return height!==undefined&&!blocked(x,z,height)?height:undefined;},
-    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=nav.pitch||0;camera.position.fromArray(nav.spawn);feet=camera.position.y-eyeHeight;camera.rotation.set(pitch,yaw,0,'YXZ');camera.fov=64;camera.near=.04;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
+    enter(data){nav=data;boxes=nav.boxes.map(([cx,cz,hx,hz,a,low=-100,high=100])=>({cx,cz,hx,hz,c:Math.cos(a),s:Math.sin(a),low,high}));indexBoxes();enabled=true;paused=false;driving=false;clearInput();yaw=nav.yaw||0;pitch=nav.pitch||0;camera.position.fromArray(nav.spawn);feet=camera.position.y-eyeHeight;camera.rotation.set(pitch,yaw,0,'YXZ');camera.fov=64;camera.near=.04;camera.updateProjectionMatrix();canvas.focus({preventScroll:true});onChange(true);},
     exit(){enabled=false;driving=false;clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();onChange(false);},
     pause(value){paused=value;if(value){clearInput();if(document.pointerLockElement===canvas)document.exitPointerLock();}},
     input(direction,pressed){if(!enabled||paused)return;if(pressed)touches.add(direction);else touches.delete(direction);},

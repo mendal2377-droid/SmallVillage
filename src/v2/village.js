@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {makeToon, toonUniforms} from './toon.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const BASE = '/models/v2/';
 const TILE = 300;
@@ -70,6 +71,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   // ---- static meshes: terrain, ponds, fields, home quarter
   const statics = new THREE.Group();
   statics.name = 'static';
+  const plain = [];
   const fieldMats = {};
   staticGltf.scene.traverse(o => {
     if (!o.isMesh) return;
@@ -85,14 +87,41 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
     } else if (name.startsWith('SV kit palette')) {
       o.material = kitMat;
     } else {
-      const m = o.material;
-      o.material = makeToon({kind: 'color', color: m.color, opacity: m.opacity});
+      plain.push(o);  // merged below
+      return;
     }
     o.castShadow = !name.startsWith('SV field');
     o.receiveShadow = true;
   });
   statics.add(staticGltf.scene);
   scene.add(statics);
+  // Phase 9: the plain-coloured meshes (mostly the home quarter, about 70 of them) become one merged mesh per
+  // opacity, with the colours baked into the vertices: some 140 draw calls (with shadows) become a few
+  statics.updateMatrixWorld(true);
+  const byOpacity = new Map();
+  for (const o of plain) {
+    const op = Math.round((o.material.opacity ?? 1) * 100) / 100;
+    let g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal') g.deleteAttribute(k);
+    if (!g.attributes.normal) g.computeVertexNormals();
+    g.applyMatrix4(o.matrixWorld);
+    const c = o.material.color, n = g.attributes.position.count, col = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) col.set([c.r, c.g, c.b], i * 3);
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    if (!byOpacity.has(op)) byOpacity.set(op, []);
+    byOpacity.get(op).push(g);
+    o.parent.remove(o);
+  }
+  for (const [op, list] of byOpacity) {
+    const merged = mergeGeometries(list);
+    const mat = makeToon({kind: 'color', opacity: op});
+    mat.vertexColors = true;
+    const m = new THREE.Mesh(merged, mat);
+    m.name = `home quarter merged ${op}`;
+    m.castShadow = op >= 1;
+    m.receiveShadow = true;
+    statics.add(m);
+  }
 
   // ---- instanced assets, grouped by key and tile
   const groups = [];  // {key, tile, records, mesh, lod, center}
@@ -116,6 +145,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
 
   const asset = (key) => data.assets[key];
   const isCloud = (key) => key.startsWith('cloud');
+  const swayKind = (key) => ['tree', 'crop'].includes(asset(key)?.kind);
   let month = 8;
 
   function stateFor(key) {
@@ -201,6 +231,78 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
     gp.state = state;
   }
 
+  // ---- Phase 9: batches for the far tiles, by LOD (1 casts shadows on the high tier, 2 does not) and material
+  const signature = (g) => Object.keys(g.attributes).sort().join() + (g.index ? '+i' : '');
+  const batches = new Map();  // `${lod}|${sway}` -> {bm, ids: Map(geometry -> geometryId), sig}
+  function planBatches() {
+    const need = new Map();  // batch key -> Set(geometry)
+    for (const key of new Set(groups.map((g) => g.key))) {
+      if (isCloud(key)) continue;
+      const a = asset(key);
+      if (!a) continue;
+      for (const st of Object.keys(a.lods)) for (const lod of [1, 2]) {
+        const f = geometryFor(key, st, lod);
+        if (!f) continue;
+        const bk = `${lod}|${swayKind(key)}`;
+        if (!need.has(bk)) need.set(bk, new Set());
+        need.get(bk).add(f.g);
+      }
+    }
+    for (const [bk, set] of need) {
+      const list = [...set];
+      // the most common attribute layout wins; odd geometries stay on the instanced path
+      const counts = new Map();
+      for (const g of list) counts.set(signature(g), (counts.get(signature(g)) || 0) + 1);
+      const sig = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      const ok = list.filter((g) => signature(g) === sig);
+      const verts = ok.reduce((n, g) => n + g.attributes.position.count, 0);
+      const idx = ok.reduce((n, g) => n + (g.index ? g.index.count : 0), 0);
+      const [lod, sway] = bk.split('|');
+      const bm = new THREE.BatchedMesh(data.instancesTotal ?? 8192, verts, Math.max(idx, 1), sway === 'true' ? kitMatSway : kitMat);
+      bm.name = `far batch lod${lod}${sway === 'true' ? ' sway' : ''}`;
+      bm.sortObjects = false;
+      bm.receiveShadow = true;
+      bm.castShadow = Number(lod) < SHADOW_LOD;
+      bm.userData.lod = Number(lod);
+      const ids = new Map();
+      for (const g of ok) ids.set(g, bm.addGeometry(g));
+      instRoot.add(bm);
+      batches.set(bk, {bm, ids, sig});
+    }
+  }
+  data.instancesTotal = Object.values(data.instances).reduce((n, r) => n + r.length, 0) + 16;
+  planBatches();
+
+  function unbatch(gp) {
+    if (!gp.b) return;
+    for (const id of gp.b.ids) gp.b.batch.bm.deleteInstance(id);
+    gp.b = null;
+  }
+  /** put a far tile into its batch; false when its geometry cannot be batched (it then stays instanced) */
+  function batchTile(gp, lod, force) {
+    if (isCloud(gp.key)) return false;
+    const state = stateFor(gp.key);
+    const f = geometryFor(gp.key, state, lod);
+    const batch = f && batches.get(`${lod}|${swayKind(gp.key)}`);
+    const gid = batch?.ids.get(f.g);
+    if (gid === undefined) { unbatch(gp); return false; }
+    if (gp.b && gp.b.lod === lod && gp.b.state === state && !force) return true;
+    unbatch(gp);
+    const ids = [];
+    gp.list.forEach(([r, i]) => {
+      if (hidden(gp, i)) return;
+      const id = batch.bm.addInstance(gid);
+      batch.bm.setMatrixAt(id, compose(r));
+      ids.push(id);
+    });
+    gp.b = {batch, ids, lod, state};
+    if (gp.mesh) gp.mesh.visible = false;
+    if (gp.near) gp.near.visible = false;
+    gp.lod = lod;
+    gp.state = state;
+    return true;
+  }
+
   let lastCamera = null;
   function updateLod(camera, force = false) {
     lastCamera = camera;
@@ -215,9 +317,13 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
       if (cull) {
         if (gp.mesh) gp.mesh.visible = false;
         if (gp.near) gp.near.visible = false;
+        unbatch(gp);
         gp.lod = -1;
         continue;
       }
+      if (lod >= 1 && batchTile(gp, lod, force)) continue;
+      unbatch(gp);
+      if (gp.lod >= 1 && !gp.mesh?.visible) gp.lod = -1;  // coming back from a batch: refill the instanced mesh
       update(gp, lod, camera, force);
       const shadows = lod < SHADOW_LOD && !isCloud(gp.key);  // distant tiles skip the shadow pass
       if (gp.mesh) gp.mesh.castShadow = shadows;
@@ -256,6 +362,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
     SMALL_CULL = qs.smallCull;
     VIEW_DIST = qs.viewDist ?? Infinity;
     SHADOW_LOD = qs.shadowLod ?? 2;
+    for (const {bm} of batches.values()) bm.castShadow = bm.userData.lod < SHADOW_LOD;
     if (lastCamera) updateLod(lastCamera, true);
   }
 
