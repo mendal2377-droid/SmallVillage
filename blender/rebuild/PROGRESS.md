@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–9 done. The branch `rebuild-2027` is pushed and Vercel built a preview (see Phase 9). `main` and `index.html` are untouched until the owner decides. Resume from here.
+Saved 21 October 2026: Phases 1–9 done and live: `main` was fast-forwarded to `rebuild-2027` and deployed on 21 Oct 2026. The new village is at https://small-village-eta.vercel.app/village-2027.html. The root `/` still serves the original app (`index.html` unchanged) until the owner decides to switch it. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -288,3 +288,9 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - It asks for a Vercel login (Vercel's default protection for previews): open it while signed in to Vercel.
   - To share it without a login, turn off Deployment Protection for previews, or make a shareable link in the Vercel project settings.
 - The live site (https://small-village-eta.vercel.app/) still serves `main` unchanged.
+
+### Production deploy (21 Oct 2026)
+
+- On the owner's instruction, `main` was fast-forwarded to `rebuild-2027` and pushed; Vercel deployed it to production.
+- **Live:** https://small-village-eta.vercel.app/village-2027.html. Ready in 5.8 s over the network, no console errors.
+- The root `/` is still the original app. Making the new village the front page means switching `index.html`, which needs the owner's word.
