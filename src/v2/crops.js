@@ -37,7 +37,7 @@ export function createCrops(scene, village) {
   // road corridors (road + shoulder + tree line) as segments, indexed the same way
   const segs = [];
   for (const R of Object.values(village.data.roads)) {
-    for (let i = 0; i + 1 < R.pts.length; i++) segs.push([...R.pts[i], ...R.pts[i + 1], R.width / 2 + 2.4]);
+    for (let i = 0; i + 1 < R.pts.length; i++) segs.push([...R.pts[i], ...R.pts[i + 1], R.width / 2]);
   }
   const segIndex = new Map();
   segs.forEach((s, n) => {
@@ -60,12 +60,13 @@ export function createCrops(scene, village) {
     }
     return null;
   }
-  function onRoad(x, z) {
+  /** on a road, or within `margin` metres of its edge (2.4 m covers the shoulder and the tree line) */
+  function onRoad(x, z, margin = 2.4) {
     for (const n of segIndex.get(`${Math.floor(x / CELL)},${Math.floor(z / CELL)}`) || []) {
       const [ax, az, bx, bz, w] = segs[n];
       const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz;
       const t = L2 ? Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / L2)) : 0;
-      if (Math.hypot(x - ax - t * dx, z - az - t * dz) < w) return true;
+      if (Math.hypot(x - ax - t * dx, z - az - t * dz) < w + margin) return true;
     }
     return false;
   }

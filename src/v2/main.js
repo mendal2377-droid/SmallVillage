@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {loadVillage, createSky} from './village.js';
 import {createCrops} from './crops.js';
+import {createFlora} from './flora.js';
 import {toonUniforms} from './toon.js';
 import {createWalkController} from '../walk.js';
 import {createGlider} from './glide.js';
@@ -21,8 +22,8 @@ import './v2.css';
 
 // ---------------------------------------------------------------- quality tiers
 export const QUALITY = {
-  high: {pixelRatio: 1.5, shadowMap: 4096, shadowExtent: 220, near: 70, lod1: 450, smallCull: 320, crops: [25, 60], fog: 1.0, clouds: 1},
-  low: {pixelRatio: 1.0, shadowMap: 1024, shadowExtent: 110, near: 35, lod1: 260, smallCull: 150, viewDist: 900, shadowLod: 1, crops: [12, 30], fog: 1.9, clouds: 0.5},
+  high: {pixelRatio: 1.5, shadowMap: 4096, shadowExtent: 220, near: 70, lod1: 450, smallCull: 320, crops: [25, 60], flora: 55, fog: 1.0, clouds: 1},
+  low: {pixelRatio: 1.0, shadowMap: 1024, shadowExtent: 110, near: 35, lod1: 260, smallCull: 150, viewDist: 900, shadowLod: 1, crops: [12, 30], flora: 30, fog: 1.9, clouds: 0.5},
 };
 function autoQuality() {
   const coarse = matchMedia('(pointer: coarse)').matches;
@@ -145,7 +146,7 @@ personBtn.addEventListener('click', () => setFirstPerson(!life.firstPerson));
 addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled && !fishing?.active && !acts?.ownsCamera) setFirstPerson(!life.firstPerson); });
 
 // ---------------------------------------------------------------- load and UI
-let village, sky, crops, life, fishing, acts, climate, ambience, nightLights;
+let village, sky, crops, flora, life, fishing, acts, climate, ambience, nightLights;
 const t0 = performance.now();
 status.textContent = 'Opening the village…';
 try {
@@ -157,6 +158,7 @@ try {
 sky = createSky(scene, village.data);
 nightLights = createNightLights(scene, village);
 crops = createCrops(scene, village);
+flora = createFlora(scene, village, crops);
 const templates = await loadCreatures(village.kitMatDry);
 follow = createFollowCamera(camera, walk);
 life = createLife({scene, templates, walk, player, data: village.data, getMonth: () => Number(monthSel.value)});
@@ -200,6 +202,7 @@ function applyQuality() {
   c.updateProjectionMatrix();
   village.setQuality(Q);
   crops.setRadii(Q.crops);
+  flora.setRadius(Q.flora);
   applySky();
 }
 function applyMonth() {
@@ -286,12 +289,13 @@ host.dataset.ready = 'true';
 function updateCrops() {
   const low = camera.position.y < 40;
   scene.getObjectByName('crops near the player').visible = low;
-  if (low) crops.update(camera, Number(monthSel.value));
+  flora.root.visible = low;
+  if (low) { crops.update(camera, Number(monthSel.value)); flora.update(camera, Number(monthSel.value)); }
 }
 
 // test and debugging hook: render one frame on demand (the loop pauses while the page is hidden)
 window.__sv2 = {
-  renderer, scene, camera, player, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
+  renderer, scene, camera, player, village, walk, crops, flora, goView, startWalking, QUALITY, glider, landing, land, backToMap,
   life: () => life, setFirstPerson, fishing: () => fishing, acts: () => acts,
   setMonth: (m) => climate.setMonth(m),
   setSky: (n) => { presetSel.value = n; climate.setOverride(n || null); },
