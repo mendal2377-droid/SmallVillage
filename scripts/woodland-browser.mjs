@@ -7,7 +7,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console'
 mkdirSync('artifacts/woodland',{recursive:true});
 const paintedFrame=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 try{
- await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
+ await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173/classic.html');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
  const data=await page.locator('#canvas-host').evaluate(e=>({...e.dataset}));assert.equal(await page.locator('.map-pin:visible').count(),7);assert.equal(data.generatedArt,'foliage,meadow,ground');assert.equal(data.woodlandPonds,'2');assert.ok(Number(data.woodlandTrees)>200);assert.ok(Number(data.flowerClumps)>3000);
  for(const name of ['foliage','meadow','ground'])assert.ok((await page.request.get(new URL(`/textures/painted/${name}.png`,page.url()).href)).ok());
  await page.screenshot({path:'artifacts/woodland/overview.png'});console.log('Seven entry pins, generated textures, forest and two large ponds',data.woodlandTrees,data.flowerClumps);

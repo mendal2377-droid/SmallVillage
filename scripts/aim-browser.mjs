@@ -2,7 +2,7 @@ import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader'],...(process.env.PLAYWRIGHT_PROXY?{proxy:{server:process.env.PLAYWRIGHT_PROXY,bypass:'127.0.0.1,localhost'}}:{})});
-const url=process.env.BASE_URL||'http://127.0.0.1:4173',out='artifacts/aim',errors=[];mkdirSync(out,{recursive:true});
+const url=process.env.BASE_URL||'http://127.0.0.1:4173/classic.html',out='artifacts/aim',errors=[];mkdirSync(out,{recursive:true});
 try{
  const context=await browser.newContext({viewport:{width:760,height:500}}),page=await context.newPage();page.setDefaultTimeout(180000);
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});

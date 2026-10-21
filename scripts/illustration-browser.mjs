@@ -4,7 +4,7 @@ import {mkdirSync,writeFileSync} from 'node:fs';
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const page=await browser.newPage({viewport:{width:800,height:540}});page.setDefaultTimeout(180000);const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('ERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.log('ERROR',m.text());}});mkdirSync('artifacts/illustration',{recursive:true});
 try{
-  await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
+  await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173/classic.html');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
   let data=await page.locator('#canvas-host').evaluate(o=>({...o.dataset}));assert.equal(data.visualStyle,'painted-illustration');assert.ok(Number(data.forestTrees)>400);assert.ok(Number(data.grassBanks)>10);assert.ok(Number(data.chimneys)>10);assert.equal(Number(data.litWindows),0);
   await page.screenshot({path:'artifacts/illustration/day-overview.png'});console.log('Painted overview and mixed forest',data.forestTrees,data.grassBanks,data.chimneys);
   await page.locator('[data-entry=house]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');await page.screenshot({path:'artifacts/illustration/day-yard.png'});

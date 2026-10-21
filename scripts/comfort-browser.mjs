@@ -7,7 +7,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console'
 mkdirSync('artifacts/comfort',{recursive:true});
 const frame=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 try{
- await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
+ await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173/classic.html');await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');
  assert.equal(await page.locator('.map-pin:visible').count(),7);assert.equal(await page.locator('[data-map-activity]:visible').count(),6);assert.equal(await page.locator('#canvas-host').getAttribute('data-activity-markers'),'9');
  await page.locator('[data-map-activity=potato]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.mapTarget==='potato');assert.ok(await page.locator('[data-activity-entry=potato]').isVisible());await page.screenshot({path:'artifacts/comfort/activity-plan.png'});
  await page.locator('[data-activity-entry=potato]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.walkLocation==='activity');

@@ -1,7 +1,7 @@
 import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
-const url=process.env.BASE_URL||'http://127.0.0.1:4173';
+const url=process.env.BASE_URL||'http://127.0.0.1:4173/classic.html';
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 // Software WebGL in CI is slower than a desktop GPU; keep pixel cost bounded.
 const page=await browser.newPage({viewport:{width:1024,height:700}});page.setDefaultTimeout(120000);

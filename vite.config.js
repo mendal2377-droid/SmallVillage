@@ -1,13 +1,13 @@
 import {resolve} from 'node:path';
 import {defineConfig} from 'vite';
 
-// Two pages: the current app (index.html) and the SmallVillage 2.0 preview (village-2027.html).
+// Two pages: the rebuilt village (index.html, the front page since 21 Oct 2026) and the original app (classic.html).
 export default defineConfig({
   build: {
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
-        village2027: resolve(import.meta.dirname, 'village-2027.html'),
+        classic: resolve(import.meta.dirname, 'classic.html'),
       },
     },
   },

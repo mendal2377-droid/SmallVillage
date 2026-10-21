@@ -1,6 +1,6 @@
 // SmallVillage 2.0 page: choose a place on the painted map or the 3D map, glide down by paraglider and walk
 // (shared walk controller + exported v2 navigation), with crops around the player, month/sky controls and
-// quality tiers for phones. The original app (index.html) is unchanged.
+// quality tiers for phones. This is the front page (index.html); the original app lives on as classic.html.
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {loadVillage, createSky} from './village.js';

@@ -1,7 +1,7 @@
 import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
-const url=process.env.BASE_URL||'http://127.0.0.1:4173',out='artifacts/coast';mkdirSync(out,{recursive:true});
+const url=process.env.BASE_URL||'http://127.0.0.1:4173/classic.html',out='artifacts/coast';mkdirSync(out,{recursive:true});
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const errors=[];
 async function run(phone){const context=await browser.newContext({viewport:phone?{width:390,height:740}:{width:900,height:600},isMobile:phone,hasTouch:phone,deviceScaleFactor:1}),page=await context.newPage();page.setDefaultTimeout(180000);page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  const frame=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {advanceActivity} from './activity-helpers.mjs';
 const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const out='artifacts/interactive';mkdirSync(out,{recursive:true});const url=process.env.BASE_URL||'http://127.0.0.1:4173';const errors=[];let lastPage;
+const out='artifacts/interactive';mkdirSync(out,{recursive:true});const url=process.env.BASE_URL||'http://127.0.0.1:4173/classic.html';const errors=[];let lastPage;
 try{
  for(const mobile of [false,true]){
   const ctx=await browser.newContext({viewport:mobile?{width:390,height:740}:{width:760,height:500},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:1});const page=await ctx.newPage();lastPage=page;page.setDefaultTimeout(180000);page.on('pageerror',e=>{errors.push(e.message);console.log('ERROR',e.message);});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});

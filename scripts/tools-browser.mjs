@@ -1,7 +1,7 @@
 import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync} from 'node:fs';
-const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const errors=[],out='artifacts/tools';mkdirSync(out,{recursive:true});const url=process.env.BASE_URL||'http://127.0.0.1:4173';
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});const errors=[],out='artifacts/tools';mkdirSync(out,{recursive:true});const url=process.env.BASE_URL||'http://127.0.0.1:4173/classic.html';
 try{
  const context=await browser.newContext({viewport:{width:760,height:500}}),page=await context.newPage();page.setDefaultTimeout(180000);page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto(url);await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.overview==='ready');await page.locator('[data-entry=house]').click();await page.waitForFunction(()=>document.querySelector('#canvas-host').dataset.game==='on');await page.keyboard.press('2');await page.locator('#hud-fire').waitFor({state:'visible'});assert.match(await page.locator('#hud-fire').textContent(),/Squirt/);console.log('Visible desktop water trigger');

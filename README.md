@@ -81,7 +81,8 @@ Browser tests use installed Microsoft Edge and write ignored evidence to `artifa
 
 ## Source and deployment
 
-- `index.html`, `src/entry.js`, `src/world.css`, `src/adventure.css`: map entry and game controls.
+- `index.html`, `src/v2/`: the rebuilt village (SmallVillage 2.0), the front page since 21 Oct 2026; plan and notes in `blender/rebuild/PROGRESS.md`.
+- `classic.html`, `src/entry.js`, `src/world.css`, `src/adventure.css`: the original app (now at `/classic.html`), map entry and game controls.
 - `src/map.js`, `src/places.js`: projected entry pins, minimap and shared activity/garden coordinates.
 - `src/viewer.js`, `src/walk.js`, `src/environment.js`: world loading, navigation and weather/time.
 - `src/world.js`: surface textures, instanced vegetation, wind, water and distance-based crop detail.

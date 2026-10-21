@@ -7,7 +7,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const pos=()=>page.locator('#canvas-host').getAttribute('data-camera-position').then(s=>s.split(',').map(Number));
 await mkdir('test-results',{recursive:true});
 try{
-  await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173',{waitUntil:'domcontentloaded',timeout:90000});
+  await page.goto(process.env.BASE_URL||'http://127.0.0.1:4173/classic.html',{waitUntil:'domcontentloaded',timeout:90000});
   assert.equal(await page.locator('.filmstrip img').count(),17);
   await page.locator('.filmstrip img').evaluateAll(images=>Promise.all(images.map(image=>{image.loading='eager';return image.decode();})));
   await page.locator('#three-mode').click();
