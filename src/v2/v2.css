@@ -59,3 +59,5 @@ body:not([data-mode="flying"]) .v2-panel { z-index: 4; }
 body[data-mode="flying"] .v2-panel { display: none; }
 .v2-pad[hidden] { display: none; }
 .v2-title { padding: 6px 16px; border-radius: 12px; background: rgba(250, 246, 234, 0.82); }
+.v2-person { position: fixed; top: 14px; right: 120px; z-index: 3; font: inherit; font-size: 13px; padding: 8px 12px; border-radius: 10px; border: 0; background: rgba(250, 247, 238, 0.92); box-shadow: 0 4px 16px rgba(30, 40, 30, 0.18); cursor: pointer; }
+.v2-person[hidden] { display: none; }

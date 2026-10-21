@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–5 done (village-2027.html is the new main page); next is Phase 6. Resume from here.
+Saved 21 October 2026: Phases 1–6 done (village-2027.html is the new main page, with the child, the dog and the animals); next is Phase 7. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -156,15 +156,38 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
 - **UI:** The title is bilingual (闫老寨 · 小村). The developer panel (month, sky, view, quality) starts folded and hides while gliding. `?view=` still jumps straight to a view for tests. The test hook `window.__sv2` adds `land`, `glider`, `landing` and `backToMap`.
 - **Regenerate:** render the map sheets (`build_layout.py -- --export --month N --render mapsheet`), then run `python blender/rebuild/layout/paint_map.py`. For data, run the export layout (`--export --month 8`) and then `export_web.py`.
 
+## Phase 6, child, dog and animals — done (21 Oct 2026)
+
+- **Kit batch 5** (`blender/rebuild/kit/build_creatures.py` → `public/models/v2/creatures.glb`, 86 KB):
+  - Ten part rigs: a generic village child, a yellow village dog, a cat, a goat, brown and white hens, a duck, a goose, a magpie and a sparrow.
+  - Each rig is an empty `RIG <name>` with rigid parts parented at their joints (`<name>:<part>`), 530–890 triangles per creature, using the shared palette.
+  - The child's shirt and trousers are seasonal palette slots: a striped shirt in summer, a red top in winter.
+  - Review sheets: `kit/renders/creatures_people.png` and `creatures_birds.png`.
+- **`src/v2/creatures.js`:**
+  - Procedural gaits (biped, quadruped with sit, wag and sniff; birds with walk, peck, flap and swim).
+  - `createLife` handles the avatar, the dog and the animals; `createFollowCamera` handles the third-person view.
+  - **Avatar:** the walk controller now drives an invisible `player` camera, so collisions and stairs are unchanged.
+    - The visible camera follows the child (52° FOV) with a boom that shortens against walls.
+    - In tight spots it switches to the child's eyes. V or the button switches first/third person.
+  - **Dog:** follows at heel with steering around obstacles, and catches up when more than 28 m away. When placed, it starts somewhere with a clear line to the child (never behind a courtyard wall) and runs to meet you. It wags while you walk, sits when you stop, and sniffs about.
+  - **Animals near the player** (refreshed every 25 m, removed beyond 140 m):
+    - hens at plot gates (some in the family courtyard);
+    - ducks and geese on the ponds (half as many in winter);
+    - goats tethered beside the field roads;
+    - cats near gates;
+    - magpies and sparrow flocks, which fly off when the child comes near.
+  - Each species draws each body part as one `InstancedMesh`, so draw calls don't grow with the number of animals.
+- **Tested:**
+  - the dog keeps heel at 1.6 m on the avenue and in the house lane;
+  - 34 animals spawned around the home, 17 on the avenue;
+  - about 390 draw calls with everything in view;
+  - no console errors, and the build passes.
+- **Regenerate:**
+  - `blender -b --factory-startup --python blender/rebuild/kit/build_creatures.py -- --sheet`;
+  - after palette changes, refresh `village.json` (re-run `export_web.py`, or rewrite its `palette` from `palette.py`).
+
 ### Next
 
-- Phase 6: the avatar (a village child), the small dog, and the kit animals (batch 5).
-- Later: Phase 7 activities polish, Phase 8 climate and seasons, Phase 9 performance and deploy (switch `index.html` to the new page only when the owner agrees).
-
-Phases 5–9 are unchanged from the plan: main page map modes and paraglider, avatar and dog with animals, activity polish, climate and seasons, then deploy.
-
-## Notes for whoever resumes
-
-- Blender 5.1 EEVEE lights the scene from the world shader. Keep the world as a dim ambient colour and show the sky on a separate dome, or toon shadows disappear.
-- The toon ramp thresholds (0.22–0.38) assume sun strength around 4.5 and ambient around 0.45. The `lit` / `shadow` tints act as exposure.
-- Write long multi-line patches with the Write tool, not shell heredocs; quoting has broken twice.
+- Phase 7: activity polish (fishing first: anticipation, bite, miss, the fight, the jump, landing, a catch journal), with seasonal activities.
+- Phase 8: climate and seasons (monthly calendar, weather, wetness, snow cover as a shader, wind, ambient sound).
+- Phase 9: performance (BatchedMesh, home-quarter material atlas) and deploy. Switch `index.html` to the new page only when the owner agrees.

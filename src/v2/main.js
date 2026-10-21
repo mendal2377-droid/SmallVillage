@@ -9,6 +9,7 @@ import {toonUniforms} from './toon.js';
 import {createWalkController} from '../walk.js';
 import {createGlider} from './glide.js';
 import {createLanding} from './landing.js';
+import {loadCreatures, createLife, createFollowCamera} from './creatures.js';
 import './v2.css';
 
 // ---------------------------------------------------------------- quality tiers
@@ -62,12 +63,17 @@ resize();
 // ---------------------------------------------------------------- walking with collisions
 const walkBtn = document.getElementById('v2-walk');
 const pad = document.getElementById('v2-pad');
-const walk = createWalkController(camera, renderer.domElement, (on) => {
+const player = new THREE.PerspectiveCamera(64, 1, 0.04, 9000);  // the child's eyes, driven by the walk controller
+const walk = createWalkController(player, renderer.domElement, (on) => {
   controls.enabled = !on;
+  if (on) life?.start(); else life?.stop();
+  personBtn.hidden = !on;
   walkBtn.textContent = on ? 'Orbit' : 'Walk';
   host.dataset.navigationMode = on ? 'walk' : 'orbit';
   pad.hidden = !(on && matchMedia('(pointer: coarse)').matches);
   if (!on) {
+    camera.position.copy(player.position);
+    camera.quaternion.copy(player.quaternion);
     camera.fov = 42;
     camera.near = 0.2;
     camera.updateProjectionMatrix();
@@ -99,10 +105,35 @@ function startWalking(x, z, yaw = 0) {
   if (!walk.nav) walk.enter({...village.data.nav});  // initialise boxes once, then place
   const [px, h, pz] = freeSpotNear(x, z);
   walk.enter({...village.data.nav, spawn: [px, h + walk.eyeHeight, pz], yaw});
+  setFirstPerson(life?.firstPerson ?? false);  // restores the walking field of view after a glide and snaps the camera
 }
 
+// third person by default (the child and the dog in view); V or the button switches to the child's eyes
+const personBtn = document.getElementById('v2-person');
+let follow = null;
+function setFirstPerson(on) {
+  life?.setFirstPerson(on);
+  personBtn.textContent = on ? '👁 1st' : '🧒 3rd';
+  camera.fov = on ? 64 : 52;
+  camera.near = on ? 0.04 : 0.1;
+  camera.updateProjectionMatrix();
+  if (walk.enabled) viewCamera(1 / 60, true);
+}
+function viewCamera(dt, snap = false) {
+  if (!walk.enabled || !life) return;
+  if (life.firstPerson) {
+    camera.position.copy(player.position);
+    camera.quaternion.copy(player.quaternion);
+  } else {
+    follow.update(player, dt, snap);
+    life.child.root.visible = !follow.tight;  // too boxed in for a camera behind: see through the child's eyes
+  }
+}
+personBtn.addEventListener('click', () => setFirstPerson(!life.firstPerson));
+addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled) setFirstPerson(!life.firstPerson); });
+
 // ---------------------------------------------------------------- load and UI
-let village, sky, crops;
+let village, sky, crops, life;
 const t0 = performance.now();
 status.textContent = 'Opening the village…';
 try {
@@ -113,6 +144,10 @@ try {
 }
 sky = createSky(scene, village.data);
 crops = createCrops(scene, village);
+const templates = await loadCreatures(village.kitMat);
+follow = createFollowCamera(camera, walk);
+life = createLife({scene, templates, walk, player, data: village.data, getMonth: () => Number(monthSel.value)});
+setFirstPerson(false);
 
 const monthSel = document.getElementById('v2-month');
 const presetSel = document.getElementById('v2-preset');
@@ -228,11 +263,15 @@ function updateCrops() {
 
 // test and debugging hook: render one frame on demand (the loop pauses while the page is hidden)
 window.__sv2 = {
-  renderer, scene, camera, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
+  renderer, scene, camera, player, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
+  life: () => life, setFirstPerson,
   setMonth: (m) => { monthSel.value = String(m); applyMonth(); },
   setSky: (n) => { presetSel.value = n; applySky(); },
   setQuality: (q) => { qualitySel.value = q; applyQuality(); },
-  step(dt = 1 / 60) { if (glider.active) glider.update(dt); else walk.update(dt); },
+  step(dt = 1 / 60) {
+    if (glider.active) glider.update(dt); else { walk.update(dt); viewCamera(dt); }
+    life.update(dt, performance.now() / 1000);
+  },
   frame() {
     renderer.info.reset();
     sky.follow(camera);
@@ -255,8 +294,9 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(timer.getDelta(), 0.1);
   toonUniforms.uTime.value += dt;
   if (glider.active) glider.update(dt);
-  else if (walk.enabled) walk.update(dt);
+  else if (walk.enabled) { walk.update(dt); viewCamera(dt); }
   else controls.update();
+  life.update(dt, timer.getElapsed());
   landing.updatePins3d();
   sky.follow(camera);
   lodTimer -= dt;
