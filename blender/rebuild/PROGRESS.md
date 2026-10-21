@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–6 done; Phase 7 fishing done, other activities written (tricycle untested). Resume from here.
+Saved 21 October 2026: Phases 1–7 done (activities: fishing, kite, bugs, roast, glean, ice, firecrackers, tricycle); next is Phase 8. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -233,9 +233,6 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - **glean**: May–June. A combine harvester cuts swaths and leaves stubble (`crops.setCut`); pick up ears into a basket. Tested.
   - **ice**: the ponds freeze Dec–Feb (ice sheets); run-up, slide, steer and fall. Fishing is not offered on frozen ponds. Tested after a slide-length fix; the fall is not re-tested.
   - **firecrackers**: Jan–Feb near home; a string of crackers, red paper that stays on the ground, and a fountain (B). Tested.
-  - **tricycle**: the electric tricycle at the gate, with the dog in the cargo bed. **Not tested yet.**
-- **Next:**
-  - Test the tricycle (seat and dog heights, steering, parking collider).
-  - Re-check the ice fall and gleaning visuals.
-  - Run a phone layout pass for the walking-activity panel (it sits at the top).
-  - Then Phase 8.
+  - **tricycle**: the electric tricycle with the dog in the cargo bed. The layout stores it inside the gatehouse room (too narrow to drive out), so it waits in the lane east of the courtyard at (−22.5, 108) and the static instance is hidden. The chase camera boom shortens against walls; if it is boxed in, the child turns it toward the longest open run. It parks where you get off, with a collider. Tested.
+- **Checked:** the ice fall (a slide is about 10 m), gleaning visuals (stubble, basket, ears), the phone layout of the walking-activity panel (top), and no console errors.
+- **Next:** Phase 8 (climate and seasons: monthly calendar, weather, wetness, snow cover as a shader, wind, ambient sound), then Phase 9 (performance and deploy).

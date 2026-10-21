@@ -18,6 +18,9 @@ export function createTricycle(api) {
   const S = {phase: 'off', pos: new THREE.Vector3(rec ? rec[0] : -26.5, 0, rec ? rec[2] : 110.6), yaw: rec ? rec[3] : Math.PI / 2,
     speed: 0, steer: 0, lean: new Set(), go: false, brake: false, reverse: false, km: 0, top: 0, taken: false, motor: null, bumpT: 0};
   const cam = smoothCamera();
+  // the layout stores it inside the gatehouse room, whose door is too narrow to drive through:
+  // it waits in the lane along the east side of the courtyard instead
+  if (rec && Math.hypot(rec[0] + 26.5, rec[2] - 110.6) < 1) { S.pos.set(-22.5, 0, 108); S.yaw = 0; }
 
   function takeOver() {
     // the first ride replaces the static courtyard instance with a mesh of our own that can move and park anywhere
@@ -50,6 +53,9 @@ export function createTricycle(api) {
     return S.pos.clone().addScaledVector(fw, 0.72);
   }
 
+  takeOver();
+  parkCollider(true);
+
   const A = {
     id: 'tricycle', icon: '🛺', zh: '开电三轮', en: 'Tricycle', pauseWalk: true,
     available() {
@@ -58,6 +64,17 @@ export function createTricycle(api) {
     },
     start() {
       takeOver();
+      // boxed in front and back (it is parked across the gatehouse)? wheel it round by hand to face the longest open run
+      const run = (yaw) => {
+        const f = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+        for (let d = 0; d < 8; d += 0.5) if (blocked(S.pos.clone().addScaledVector(f, d), f, 1)) return d;
+        return 8;
+      };
+      if (run(S.yaw) < 3 && run(S.yaw + Math.PI) < 3) {
+        const yaws = [S.yaw, S.yaw + Math.PI / 2, S.yaw - Math.PI / 2, S.yaw + Math.PI];
+        S.yaw = yaws.reduce((a, b) => (run(b) > run(a) ? b : a));
+        place();
+      }
       parkCollider(false);
       S.speed = 0; S.steer = 0; S.lean.clear(); S.go = S.brake = S.reverse = false;
       S.motor = api.sounds.hum(true);
@@ -135,7 +152,14 @@ export function createTricycle(api) {
     },
     camera(c, dt) {
       const fw = fwd();
-      const want = S.pos.clone().addScaledVector(fw, -5.2).setY(ground() + 2.5);
+      // a boom that shortens against walls and gate roofs, like the walking camera
+      let len = 5.2;
+      for (let d = 1.2; d <= 5.2; d += 0.3) {
+        const p = S.pos.clone().addScaledVector(fw, -d).setY(ground() + 1.2 + d * 0.25);
+        if (walk.solidAt(p.x, p.z, p.y - 0.3, p.y + 0.3, 0.3)) { len = Math.max(1.2, d - 0.4); break; }
+      }
+      S.boom = S.boom === undefined ? len : damp(S.boom, len, len < S.boom ? 20 : 3, dt);
+      const want = S.pos.clone().addScaledVector(fw, -S.boom).setY(ground() + 1.2 + S.boom * 0.25);
       const look = S.pos.clone().addScaledVector(fw, 3).setY(ground() + 0.9);
       cam.update(c, want, look, dt, 4);
     },
