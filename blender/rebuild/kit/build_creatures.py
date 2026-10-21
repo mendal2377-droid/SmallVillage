@@ -57,42 +57,86 @@ def blob(m, c, r, slot, rng, sq=(1, 1, 1), sub=2, j=0.04):
 # ---------------------------------------------------------------- the village child (~1.36 m)
 
 def child(coll):
+    """A village child of about eight: striped short-sleeved polo, dark trousers, sneakers, tufted bob."""
     R = Rig("child", coll, 1.36)
-    R.part("hips", (0, 0, 0.62), lambda m, g: m.box((0, 0, 0.03), (0.24, 0.15, 0.14), "child_bottom"))
+
+    def hips(m, g):
+        m.cyl((0, 0, -0.03), (0, 0, 0.1), 0.118, 0.124, "child_bottom", segs=16)        # seat of the trousers
+        m.cyl((0, 0, 0.08), (0, 0, 0.115), 0.127, 0.127, "child_stripe", segs=16)       # waistband
+        for s in (-1, 1):
+            m.box((s * 0.085, -0.1, 0.03), (0.06, 0.012, 0.07), "child_bottom")          # back pockets
+            m.box((s * 0.11, 0.055, 0.06), (0.012, 0.05, 0.05), "child_stripe")          # side pocket seams
+    R.part("hips", (0, 0, 0.62), hips)
 
     def torso(m, g):
-        m.cyl((0, 0, 0), (0, 0, 0.34), 0.13, 0.118, "child_top", segs=12)
-        for z in (0.11, 0.21):
-            m.cyl((0, 0, z), (0, 0, z + 0.035), 0.1325, 0.131, "child_stripe", segs=12)
-        m.cyl((0, 0, 0.33), (0, 0, 0.36), 0.075, 0.06, "child_top", segs=10)  # collar
+        m.cyl((0, 0, 0), (0, 0, 0.2), 0.124, 0.132, "child_top", segs=16)
+        m.cyl((0, 0, 0.2), (0, 0, 0.31), 0.132, 0.118, "child_top", segs=16)
+        blob(m, (0, 0, 0.3), 0.12, "child_top", g, (1.12, 0.8, 0.45), j=0)               # rounded shoulders
+        for z in (0.07, 0.15, 0.23):
+            m.cyl((0, 0, z), (0, 0, z + 0.03), 0.1345, 0.134, "child_stripe", segs=16)
+        # polo collar: two flaps, a placket and two buttons
+        m.cyl((0, 0, 0.33), (0, 0, 0.365), 0.068, 0.058, "child_top", segs=12)
+        for s in (-1, 1):
+            m.poly([(s * 0.012, 0.075, 0.345), (s * 0.075, 0.05, 0.35), (s * 0.06, 0.082, 0.3)], "cloth_cream")
+            m.poly([(s * 0.06, 0.082, 0.3), (s * 0.075, 0.05, 0.35), (s * 0.012, 0.075, 0.345)], "cloth_cream")
+        m.box((0, 0.124, 0.28), (0.03, 0.006, 0.08), "cloth_cream")
+        for z in (0.29, 0.26):
+            blob(m, (0, 0.13, z), 0.007, "ac_white", g, sub=1, j=0)
+        m.box((-0.06, 0.128, 0.22), (0.05, 0.005, 0.05), "child_stripe")                 # chest pocket
     R.part("torso", (0, 0, 0.68), torso, "hips")
 
     def head(m, g):
-        m.cyl((0, 0, 0), (0, 0, 0.07), 0.045, 0.045, "skin", segs=8)
-        blob(m, (0, 0.0, 0.17), 0.14, "skin", g, (1, 0.95, 1.05), j=0.0)
-        blob(m, (0, -0.032, 0.215), 0.147, "hair", g, (1.04, 1.0, 0.93), j=0.02)  # bob haircut covering top and back
-        blob(m, (0, 0.06, 0.255), 0.1, "hair", g, (1.25, 0.8, 0.5), j=0.02)       # fringe
+        m.cyl((0, 0, -0.01), (0, 0, 0.075), 0.044, 0.046, "skin", segs=10)                 # neck
+        blob(m, (0, 0.004, 0.17), 0.138, "skin", g, (1, 0.96, 1.04), sub=3, j=0.0)         # head
+        blob(m, (0, 0.06, 0.1), 0.085, "skin", g, (1.05, 0.8, 0.75), sub=2, j=0)           # round chin and cheeks
         for s in (-1, 1):
-            blob(m, (s * 0.05, 0.128, 0.16), 0.019, "eye", g, (1, 0.6, 1.3), sub=1, j=0)
-            blob(m, (s * 0.078, 0.112, 0.122), 0.024, "cheek", g, (1, 0.5, 0.7), sub=1, j=0)
-        blob(m, (0, 0.136, 0.105), 0.012, "cheek", g, (1.6, 0.6, 0.5), sub=1, j=0)  # small mouth
+            blob(m, (s * 0.136, 0.0, 0.16), 0.028, "skin", g, (0.45, 0.8, 1.15), sub=2, j=0)  # ears
+            blob(m, (s * 0.142, 0.002, 0.158), 0.012, "cheek", g, (0.3, 0.7, 1.0), sub=1, j=0)
+        # hair: a bob over the top and back, a fringe, and soft tufts with a cowlick at the crown
+        blob(m, (0, -0.03, 0.215), 0.148, "hair", g, (1.04, 1.0, 0.92), sub=3, j=0.015)
+        blob(m, (0, 0.065, 0.258), 0.095, "hair", g, (1.3, 0.75, 0.48), sub=2, j=0.02)
+        for k in range(9):
+            a = k / 9 * 6.283
+            blob(m, (math.cos(a) * 0.12, -0.02 + math.sin(a) * 0.11, 0.26 + 0.02 * math.sin(a * 2)), 0.045, "hair", g, (1, 1, 0.7), sub=1, j=0.03)
+        m.cyl((0.01, -0.06, 0.34), (0.03, -0.04, 0.39), 0.016, 0.003, "hair", segs=5)      # cowlick
+        for s in (-1, 1):
+            blob(m, (s * 0.11, 0.07, 0.17), 0.04, "hair", g, (0.6, 0.8, 1.4), sub=1, j=0.02)  # sideburn tufts
+            # eyes: dark, with a white glint; brows; cheeks
+            blob(m, (s * 0.05, 0.128, 0.165), 0.02, "eye", g, (1, 0.55, 1.3), sub=2, j=0)
+            blob(m, (s * 0.05 + 0.007, 0.142, 0.172), 0.006, "ac_white", g, sub=1, j=0)
+            blob(m, (s * 0.052, 0.13, 0.205), 0.02, "hair", g, (1.4, 0.45, 0.32), sub=1, j=0)
+            blob(m, (s * 0.08, 0.112, 0.125), 0.026, "cheek", g, (1, 0.45, 0.7), sub=1, j=0)
+        blob(m, (0, 0.145, 0.14), 0.014, "skin", g, (1, 1.1, 0.9), sub=1, j=0)            # nose
+        for s in (-1, 1):                                                                 # a small smile
+            blob(m, (s * 0.012, 0.137, 0.103), 0.008, "tongue", g, (1.4, 0.5, 0.6), sub=1, j=0)
+        blob(m, (0, 0.138, 0.098), 0.009, "tongue", g, (1.5, 0.5, 0.6), sub=1, j=0)
     R.part("head", (0, 0, 1.03), head, "torso")
 
     for s, side in ((-1, "L"), (1, "R")):
         def arm(m, g, s=s):
-            m.cyl((0, 0, 0), (0, 0, -0.2), 0.047, 0.042, "child_top", segs=8)
-            m.cyl((0, 0, -0.2), (0, 0, -0.38), 0.035, 0.03, "skin", segs=8)
-            blob(m, (0, 0.005, -0.415), 0.04, "skin", g, (0.9, 0.8, 1.1), sub=1, j=0)
+            blob(m, (0, 0, -0.01), 0.05, "child_top", g, (1, 1, 1.1), sub=2, j=0)        # shoulder
+            m.cyl((0, 0, 0), (0, 0, -0.16), 0.052, 0.05, "child_top", segs=12)          # short sleeve
+            m.cyl((0, 0, -0.14), (0, 0, -0.165), 0.053, 0.052, "child_stripe", segs=12)  # sleeve hem
+            m.cyl((0, 0, -0.16), (0, 0, -0.37), 0.034, 0.029, "skin", segs=10)
+            blob(m, (0, 0.006, -0.405), 0.036, "skin", g, (0.75, 0.85, 1.15), sub=2, j=0)  # hand
+            blob(m, (-s * 0.018, 0.026, -0.39), 0.014, "skin", g, (1, 1, 1.4), sub=1, j=0)  # thumb
         R.part(f"arm {side}", (s * 0.168, 0, 0.99), arm, "torso")
 
         def thigh(m, g):
-            m.cyl((0, 0, 0), (0, 0, -0.28), 0.06, 0.052, "child_bottom", segs=10)
+            m.cyl((0, 0, 0.02), (0, 0, -0.28), 0.064, 0.054, "child_bottom", segs=12)
+            blob(m, (0, 0.012, -0.28), 0.055, "child_bottom", g, (1, 1, 0.8), sub=2, j=0)  # knee
         R.part(f"leg {side}", (s * 0.07, 0, 0.6), thigh, "hips")
 
         def shin(m, g):
-            m.cyl((0, 0, 0), (0, 0, -0.25), 0.05, 0.044, "child_bottom", segs=10)
-            m.box((0, 0.035, -0.285), (0.09, 0.18, 0.07), "shoe")
-            m.box((0, 0.035, -0.317), (0.095, 0.185, 0.02), "shoe_sole")
+            m.cyl((0, 0, 0), (0, 0, -0.22), 0.053, 0.048, "child_bottom", segs=12)
+            m.cyl((0, 0, -0.2), (0, 0, -0.235), 0.051, 0.051, "child_stripe", segs=12)  # turned-up cuff
+            m.cyl((0, 0, -0.235), (0, 0, -0.26), 0.04, 0.04, "ac_white", segs=10)       # sock
+            # sneaker: rounded toe cap, upper, laces, a thick pale sole
+            m.box((0, 0.025, -0.285), (0.088, 0.15, 0.06), "shoe")
+            blob(m, (0, 0.1, -0.29), 0.046, "shoe", g, (1, 1.05, 0.7), sub=2, j=0)
+            m.box((0, 0.06, -0.255), (0.05, 0.08, 0.008), "cloth_cream")
+            m.box((0, 0.035, -0.317), (0.098, 0.2, 0.024), "shoe_sole")
+            blob(m, (0, 0.118, -0.318), 0.047, "shoe_sole", g, (1.03, 0.9, 0.3), sub=2, j=0)
         R.part(f"knee {side}", (s * 0.07, 0, 0.32), shin, f"leg {side}")
     return R
 
@@ -100,28 +144,52 @@ def child(coll):
 # ---------------------------------------------------------------- quadrupeds
 
 def dog(coll):
-    """Small yellow village dog (中华田园犬 type puppy)."""
+    """Small yellow village dog (中华田园犬 type): pricked ears, curled tail, pale eyebrows and chest, a red collar."""
     R = Rig("dog", coll, 0.48)
 
     def body(m, g):
-        blob(m, (0, 0, 0), 0.14, "dog_fur", g, (0.85, 1.75, 0.85))
-        blob(m, (0, 0.03, -0.05), 0.11, "dog_light", g, (0.72, 1.45, 0.6))
+        blob(m, (0, 0, 0), 0.14, "dog_fur", g, (0.85, 1.7, 0.85), sub=3, j=0.02)
+        blob(m, (0, 0.13, 0.04), 0.12, "dog_fur", g, (0.85, 0.9, 0.95), sub=2, j=0.01)     # deep chest
+        blob(m, (0, 0.16, -0.01), 0.09, "dog_light", g, (0.75, 0.8, 0.95), sub=2, j=0)      # pale bib
+        blob(m, (0, 0.02, -0.06), 0.11, "dog_light", g, (0.7, 1.45, 0.55), sub=2, j=0)      # belly
+        for s in (-1, 1):
+            blob(m, (s * 0.06, -0.15, 0.0), 0.085, "dog_fur", g, (0.7, 1.0, 1.0), sub=2, j=0.01)  # haunches
+        blob(m, (0, 0.2, 0.12), 0.08, "dog_fur", g, (0.85, 0.9, 1.1), sub=2, j=0)           # neck
+        m.cyl((0, 0.19, 0.06), (0, 0.235, 0.17), 0.083, 0.08, "plastic_red", segs=14)       # collar
+        blob(m, (0, 0.265, 0.07), 0.018, "trim_gold", g, sub=2, j=0)                        # bell
     R.part("body", (0, 0, 0.3), body)
 
     def head(m, g):
-        blob(m, (0, 0.04, 0.06), 0.11, "dog_fur", g)
-        blob(m, (0, 0.14, 0.03), 0.056, "dog_light", g, (1, 1.3, 0.85))
-        blob(m, (0, 0.205, 0.046), 0.022, "nose", g, sub=1, j=0)
+        blob(m, (0, 0.03, 0.06), 0.105, "dog_fur", g, (1, 0.95, 0.95), sub=3, j=0)        # skull
+        blob(m, (0, 0.125, 0.025), 0.06, "dog_light", g, (0.95, 1.35, 0.8), sub=2, j=0)    # muzzle
+        blob(m, (0, 0.11, 0.06), 0.05, "dog_fur", g, (0.8, 1.2, 0.6), sub=2, j=0)          # bridge of the nose
+        blob(m, (0, 0.188, 0.04), 0.024, "nose", g, (1.15, 0.85, 0.9), sub=2, j=0)
+        m.box((0, 0.17, 0.0), (0.05, 0.03, 0.006), "nose")                                 # mouth line
+        blob(m, (0, 0.165, -0.012), 0.018, "tongue", g, (1, 1.4, 0.4), sub=1, j=0)
         for s in (-1, 1):
-            blob(m, (s * 0.045, 0.118, 0.1), 0.016, "eye", g, sub=1, j=0)
-            blob(m, (s * 0.085, 0.0, 0.15), 0.05, "dog_fur", g, (0.45, 0.9, 1.3), sub=1)
-        blob(m, (0, 0.17, -0.005), 0.02, "tongue", g, (1, 1.4, 0.4), sub=1, j=0)
+            blob(m, (s * 0.046, 0.108, 0.098), 0.017, "eye", g, (1, 0.8, 1.05), sub=2, j=0)
+            blob(m, (s * 0.046 + 0.005, 0.122, 0.104), 0.005, "ac_white", g, sub=1, j=0)  # glint
+            blob(m, (s * 0.05, 0.095, 0.128), 0.014, "dog_light", g, (1.2, 0.8, 0.6), sub=1, j=0)  # pale "eyebrows"
+            blob(m, (s * 0.06, 0.11, 0.035), 0.03, "dog_light", g, (0.8, 1, 0.8), sub=1, j=0)  # cheeks
+            # pricked, slightly folded ears
+            m.cyl((s * 0.055, 0.01, 0.13), (s * 0.075, 0.025, 0.22), 0.034, 0.004, "dog_fur", segs=6)
+            m.cyl((s * 0.055, 0.016, 0.135), (s * 0.072, 0.03, 0.2), 0.022, 0.003, "dog_light", segs=5)
     R.part("head", (0, 0.24, 0.4), head, "body")
-    R.part("tail", (0, -0.23, 0.36), lambda m, g: m.cyl((0, 0, 0), (0, -0.05, 0.17), 0.032, 0.014, "dog_fur", segs=7), "body")
+
+    def tail(m, g):
+        # the curled tail, carried up over the back
+        m.cyl((0, 0, 0), (0, -0.04, 0.09), 0.03, 0.025, "dog_fur", segs=8)
+        m.cyl((0, -0.04, 0.09), (0, -0.01, 0.17), 0.025, 0.019, "dog_fur", segs=8)
+        m.cyl((0, -0.01, 0.17), (0, 0.04, 0.19), 0.019, 0.012, "dog_fur", segs=8)
+        blob(m, (0, 0.05, 0.188), 0.014, "dog_light", g, sub=1, j=0)
+    R.part("tail", (0, -0.23, 0.36), tail, "body")
     for name, x, y in (("FL", -0.075, 0.15), ("FR", 0.075, 0.15), ("BL", -0.075, -0.15), ("BR", 0.075, -0.15)):
-        def leg(m, g):
-            m.cyl((0, 0, 0), (0, 0, -0.2), 0.032, 0.028, "dog_fur", segs=8)
-            blob(m, (0, 0.012, -0.21), 0.034, "dog_light", g, (1, 1.2, 0.7), sub=1, j=0)
+        def leg(m, g, back=name.startswith("B")):
+            m.cyl((0, 0, 0.02), (0, 0.0 if not back else -0.01, -0.11), 0.042 if back else 0.036, 0.03, "dog_fur", segs=10)
+            m.cyl((0, 0.0 if not back else -0.01, -0.11), (0, 0.005, -0.2), 0.03, 0.026, "dog_light" if not back else "dog_fur", segs=10)
+            blob(m, (0, 0.016, -0.212), 0.032, "dog_light", g, (1, 1.25, 0.6), sub=2, j=0)  # paw
+            for k in (-1, 0, 1):
+                blob(m, (k * 0.014, 0.045, -0.218), 0.011, "dog_light", g, sub=1, j=0)     # toes
         R.part(f"leg {name}", (x, y, 0.23), leg, "body")
     return R
 

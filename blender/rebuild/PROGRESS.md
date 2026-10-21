@@ -301,3 +301,18 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
 - The original app's browser tests now default to `http://127.0.0.1:4173/classic.html` (`BASE_URL` must point at the classic page).
 - `npm run test` (world-browser) fails on the animal count ('25' vs '24'). This happens with the old `walk.js` too, so it is not caused by this work; the classic app's test expectation is out of date.
 - Live checks: `/` has the title "SmallVillage · 小村", is ready in 0.8 s and has no console errors; `/classic.html` serves the original app.
+
+## After launch: owner's suggestions (21 Oct 2026)
+
+- **Sky and night:**
+  - The dome draws a sun disc and glow that follow the real sun for the month and hour, a moon about half a day behind it, and twinkling stars on clear nights; cloud cover dims all three. After dark the light comes from the moon.
+  - Windows light up pane by pane from dusk. The share rises to about 80 % in the evening and falls to a few before dawn (`climate.js` LIT table). The kit's palette glass cells and the home quarter's glass both glow.
+  - Street lamps: 63 solar lamps along the village lanes and lamp arms on 10 power poles near the houses (`nightlights.js` adds them before grouping). Their heads glow with a halo and a pool of light on the ground.
+- **Flowers** (`flora.js`): about 45,000 sites along walls, house fronts, road shoulders, under the poplars, in the home courtyard, and for trees among the houses. 27 kinds, each with the months it is there and the months it blooms; plants grow in patches and sway in the wind. Wall sites use every face of the ground boxes. `crops.onRoad(x, z, margin)` now takes a margin.
+- **Yard and stairs:**
+  - The follow camera on stairs and upstairs comes in closer and higher, with an eased boom: the largest per-frame jump fell from 1.18 m to 0.15 m. A hysteresis stops the view flickering into the child's eyes.
+  - The sun umbrella is gone (it is not in the photos).
+  - The tricycle lives in the blue shed again. A ride wheels it out to the lane, and it is wheeled back when you get off nearby.
+  - The courtyard concrete has moss stains.
+- **Names:** only general names are used (小村 SmallVillage, 邻村 Next village). Docs and references no longer name the real village or its location; internal `.blend` filenames are unchanged.
+- **Creatures:** the child (3.8k triangles) and the dog (2.8k) were rebuilt with more detail; same part names and joints, so the gaits are unchanged. See `kit/renders/creatures_people.png`.
