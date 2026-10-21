@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–9 done and live: `main` was fast-forwarded to `rebuild-2027` and deployed on 21 Oct 2026. The new village is at https://small-village-eta.vercel.app/village-2027.html. The root `/` still serves the original app (`index.html` unchanged) until the owner decides to switch it. Resume from here.
+Saved 21 October 2026: Phases 1–9 done and live. Since 21 Oct 2026 the rebuilt village is the front page, https://small-village-eta.vercel.app/ (`index.html`, formerly `village-2027.html`, whose old address redirects to `/`). The original app is at https://small-village-eta.vercel.app/classic.html (`classic.html`), linked from the new page. Work continues on `main`. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -294,3 +294,10 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
 - On the owner's instruction, `main` was fast-forwarded to `rebuild-2027` and pushed; Vercel deployed it to production.
 - **Live:** https://small-village-eta.vercel.app/village-2027.html. Ready in 5.8 s over the network, no console errors.
 - The root `/` is still the original app. Making the new village the front page means switching `index.html`, which needs the owner's word.
+
+### Front page switched (21 Oct 2026)
+
+- On the owner's instruction, `index.html` is now the rebuilt village and the original app moved to `classic.html`. `vercel.json` redirects `/village-2027.html` to `/` (307). Vite builds `index.html` and `classic.html`.
+- The original app's browser tests now default to `http://127.0.0.1:4173/classic.html` (`BASE_URL` must point at the classic page).
+- `npm run test` (world-browser) fails on the animal count ('25' vs '24'). This happens with the old `walk.js` too, so it is not caused by this work; the classic app's test expectation is out of date.
+- Live checks: `/` has the title "SmallVillage · 闫老寨", is ready in 0.8 s and has no console errors; `/classic.html` serves the original app.
