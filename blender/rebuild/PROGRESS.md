@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–9 done locally; the deploy waits for the owner (push the branch for a Vercel preview, then decide about index.html). Resume from here.
+Saved 21 October 2026: Phases 1–9 done. The branch `rebuild-2027` is pushed and Vercel built a preview (see Phase 9). `main` and `index.html` are untouched until the owner decides. Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -280,3 +280,11 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - Vercel builds `dist/` from GitHub `main`. Pushing `rebuild-2027` should give a Vercel preview URL for that branch, leaving the live site unchanged.
   - Making the new village the main page means merging into `main`, plus either renaming `village-2027.html` to `index.html` or adding a link or redirect. This needs the owner's agreement.
 - **Possible later:** a smaller assets.glb (texture-free already, so geometry quantisation), one shared Draco loader, and code-splitting the 700 KB three.js chunk.
+
+### Vercel preview (21 Oct 2026)
+
+- The branch `rebuild-2027` is pushed to GitHub (`origin/rebuild-2027`), and Vercel built it: "Deployment has completed".
+- **Preview page:** https://small-village-git-rebuild-2027-mendal2377-2948s-projects.vercel.app/village-2027.html
+  - It asks for a Vercel login (Vercel's default protection for previews): open it while signed in to Vercel.
+  - To share it without a login, turn off Deployment Protection for previews, or make a shareable link in the Vercel project settings.
+- The live site (https://small-village-eta.vercel.app/) still serves `main` unchanged.
