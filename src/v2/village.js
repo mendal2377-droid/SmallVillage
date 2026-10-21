@@ -47,7 +47,7 @@ function slotRect(pal, slot) {
   return new THREE.Vector4(col / g, row / g, (col + 1) / g, (row + 1) / g);
 }
 
-export async function loadVillage(scene, {onProgress = () => {}} = {}) {
+export async function loadVillage(scene, {onProgress = () => {}, prepare = null} = {}) {
   const draco = new DRACOLoader().setDecoderPath('/draco/');
   const loader = new GLTFLoader().setDRACOLoader(draco);
   const [data, assetsGltf, staticGltf] = await Promise.all([
@@ -58,6 +58,10 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   const pal = data.palette;
   const textures = Object.fromEntries(Object.keys(pal.seasons).map(s => [s, paletteTexture(pal, s)]));
   toonUniforms.uWaterRect.value.copy(slotRect(pal, 'water'));
+  const g0 = slotRect(pal, 'glass'), g1 = slotRect(pal, 'glass_light');  // neighbouring cells: one rect
+  toonUniforms.uGlassRect.value.set(Math.min(g0.x, g1.x), Math.min(g0.y, g1.y), Math.max(g0.z, g1.z), Math.max(g0.w, g1.w));
+  toonUniforms.uLampRect.value.copy(slotRect(pal, 'lamp'));
+  prepare?.(data);  // e.g. street lamps added to the instances before they are grouped
   const kitMat = makeToon({kind: 'palette', map: textures.summer});
   const kitMatSway = makeToon({kind: 'palette', map: textures.summer, sway: true});  // trees and crops in the wind
   const kitMatDry = makeToon({kind: 'palette', map: textures.summer, weather: false});  // creatures and props they carry
@@ -101,6 +105,9 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   const byOpacity = new Map();
   for (const o of plain) {
     const op = Math.round((o.material.opacity ?? 1) * 100) / 100;
+    const mname = (o.material.name || '').toLowerCase();
+    const glass = /glass|glazing/.test(mname) ? 1 : 0;  // window panes light up at night
+    const moss = /courtyard concrete|puddles|wet mud/.test(mname);
     let g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
     for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal') g.deleteAttribute(k);
     if (!g.attributes.normal) g.computeVertexNormals();
@@ -108,16 +115,19 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
     const c = o.material.color, n = g.attributes.position.count, col = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) col.set([c.r, c.g, c.b], i * 3);
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    if (!byOpacity.has(op)) byOpacity.set(op, []);
-    byOpacity.get(op).push(g);
+    g.setAttribute('aGlow', new THREE.BufferAttribute(new Float32Array(n).fill(glass), 1));
+    const key = `${op}|${moss}`;
+    if (!byOpacity.has(key)) byOpacity.set(key, []);
+    byOpacity.get(key).push(g);
     o.parent.remove(o);
   }
-  for (const [op, list] of byOpacity) {
+  for (const [key, list] of byOpacity) {
+    const [opS, mossS] = key.split('|'), op = Number(opS);
     const merged = mergeGeometries(list);
-    const mat = makeToon({kind: 'color', opacity: op});
+    const mat = makeToon({kind: 'color', opacity: op, glowAttr: true, moss: mossS === 'true'});
     mat.vertexColors = true;
     const m = new THREE.Mesh(merged, mat);
-    m.name = `home quarter merged ${op}`;
+    m.name = `home quarter merged ${key}`;
     m.castShadow = op >= 1;
     m.receiveShadow = true;
     statics.add(m);
@@ -375,11 +385,31 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
 export function createSky(scene, data) {
   const domeMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: {uH: {value: new THREE.Color()}, uM: {value: new THREE.Color()}, uZ: {value: new THREE.Color()}},
+    uniforms: {uH: {value: new THREE.Color()}, uM: {value: new THREE.Color()}, uZ: {value: new THREE.Color()},
+      uSun: {value: new THREE.Vector3(0, 1, 0)}, uMoon: {value: new THREE.Vector3(0, -1, 0)}, uNight: {value: 0}, uClear: {value: 1},
+      uTime: toonUniforms.uTime},
     vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `varying vec3 vDir; uniform vec3 uH, uM, uZ;
-      void main(){ float y = max(vDir.y, 0.0);
+    fragmentShader: `varying vec3 vDir; uniform vec3 uH, uM, uZ, uSun, uMoon; uniform float uNight, uClear, uTime;
+      float h21(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+      void main(){ vec3 d = normalize(vDir); float y = max(d.y, 0.0);
         vec3 c = y < 0.12 ? mix(uH, uM, smoothstep(0.0, 0.12, y)) : mix(uM, uZ, smoothstep(0.12, 0.62, y));
+        float above = smoothstep(-0.01, 0.03, d.y);
+        // stars, twinkling, only on clear nights
+        if (uNight > 0.01) {
+          vec2 sp = vec2(atan(d.z, d.x) * 90.0, asin(clamp(d.y, -1.0, 1.0)) * 90.0);
+          vec2 cell = floor(sp); float h = h21(cell);
+          float star = step(0.986, h) * smoothstep(0.42, 0.0, length(fract(sp) - 0.5)) * (0.6 + 0.4 * sin(uTime * (1.0 + h * 3.0) + h * 40.0));
+          c += vec3(0.95, 0.95, 1.0) * star * uNight * uClear * smoothstep(0.03, 0.25, d.y) * (0.6 + h * 0.6);
+        }
+        // the sun: a painted disc with a warm glow (dimmed by cloud)
+        float sd = max(dot(d, uSun), 0.0), sunUp = smoothstep(-0.03, 0.02, uSun.y);
+        c += vec3(1.0, 0.78, 0.5) * (pow(sd, 900.0) * 0.6 + pow(sd, 48.0) * 0.18) * uClear * sunUp * above;
+        c = mix(c, vec3(1.0, 0.96, 0.84), smoothstep(0.99955, 0.99972, sd) * uClear * sunUp * above);
+        // the moon: a pale disc with a cool halo
+        float md = max(dot(d, uMoon), 0.0), moonUp = smoothstep(-0.03, 0.03, uMoon.y);
+        float mVis = moonUp * above * mix(0.35, 1.0, uNight);
+        c += vec3(0.55, 0.62, 0.8) * pow(md, 260.0) * 0.3 * uClear * mVis;
+        c = mix(c, vec3(0.93, 0.93, 0.86), smoothstep(0.99966, 0.9998, md) * mix(0.45, 1.0, uClear) * mVis);
         gl_FragColor = vec4(c, 1.0);
         #include <colorspace_fragment>
       }`,

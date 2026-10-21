@@ -21,6 +21,11 @@ export const toonUniforms = {
   uSnow: {value: 0},
   uRain: {value: 0},
   uWind: {value: 0.2},
+  // night: lit windows (a share of them, fewer as the night goes on) and glowing lamps
+  uNightGlow: {value: 0},
+  uLitFrac: {value: 0},
+  uGlassRect: {value: new THREE.Vector4(-1, -1, -1, -1)},
+  uLampRect: {value: new THREE.Vector4(-1, -1, -1, -1)},
 };
 
 const NOISE = /* glsl */`
@@ -36,8 +41,11 @@ float svFbm(vec2 p){ float a = 0.5, s = 0.0; for (int k = 0; k < 4; k++){ s += a
 /**
  * kind: 'palette' (kit assets, map = palette texture), 'color' (home quarter), 'water', 'field'
  * sway: trees and crops bend in the wind (taller parts more)
+ * glowAttr: the geometry has an 'aGlow' attribute (1 = window glass that lights up at night)
+ * moss: damp moss stains (the courtyard concrete)
  */
-export function makeToon({kind = 'palette', map = null, color = null, opacity = 1, algae = 0, local = {}, sway = false, weather = true} = {}) {
+export function makeToon({kind = 'palette', map = null, color = null, opacity = 1, algae = 0, local = {}, sway = false, weather = true,
+  glowAttr = false, moss = false} = {}) {
   const mat = new THREE.MeshLambertMaterial({map, color: color ?? 0xffffff, side: THREE.DoubleSide,
     transparent: opacity < 1, opacity});
   mat.defines = mat.defines || {};
@@ -45,13 +53,15 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
   if (kind === 'field') mat.defines.SV_FIELD = '';
   if (kind === 'palette') mat.defines.SV_PALETTE = '';
   if (sway) mat.defines.SV_SWAY = '';
-  if (!weather) mat.defines.SV_DRY = '';  // creatures and carried things: no puddles or snow on them
+  if (!weather) mat.defines.SV_DRY = '';
+  if (glowAttr) mat.defines.SV_GLOWATTR = '';
+  if (moss) mat.defines.SV_MOSS = '';  // creatures and carried things: no puddles or snow on them
   const u = {...toonUniforms, uAlgae: {value: algae}, ...local};
   mat.userData.svUniforms = u;  // uniform objects are shared by reference: update .value to change the shader
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, u);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 vToonPos;\nuniform float uTime; uniform float uWind;')
+      .replace('#include <common>', '#include <common>\nvarying vec3 vToonPos;\nuniform float uTime; uniform float uWind;\n#ifdef SV_GLOWATTR\nattribute float aGlow; varying float vGlow;\n#endif')
       .replace('#include <begin_vertex>', `#include <begin_vertex>
         #ifdef SV_SWAY
           // bend with height: crops ripple, tree crowns rock; each plant has its own phase
@@ -77,14 +87,30 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
         #ifdef USE_BATCHING
           svW = batchingMatrix * svW;
         #endif
-        vToonPos = (modelMatrix * svW).xyz;`);
+        vToonPos = (modelMatrix * svW).xyz;
+        #ifdef SV_GLOWATTR
+          vGlow = aGlow;
+        #endif`);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
         uniform vec3 uLit; uniform vec3 uShadow; uniform vec3 uShadowTint; uniform float uT0; uniform float uT1;
         uniform float uTime; uniform vec3 uSkyHorizon; uniform vec4 uWaterRect; uniform float uAlgae;
         uniform vec3 uFieldA; uniform vec3 uFieldB;
         uniform float uWet; uniform float uSnow; uniform float uRain;
-        ${NOISE}`)
+        uniform float uNightGlow; uniform float uLitFrac; uniform vec4 uGlassRect; uniform vec4 uLampRect;
+        #ifdef SV_GLOWATTR
+          varying float vGlow;
+        #endif
+        ${NOISE}
+        // is this window lit tonight? one draw per pane-sized cell, so neighbours differ
+        float svWindowLit(vec3 p) {
+          float h = svHash(floor(p.xz / 1.9) + floor(p.y / 2.9) * vec2(7.13, 3.71));
+          return step(h, uLitFrac);
+        }
+        vec3 svWindowColour(vec3 p) {
+          float h = svHash(floor(p.xz / 1.9) + vec2(19.7, 4.3));
+          return mix(vec3(1.0, 0.68, 0.34), vec3(1.0, 0.88, 0.62), h) * 1.15;  // warm bulbs, some whiter
+        }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
         #ifdef SV_FIELD
           // crop rows (N-S) as painted stripes plus large patch variation, colours from the crop calendar
@@ -92,6 +118,12 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
           vec3 fc = mix(uFieldA, uFieldB, smoothstep(0.35, 0.65, patchN));
           float rows = 0.5 + 0.5 * sin(vToonPos.x * 6.2831 / 0.9);
           diffuseColor.rgb = fc * (1.0 - 0.18 * rows);
+        #endif
+        #ifdef SV_MOSS
+          // damp moss in the corners and along the cracks of old concrete
+          float svMoss = smoothstep(0.5, 0.72, svFbm(vToonPos.xz * 0.45)) * 0.7 + smoothstep(0.62, 0.7, svNoise(vToonPos.xz * 2.4)) * 0.25;
+          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.2, 0.27, 0.13), clamp(svMoss, 0.0, 1.0) * 0.6);
+          diffuseColor.rgb *= 0.92 + 0.12 * svNoise(vToonPos.xz * 0.9);
         #endif`)
       .replace('#include <opaque_fragment>', `
         vec3 svBase = max(diffuseColor.rgb, vec3(1e-4));
@@ -126,6 +158,21 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
           }
         }
         #endif
+        // ---- night: windows and lamps
+        if (uNightGlow > 0.001) {
+          float svGlowW = 0.0, svGlowL = 0.0;
+          #if defined(SV_PALETTE) && defined(USE_MAP)
+            if (vMapUv.x > uGlassRect.x && vMapUv.x < uGlassRect.z && vMapUv.y > uGlassRect.y && vMapUv.y < uGlassRect.w) svGlowW = 1.0;
+            if (vMapUv.x > uLampRect.x && vMapUv.x < uLampRect.z && vMapUv.y > uLampRect.y && vMapUv.y < uLampRect.w) svGlowL = 1.0;
+          #endif
+          #ifdef SV_GLOWATTR
+            svGlowW = step(0.5, vGlow);
+          #endif
+          float svLit = svGlowW * svWindowLit(vToonPos) * uNightGlow;
+          svToon = mix(svToon, svWindowColour(vToonPos), svLit);
+          svToon = mix(svToon, vec3(1.0, 0.94, 0.78) * 1.35, svGlowL * uNightGlow);
+          diffuseColor.a = mix(diffuseColor.a, 0.95, svLit);
+        }
         bool svWater = false;
         #ifdef SV_WATER
           svWater = true;
@@ -156,6 +203,6 @@ export function makeToon({kind = 'palette', map = null, color = null, opacity = 
         outgoingLight = svToon;
         #include <opaque_fragment>`);
   };
-  mat.customProgramCacheKey = () => `sv-toon-${kind}${sway ? '-sway' : ''}${weather ? '' : '-dry'}`;
+  mat.customProgramCacheKey = () => `sv-toon-${kind}${sway ? '-sway' : ''}${weather ? '' : '-dry'}${glowAttr ? '-glow' : ''}${moss ? '-moss' : ''}`;
   return mat;
 }

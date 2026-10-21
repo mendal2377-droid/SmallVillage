@@ -13,6 +13,7 @@ import {loadCreatures, createLife, createFollowCamera} from './creatures.js';
 import {createFishing} from './fishing.js';
 import {createActivities} from './activities.js';
 import {createClimate} from './climate.js';
+import {prepareLamps, createNightLights} from './nightlights.js';
 import {createAmbience} from './ambience.js';
 import {sounds} from './sounds.js';
 import {nearestPond} from './acts/common.js';
@@ -144,16 +145,17 @@ personBtn.addEventListener('click', () => setFirstPerson(!life.firstPerson));
 addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled && !fishing?.active && !acts?.ownsCamera) setFirstPerson(!life.firstPerson); });
 
 // ---------------------------------------------------------------- load and UI
-let village, sky, crops, life, fishing, acts, climate, ambience;
+let village, sky, crops, life, fishing, acts, climate, ambience, nightLights;
 const t0 = performance.now();
 status.textContent = 'Opening the village…';
 try {
-  village = await loadVillage(scene, {onProgress: (w) => { status.textContent = `Loaded ${w}…`; }});
+  village = await loadVillage(scene, {onProgress: (w) => { status.textContent = `Loaded ${w}…`; }, prepare: prepareLamps});
 } catch (err) {
   status.textContent = 'The village could not be loaded: ' + err.message;
   throw err;
 }
 sky = createSky(scene, village.data);
+nightLights = createNightLights(scene, village);
 crops = createCrops(scene, village);
 const templates = await loadCreatures(village.kitMatDry);
 follow = createFollowCamera(camera, walk);
@@ -295,12 +297,13 @@ window.__sv2 = {
   setSky: (n) => { presetSel.value = n; climate.setOverride(n || null); },
   setHour: (h) => climate.setHour(h),
   setWeather: (w) => climate.setWeather(w),
-  climate: () => climate, ambience: () => ambience,
+  climate: () => climate, ambience: () => ambience, nightLights: () => nightLights,
   setQuality: (q) => { qualitySel.value = q; applyQuality(); },
   step(dt = 1 / 60) {
     fishing.update(dt);
     acts.update(dt);
     climate.update(dt, camera);
+    nightLights.update(toonUniforms.uNightGlow.value);
     const sdt = dt * fishing.timeScale * acts.timeScale;
     if (glider.active) glider.update(dt); else { walk.update(dt); viewCamera(dt); }
     life.update(sdt, performance.now() / 1000);
@@ -329,6 +332,7 @@ renderer.setAnimationLoop(() => {
   acts.update(dt);
   climate.update(dt, camera);
   ambience.update(dt);
+  nightLights.update(toonUniforms.uNightGlow.value);
   if ((pondT -= dt) <= 0) {
     pondT = 1;
     const p = nearestPond(village.data, camera.position.x, camera.position.z);

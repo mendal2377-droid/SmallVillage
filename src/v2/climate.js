@@ -128,18 +128,55 @@ export function createClimate({scene, camera, village, sky, quality, onMonth, so
     }
     // light from where the sun really is (the moon's direction from the night preset after dark)
     if (el > -4) { P.sun_el = Math.max(el, 4); P.sun_az = az; }
+    else {
+      // after dark the light comes from the moon, where it is drawn in the sky
+      const m = moonAt();
+      if (m.el > 5) { P.sun_el = m.el; P.sun_az = m.az; }
+    }
     P.fog_density *= {fog: 5, rain: 2, snow: 1.3, storm: 1.8, overcast: 1.25}[S.weather] ?? 1;
     P.clouds = CLOUDS[S.weather] ?? P.clouds;
     return P;
   }
 
   let lastQ = null;
+  // the moon, simply: about half a day behind the sun (a moon near full, rising around dusk)
+  function moonAt() { return sunAt(S.month, (S.hour + 11.2) % 24); }
+  const dirOf = ({el, az}) => {
+    const e = THREE.MathUtils.degToRad(el), a = THREE.MathUtils.degToRad(az);
+    return new THREE.Vector3(Math.sin(a) * Math.cos(e), Math.sin(e), -Math.cos(a) * Math.cos(e));
+  };
+  // how many windows are lit: lights come on at dusk, most homes are lit in the evening, then fewer and fewer
+  // as the night goes on; a few early risers before dawn
+  const LIT = [[0, 0.16], [1, 0.08], [3, 0.04], [5, 0.12], [6.5, 0.06], [8, 0], [16.5, 0], [18, 0.45], [19.5, 0.82], [21, 0.75], [22, 0.5], [23, 0.3], [24, 0.16]];
+  function litFraction(h) {
+    for (let i = 0; i + 1 < LIT.length; i++) {
+      const [h0, f0] = LIT[i], [h1, f1] = LIT[i + 1];
+      if (h >= h0 && h <= h1) return lerp(f0, f1, (h - h0) / (h1 - h0));
+    }
+    return 0;
+  }
+  function nightUniforms() {
+    const u = sky.domeMat.uniforms;
+    const sun = S.override ? {el: presets[S.override].sun_el, az: presets[S.override].sun_az} : S.sun;
+    const night = S.override ? (S.override === 'night' ? 1 : S.override === 'dusk' ? 0.6 : 0) : 1 - smoothstep(S.sun.el, -10, -2);
+    u.uSun.value.copy(S.override === 'night' ? new THREE.Vector3(0, -1, 0) : dirOf(sun));
+    u.uMoon.value.copy(dirOf(S.override ? {el: 40, az: 150} : moonAt()));
+    u.uNight.value = night;
+    const w = S.override ? 'clear' : S.weather;
+    u.uClear.value = {clear: 1, cloudy: 0.7, overcast: 0.12, rain: 0.05, storm: 0, snow: 0.05, fog: 0.15}[w] ?? 1;
+    // windows and lamps: on from dusk (and on dark stormy days a little)
+    const glow = S.override ? night : 1 - smoothstep(S.sun.el, -6, 3);
+    toonUniforms.uNightGlow.value = Math.max(glow, ['storm', 'rain'].includes(w) && S.sun.el < 25 ? 0.35 : 0);
+    toonUniforms.uLitFrac.value = S.override ? (night > 0.5 ? 0.6 : 0) : Math.max(litFraction(S.hour), w === 'storm' ? 0.3 : 0);
+  }
+
   function applySky() {
     const P = S.override ? presets[S.override] : skyParams();
     sky.apply(P);
     scene.fog.density *= quality().fog;
     S.baseAmb = sky.amb.intensity;
     S.baseZenith = sky.domeMat.uniforms.uZ.value.clone();
+    nightUniforms();
     // clouds only change with the weather (placement is costly)
     const key = `${S.override ?? S.weather}|${quality().clouds}|${(P.clouds || []).join()}`;
     if (key !== S.cloudsFor) {
@@ -279,10 +316,17 @@ export function createClimate({scene, camera, village, sky, quality, onMonth, so
   runIn.addEventListener('change', () => { S.runs = runIn.checked; });
 
   const hh = (h) => `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60)).padStart(2, '0')}`;
-  function hourWord(h) { for (const [lim, w] of HOUR_WORDS) if (h < lim) return w; return '夜里'; }
+  function hourWord(h) {
+    // evening lasts while the sky is still light (long summer evenings, short winter ones)
+    if (h >= 16 && h < 21.5) return S.sun.el > 6 ? '下午' : S.sun.el > -7 ? '傍晚' : '夜里';
+    for (const [lim, w] of HOUR_WORDS) if (h < lim) return w;
+    return '夜里';
+  }
   function updateCard() {
     const W = WEATHER[S.weather];
-    chip.textContent = S.override ? `📅 ${MONTH_ZH[S.month]} · ${S.override}` : `📅 ${MONTH_ZH[S.month]} · ${hourWord(S.hour)} ${hh(S.hour)} · ${W.icon} ${W.zh}`;
+    // a clear night shows the moon, not the sun
+    const icon = S.sun.el < -4 && (S.weather === 'clear' || S.weather === 'cloudy') ? (S.weather === 'clear' ? '🌙' : '☁️🌙') : W.icon;
+    chip.textContent = S.override ? `📅 ${MONTH_ZH[S.month]} · ${S.override}` : `📅 ${MONTH_ZH[S.month]} · ${hourWord(S.hour)} ${hh(S.hour)} · ${icon} ${W.zh}`;
     monthEl.textContent = `${MONTH_ZH[S.month]} · ${['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][S.month]}`;
     hourIn.value = String(S.hour);
     hourTxt.textContent = `${hourWord(S.hour)} ${hh(S.hour)} · 太阳 sun ${Math.round(S.sun.el)}°`;
