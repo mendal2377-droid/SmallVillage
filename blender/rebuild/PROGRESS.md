@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–6 done (village-2027.html is the new main page, with the child, the dog and the animals); next is Phase 7. Resume from here.
+Saved 21 October 2026: Phases 1–6 done and Phase 7 started (pond fishing done; other activities next). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -186,8 +186,39 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - `blender -b --factory-startup --python blender/rebuild/kit/build_creatures.py -- --sheet`;
   - after palette changes, refresh `village.json` (re-run `export_web.py`, or rewrite its `palette` from `palette.py`).
 
+## Phase 7, activities — fishing done (21 Oct 2026)
+
+- **`src/v2/fishing.js`**: pond fishing the way village children do it, with a bamboo hand pole (手竿) and a float, and no reel.
+  - **Spots:** `export_web.py` now writes `pondShapes` (water outlines and the water height) into `village.json`. Within 4.5 m of a pond edge, a "🎣 钓鱼 Fish · F" button appears. The child steps to the nearest standing room on the bank (the bank collider keeps walkers about 3 m from the water) and faces the water.
+  - **Cast:** hold to swing the rod back, release to cast 3.5–8 m. The float arcs out with a plop, rings and spray. Bait is a worm (蚯蚓) or dough (面团); each changes the species odds.
+  - **Watch:** the float bobs on the water. Nibbles are small dips with rings, and sometimes a small fish teases first. The real bite depends on the species: a crucian lifts the float until it lies flat (顶漂); a carp sinks it (黑漂); a grass carp drags it away; a loach or gudgeon makes it jitter. Each species has its own strike window (0.55–1.5 s).
+  - **Miss:** striking too early sends the float flying back over the child's head, and the child scratches their head. Striking too late means "the fish stole the bait". Either way, one tap casts again.
+  - **The fight:** hold to pull while the fish rests. When it runs left or right, let go and lean the other way (A/D or the ◀ ▶ buttons). Pulling against a run, or leaning the wrong way, raises tension. The tension bar goes green, then yellow, then red, then the line snaps. A big fish that isn't yet tired bolts when it sees the bank. The rod bends towards the pull and the line sags less as tension rises. Far out, the fish shows as a dark shadow with wake rings; near the bank it thrashes at the surface. The species stays a surprise until it is landed.
+  - **The jump:** carp and especially grass carp may leap during a run. It plays in slow motion (the scene's time scale drops to 0.3 near the top), with spray and splash. Pulling during the leap throws the hook.
+  - **Landing:** the fish swings out of the water into the child's hands. The camera turns to a front "photo" shot, the child hops, and the dog comes over.
+  - **Catch card:** species (zh/en), length, weight (a·L³), number of jumps, pond, month, sky and bait, with "new species" and "biggest yet" flags. You choose Keep (into the red bucket beside the child) or Release (the fish splashes back).
+  - **Journal (鱼谱, J or the 📖 button):** five species cards (unknown ones are silhouettes) with count and biggest length, plus the last 8 catches. Stored in localStorage under `sv2-fish-journal`.
+  - **Conditions:**
+    - The sky preset sets the bite rate: dusk, golden sunset, overcast and stormy skies are good; a summer afternoon is slow.
+    - Ponds have their own species mix; grass carp and loach feed mainly in the warm months.
+    - December to February the pond is frozen.
+  - **Feel:**
+    - Synthesised sounds: whoosh, plop, nibble tick, splash, rod creak, snap, chime.
+    - Phone vibration on bites, runs, jumps and snaps (only after the first touch).
+    - Slow motion for the rest of the scene too (`fishing.timeScale` scales the life update and the toon time).
+  - **Controls:**
+    - Space, F or the mouse on the view to act; A/D or the arrow keys to lean; B for bait; Esc to stop.
+    - On phones, a panel replaces the walking arrows.
+    - The camera stands over the shoulder, closer while watching the float, and further back on portrait screens.
+  - **Pacing tested** with a scripted "good player":
+    - an 18 cm crucian lands in about 6 s, a 45 cm carp in 19 s, and a 68 cm grass carp in 38 s (two jumps);
+    - pulling the whole time snaps the line within a few seconds.
+- **Hooks:**
+  - `creatures.js` `life.setPosture(fn)` applies an activity pose after the walking pose.
+  - `__sv2.fishing()` gives `start`, `press`, `release`, `setLean`, `forceBite`, `forceJump`, `state` and `clearJournal`.
+
 ### Next
 
-- Phase 7: activity polish (fishing first: anticipation, bite, miss, the fight, the jump, landing, a catch journal), with seasonal activities.
+- Phase 7, continued: the other activities in the new village (the old app's toys and adventures: kites, the swing, catching dragonflies, the tricycle ride, harvest work), with seasonal activities (sliding on the frozen pond in winter, wheat harvest in May). Ice fishing could also be added.
 - Phase 8: climate and seasons (monthly calendar, weather, wetness, snow cover as a shader, wind, ambient sound).
 - Phase 9: performance (BatchedMesh, home-quarter material atlas) and deploy. Switch `index.html` to the new page only when the owner agrees.

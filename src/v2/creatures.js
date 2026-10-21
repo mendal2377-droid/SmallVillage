@@ -336,8 +336,10 @@ export function createLife({scene, templates, walk, player, data, getMonth}) {
     quad: (rig, a) => POSE.quad(rig, performance.now() / 1000 + a.t0, a.speed, a.phase, {wag: a.sp === 'cat' ? 0.15 : 0.3}),
   };
 
-  let enabled = false, firstPerson = false;
+  let enabled = false, firstPerson = false, posture = null;
   return {
+    /** an activity pose applied on top of the walking pose (fishing), or null */
+    setPosture(fn) { posture = fn; },
     child, dogRig, kid, dog,
     get firstPerson() { return firstPerson; },
     setFirstPerson(v) { firstPerson = v; child.root.visible = enabled && !v; },
@@ -367,6 +369,7 @@ export function createLife({scene, templates, walk, player, data, getMonth}) {
         child.root.position.copy(kid.pos);
         child.root.rotation.y = walk.yaw;
         POSE.biped(child, t, kid.speed, kid.phase);
+        posture?.(child, t);
         updateDog(dt, t);
         refill(kid.pos);
       }

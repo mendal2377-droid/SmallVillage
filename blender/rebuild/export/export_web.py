@@ -393,8 +393,13 @@ msc = map_to3(LD.MAP_SHEET["center"])
 map_sheet = {"center": [round(msc[0], 2), round(msc[1], 2)], "size": LD.MAP_SHEET["size"],
              "images": {s: f"/images/v2/map_{s}.webp" for s in ("spring", "summer", "autumn", "winter")}}
 
+# pond water outlines for fishing (three.js x, z) and the water surface height
+pond_shapes = {name: {"water": -0.7, "algae": P["algae"], "outline": [[round(v, 2) for v in map_to3(p)] for p in P["pts"]]}
+               for name, P in LD.PONDS.items()}
+
 data = {
-    "version": "village-2027-phase5-1",
+    "version": "village-2027-phase7-1",
+    "pondShapes": pond_shapes,
     "places": places,
     "mapSheet": map_sheet,
     "nav": nav,

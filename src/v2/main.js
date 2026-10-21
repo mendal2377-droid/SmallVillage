@@ -10,6 +10,7 @@ import {createWalkController} from '../walk.js';
 import {createGlider} from './glide.js';
 import {createLanding} from './landing.js';
 import {loadCreatures, createLife, createFollowCamera} from './creatures.js';
+import {createFishing} from './fishing.js';
 import './v2.css';
 
 // ---------------------------------------------------------------- quality tiers
@@ -66,7 +67,7 @@ const pad = document.getElementById('v2-pad');
 const player = new THREE.PerspectiveCamera(64, 1, 0.04, 9000);  // the child's eyes, driven by the walk controller
 const walk = createWalkController(player, renderer.domElement, (on) => {
   controls.enabled = !on;
-  if (on) life?.start(); else life?.stop();
+  if (on) life?.start(); else { fishing?.stop(); life?.stop(); }
   personBtn.hidden = !on;
   walkBtn.textContent = on ? 'Orbit' : 'Walk';
   host.dataset.navigationMode = on ? 'walk' : 'orbit';
@@ -121,6 +122,11 @@ function setFirstPerson(on) {
 }
 function viewCamera(dt, snap = false) {
   if (!walk.enabled || !life) return;
+  if (fishing?.active) {  // the activity frames its own shots; the child is always in view
+    life.child.root.visible = true;
+    fishing.updateCamera(camera, dt);
+    return;
+  }
   if (life.firstPerson) {
     camera.position.copy(player.position);
     camera.quaternion.copy(player.quaternion);
@@ -130,10 +136,10 @@ function viewCamera(dt, snap = false) {
   }
 }
 personBtn.addEventListener('click', () => setFirstPerson(!life.firstPerson));
-addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled) setFirstPerson(!life.firstPerson); });
+addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled && !fishing?.active) setFirstPerson(!life.firstPerson); });
 
 // ---------------------------------------------------------------- load and UI
-let village, sky, crops, life;
+let village, sky, crops, life, fishing;
 const t0 = performance.now();
 status.textContent = 'Opening the village…';
 try {
@@ -148,6 +154,10 @@ const templates = await loadCreatures(village.kitMat);
 follow = createFollowCamera(camera, walk);
 life = createLife({scene, templates, walk, player, data: village.data, getMonth: () => Number(monthSel.value)});
 setFirstPerson(false);
+fishing = createFishing({scene, camera, walk, player, life, village,
+  getMonth: () => Number(monthSel.value), getSky: () => presetSel.value});
+const endFishing = fishing.stop;
+fishing.stop = () => { endFishing(); if (walk.enabled) setFirstPerson(life.firstPerson); };
 
 const monthSel = document.getElementById('v2-month');
 const presetSel = document.getElementById('v2-preset');
@@ -264,13 +274,15 @@ function updateCrops() {
 // test and debugging hook: render one frame on demand (the loop pauses while the page is hidden)
 window.__sv2 = {
   renderer, scene, camera, player, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
-  life: () => life, setFirstPerson,
+  life: () => life, setFirstPerson, fishing: () => fishing,
   setMonth: (m) => { monthSel.value = String(m); applyMonth(); },
   setSky: (n) => { presetSel.value = n; applySky(); },
   setQuality: (q) => { qualitySel.value = q; applyQuality(); },
   step(dt = 1 / 60) {
+    fishing.update(dt);
+    const sdt = dt * fishing.timeScale;
     if (glider.active) glider.update(dt); else { walk.update(dt); viewCamera(dt); }
-    life.update(dt, performance.now() / 1000);
+    life.update(sdt, performance.now() / 1000);
   },
   frame() {
     renderer.info.reset();
@@ -292,11 +304,13 @@ renderer.setAnimationLoop(() => {
   renderer.info.reset();
   timer.update();
   const dt = Math.min(timer.getDelta(), 0.1);
-  toonUniforms.uTime.value += dt;
+  fishing.update(dt);
+  const sdt = dt * fishing.timeScale;  // slow motion while a fish leaps
+  toonUniforms.uTime.value += sdt;
   if (glider.active) glider.update(dt);
   else if (walk.enabled) { walk.update(dt); viewCamera(dt); }
   else controls.update();
-  life.update(dt, timer.getElapsed());
+  life.update(sdt, timer.getElapsed());
   landing.updatePins3d();
   sky.follow(camera);
   lodTimer -= dt;
