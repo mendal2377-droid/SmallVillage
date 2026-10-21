@@ -122,17 +122,17 @@ AVENUES = ["east road", "main road", "south road", "west road"]  # whitewashed p
 # ---------------------------------------------------------------- places on the main page maps (landing spots)
 
 PLACES = [
-    # (id, Chinese, English, map point where the paraglider lands, kind)
-    ("home", "家", "Home", (563.3, 413.5), "home"),               # the house lane start tested in the original app
-    ("north-pond", "北坑塘", "North pond", (404, 131), "water"),
-    ("avenue", "杨树大道", "Poplar avenue", (599, 760), "road"),
-    ("main-road", "村中大路", "Village road", (300, 258), "road"),
-    ("school", "学校 · 文化大院", "School", (565, 118), "school"),
-    ("wheat", "麦田", "Wheat fields", (380, 520), "field"),
-    ("south-pond", "南坑塘", "South pond", (395, 392), "water"),
-    ("west-pond", "西坑塘", "West pond", (132, 292), "water"),
-    ("xiaowangzhuang", "小王庄", "Xiaowangzhuang", (180, 450), "village"),
-    ("canal", "南渠", "South canal", (300, 645), "water"),
+    # (id, Chinese, English, map point where the paraglider lands, kind, map point to face after landing)
+    ("home", "家", "Home", (563.3, 413.5), "home", (563.3, 395.0)),        # house lane start; look north up the lane to the gate
+    ("north-pond", "北坑塘", "North pond", (404, 131), "water", (375, 88)),
+    ("avenue", "杨树大道", "Poplar avenue", (599, 760), "road", (597, 560)),
+    ("main-road", "村中大路", "Village road", (300, 258), "road", (450, 244)),
+    ("school", "学校 · 文化大院", "School", (565, 118), "school", (565, 70)),
+    ("wheat", "麦田", "Wheat fields", (380, 520), "field", (380, 380)),
+    ("south-pond", "南坑塘", "South pond", (395, 392), "water", (395, 368)),
+    ("west-pond", "西坑塘", "West pond", (132, 292), "water", (132, 268)),
+    ("xiaowangzhuang", "小王庄", "Xiaowangzhuang", (180, 450), "village", (180, 380)),
+    ("canal", "南渠", "South canal", (300, 645), "water", (450, 650)),
 ]
 
 # square of the illustrated 2D map (map metres): covers the village, its fields and the near avenues

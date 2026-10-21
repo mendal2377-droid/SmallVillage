@@ -23,3 +23,39 @@ html, body { margin: 0; height: 100%; background: #e9e4d6; font-family: system-u
 .v2-panel h1 button { all: unset; cursor: pointer; }
 .v2-controls { display: grid; gap: 8px; }
 .v2-panel.collapsed .v2-controls { display: none; }
+
+/* ---- main page: painted map, 3D pins, mode switch, paraglider */
+.v2-map { position: fixed; inset: 0; background: #ede3cb; overflow: hidden; touch-action: none; cursor: grab; z-index: 2; }
+.v2-map-view { position: absolute; left: 50%; top: 50%; transform-origin: 50% 50%; }
+.v2-map-view img { width: 100%; height: 100%; display: block; border-radius: 6px; box-shadow: 0 10px 40px rgba(60, 50, 30, 0.25); user-select: none; }
+.v2-map-pins { position: absolute; inset: 0; }
+.v2-pin { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: #2a2a22; }
+.v2-map-pins .v2-pin { transform: translate(-50%, -100%) scale(var(--inv, 1)); transform-origin: 50% 100%; }
+.v2-pin-label { display: grid; justify-items: center; padding: 3px 8px; border-radius: 10px; background: rgba(253, 249, 238, 0.92); box-shadow: 0 2px 10px rgba(40, 40, 20, 0.22); line-height: 1.15; }
+.v2-pin-label b { font-size: 15px; font-weight: 650; }
+.v2-pin-label small { font-size: 10px; opacity: 0.75; }
+.v2-pin-dot { order: 2; width: 12px; height: 12px; border-radius: 50%; background: #c8402c; border: 2px solid #fff8e8; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+.v2-pin-home .v2-pin-dot { background: #d9a21b; width: 16px; height: 16px; }
+.v2-pin-water .v2-pin-dot { background: #2f7e86; }
+.v2-pin-field .v2-pin-dot, .v2-pin-road .v2-pin-dot { background: #6c8a2a; }
+.v2-pin:hover .v2-pin-label, .v2-pin:focus-visible .v2-pin-label { background: #fffbe9; outline: 2px solid #c8402c; }
+.v2-pins3d { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+.v2-pins3d .v2-pin { left: 0; top: 0; pointer-events: auto; margin-left: -40px; margin-top: -58px; width: 80px; }
+.v2-dream { position: absolute; right: 18px; bottom: 18px; padding: 10px 14px; border-radius: 12px; background: linear-gradient(135deg, rgba(120, 170, 200, 0.35), rgba(240, 230, 200, 0.5)); color: #2c4a5a; opacity: 0.7; display: grid; line-height: 1.2; }
+.v2-dream small { font-size: 11px; }
+.v2-title { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 3; pointer-events: none; color: #2a2a22; text-shadow: 0 1px 0 rgba(255, 252, 240, 0.8); }
+.v2-title h2 { margin: 0; font-size: 22px; letter-spacing: 0.08em; }
+.v2-title p { margin: 2px 0 0; font-size: 12px; opacity: 0.8; }
+.v2-mode { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(250, 247, 238, 0.9); box-shadow: 0 4px 16px rgba(30, 40, 30, 0.18); }
+.v2-mode button { font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 9px; border: 0; background: transparent; cursor: pointer; }
+.v2-mode button[aria-pressed="true"] { background: #2f4a3a; color: #fbf6e6; }
+body[data-mode="flying"] .v2-title, body[data-mode="flying"] .v2-mode { display: none; }
+.v2-back { position: fixed; top: 14px; right: 16px; z-index: 3; font: inherit; font-size: 13px; padding: 8px 12px; border-radius: 10px; border: 0; background: rgba(250, 247, 238, 0.92); box-shadow: 0 4px 16px rgba(30, 40, 30, 0.18); cursor: pointer; }
+.v2-where { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); margin: 0; z-index: 3; font-size: 26px; letter-spacing: 0.06em; color: #fffbea; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45); pointer-events: none; }
+body:not([data-mode="flying"]) .v2-panel { z-index: 4; }
+@media (max-width: 640px) { .v2-title { top: 52px; } .v2-title h2 { font-size: 18px; } .v2-mode { top: 104px; } .v2-pin-label b { font-size: 13px; } }
+
+.v2-where { white-space: nowrap; width: max-content; }
+body[data-mode="flying"] .v2-panel { display: none; }
+.v2-pad[hidden] { display: none; }
+.v2-title { padding: 6px 16px; border-radius: 12px; background: rgba(250, 246, 234, 0.82); }

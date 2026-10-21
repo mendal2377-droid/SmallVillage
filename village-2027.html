@@ -12,7 +12,7 @@
   <section class="v2-panel" aria-label="Village preview controls">
     <h1><button id="v2-toggle" type="button" aria-expanded="true" aria-controls="v2-controls">SmallVillage 2.0</button></h1>
     <div id="v2-controls" class="v2-controls">
-    <p>Preview of the rebuilt village · Phase 4</p>
+    <p>Preview of the rebuilt village · Phase 5</p>
     <div class="v2-row">
       <label>Month <select id="v2-month">
         <option value="1">January</option><option value="2">February</option><option value="3">March</option>
@@ -31,6 +31,17 @@
     <span id="v2-info"></span>
     </div>
   </section>
+  <div id="v2-map" class="v2-map" hidden aria-label="Painted map of the village: choose a place to land">
+    <div class="v2-map-view"><img alt="Painted map of the village and its fields" draggable="false"><div class="v2-map-pins"></div></div>
+  </div>
+  <div id="v2-pins3d" class="v2-pins3d" hidden aria-label="Places in the 3D view"></div>
+  <header class="v2-title"><h2>闫老寨 · 小村</h2><p>选一个地方，乘滑翔伞降落 · Choose a place and glide down</p></header>
+  <nav class="v2-mode" aria-label="Map mode">
+    <button type="button" data-mode="map" aria-pressed="true">地图 Map</button>
+    <button type="button" data-mode="3d" aria-pressed="false">3D</button>
+  </nav>
+  <button id="v2-back" class="v2-back" type="button" hidden>↩ 地图 Map</button>
+  <p id="v2-where" class="v2-where" hidden></p>
   <div id="v2-pad" class="v2-pad" hidden aria-label="Walk controls">
     <button data-dir="forward" type="button" aria-label="Forward">▲</button>
     <button data-dir="left" type="button" aria-label="Left">◀</button>

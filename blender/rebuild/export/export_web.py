@@ -386,8 +386,17 @@ for o in bpy.data.objects:
         field_rects.append([round(min(v.x for v in bb), 2), round(min(-v.y for v in bb), 2), round(max(v.x for v in bb), 2),
                             round(max(-v.y for v in bb), 2), o.get("sv_crop", "wheat-maize")])
 
+places = [{"id": pid, "zh": zh, "en": en, "kind": kind, "position": [round(v, 2) for v in map_to3(pt)],
+           "look": [round(v, 2) for v in map_to3(look)]}
+          for pid, zh, en, pt, kind, look in LD.PLACES]
+msc = map_to3(LD.MAP_SHEET["center"])
+map_sheet = {"center": [round(msc[0], 2), round(msc[1], 2)], "size": LD.MAP_SHEET["size"],
+             "images": {s: f"/images/v2/map_{s}.webp" for s in ("spring", "summer", "autumn", "winter")}}
+
 data = {
-    "version": "village-2027-phase4-2",
+    "version": "village-2027-phase5-1",
+    "places": places,
+    "mapSheet": map_sheet,
     "nav": nav,
     "fields": field_rects,
     "roads": roads3,

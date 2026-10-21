@@ -1,5 +1,5 @@
-// SmallVillage 2.0 preview page: the Blender-built village with orbit, collision-aware walking (the shared
-// walk controller and the exported v2 navigation), crops around the player, month/sky/view controls and
+// SmallVillage 2.0 page: choose a place on the painted map or the 3D map, glide down by paraglider and walk
+// (shared walk controller + exported v2 navigation), with crops around the player, month/sky controls and
 // quality tiers for phones. The original app (index.html) is unchanged.
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
@@ -7,6 +7,8 @@ import {loadVillage, createSky, placeClouds} from './village.js';
 import {createCrops} from './crops.js';
 import {toonUniforms} from './toon.js';
 import {createWalkController} from '../walk.js';
+import {createGlider} from './glide.js';
+import {createLanding} from './landing.js';
 import './v2.css';
 
 // ---------------------------------------------------------------- quality tiers
@@ -26,7 +28,7 @@ const host = document.getElementById('v2-canvas');
 const panel = document.querySelector('.v2-panel'), toggle = document.getElementById('v2-toggle');
 function fold(on) { panel.classList.toggle('collapsed', on); toggle.setAttribute('aria-expanded', String(!on)); }
 toggle.addEventListener('click', () => fold(!panel.classList.contains('collapsed')));
-fold(innerWidth < 640);
+fold(true);  // developer controls start folded; the main page belongs to the maps
 const status = document.getElementById('v2-status');
 const params = new URLSearchParams(location.search);
 const qualitySel = document.getElementById('v2-quality');
@@ -158,10 +160,51 @@ function goView(name) {
     camera.lookAt(controls.target);
   }
 }
-monthSel.addEventListener('change', applyMonth);
+// ---------------------------------------------------------------- main page: maps and the paraglider landing
+const glider = createGlider(scene, camera);
+const backBtn = document.getElementById('v2-back');
+const where = document.getElementById('v2-where');
+let lastMode = 'map';
+const landing = createLanding({
+  data: village.data, camera, renderer,
+  getSeason: () => village.data.seasonOfMonth[monthSel.value],
+  onLand: (x, z, place) => land(x, z, place),
+});
+function land(x, z, place) {
+  lastMode = landing.mode === 'flying' ? lastMode : landing.mode;
+  landing.hideAll();
+  if (walk.enabled) walk.exit();
+  controls.enabled = false;
+  backBtn.hidden = false;
+  where.textContent = `${place.zh} · ${place.en}`;
+  where.hidden = false;
+  host.dataset.navigationMode = 'glide';
+  const facing = place.look ? new THREE.Vector3(place.look[0] - x, 0, place.look[1] - z) : null;
+  glider.fly(new THREE.Vector3(x, 0, z), {
+    groundY: village.data.nav.ground, facing,
+    onLand: (lx, lz, yaw) => {
+      startWalking(lx, lz, yaw);
+      setTimeout(() => { where.hidden = true; }, 2500);
+    },
+  });
+}
+function backToMap() {
+  if (glider.active) glider.skip();
+  if (walk.enabled) walk.exit();
+  backBtn.hidden = true;
+  where.hidden = true;
+  goView('overview');
+  landing.setMode(lastMode);
+}
+backBtn.addEventListener('click', backToMap);
+for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, (e) => {
+  if (glider.active && !e.target.closest?.('#v2-back')) glider.skip();
+});
+
+monthSel.addEventListener('change', () => { applyMonth(); landing.setSeason(village.data.seasonOfMonth[monthSel.value]); });
 presetSel.addEventListener('change', applySky);
 qualitySel.addEventListener('change', applyQuality);
-viewSel.addEventListener('change', () => goView(viewSel.value));
+viewSel.addEventListener('change', () => { landing.hideAll(); backBtn.hidden = false; goView(viewSel.value); });
 walkBtn.addEventListener('click', () => {
   if (walk.enabled) walk.exit();
   else startWalking(controls.target.x, controls.target.z, Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z));
@@ -171,6 +214,7 @@ applyQuality();
 applyMonth();
 viewSel.value = params.get('view') || 'overview';
 goView(viewSel.value);
+if (params.get('view')) { landing.hideAll(); backBtn.hidden = false; } else landing.setMode(params.get('mode') === '3d' ? '3d' : 'map');
 village.updateLod(camera);
 status.textContent = `Ready in ${((performance.now() - t0) / 1000).toFixed(1)} s · quality ${tierName()}`;
 host.dataset.ready = 'true';
@@ -184,11 +228,11 @@ function updateCrops() {
 
 // test and debugging hook: render one frame on demand (the loop pauses while the page is hidden)
 window.__sv2 = {
-  renderer, scene, camera, village, walk, crops, goView, startWalking, QUALITY,
+  renderer, scene, camera, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
   setMonth: (m) => { monthSel.value = String(m); applyMonth(); },
   setSky: (n) => { presetSel.value = n; applySky(); },
   setQuality: (q) => { qualitySel.value = q; applyQuality(); },
-  step(dt = 1 / 60) { walk.update(dt); },
+  step(dt = 1 / 60) { if (glider.active) glider.update(dt); else walk.update(dt); },
   frame() {
     renderer.info.reset();
     sky.follow(camera);
@@ -210,7 +254,10 @@ renderer.setAnimationLoop(() => {
   timer.update();
   const dt = Math.min(timer.getDelta(), 0.1);
   toonUniforms.uTime.value += dt;
-  if (walk.enabled) walk.update(dt); else controls.update();
+  if (glider.active) glider.update(dt);
+  else if (walk.enabled) walk.update(dt);
+  else controls.update();
+  landing.updatePins3d();
   sky.follow(camera);
   lodTimer -= dt;
   const sample = lodTimer <= 0;
