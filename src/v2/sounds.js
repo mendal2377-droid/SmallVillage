@@ -31,6 +31,9 @@ function createSounds() {
   }
   return {
     unlock: ac,
+    /** the shared audio context (null until a gesture allows it) and a second of white noise, for the ambience */
+    context: () => ctx,
+    noise: () => noise,
     whoosh: () => hiss(500, 0.8, 0.35, 0.12, 4),
     plop: () => { tone(520, 140, 0.12, 0.25); hiss(1200, 1.2, 0.12, 0.08); },
     tick: () => tone(1500, 900, 0.03, 0.05, 'triangle'),

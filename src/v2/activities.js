@@ -86,7 +86,7 @@ export function createActivities(ctx) {
     month: () => getMonth(),
     sky: () => getSky(),
     night: () => ['night', 'dusk'].includes(getSky()),
-    wet: () => ['summer storm', 'snow day'].includes(getSky()),
+    wet: () => ['summer storm', 'snow day', 'rain'].includes(getSky()),
   };
   let toastT = 0;
 

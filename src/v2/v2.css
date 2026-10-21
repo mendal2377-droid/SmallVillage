@@ -120,3 +120,18 @@ body[data-mode="flying"] .v2-panel { display: none; }
 .v2-diary-title { margin: 18px 0 8px; font-size: 18px; }
 .v2-diary-icon { font-size: 30px; line-height: 1.2; }
 .v2-diary .v2-journal-unknown .v2-diary-icon { filter: grayscale(1) opacity(0.45); }
+
+/* ---- the calendar card (Phase 8) */
+.v2-cal { position: fixed; left: 16px; top: 64px; z-index: 3; display: grid; gap: 6px; justify-items: start; max-width: calc(100vw - 32px); }
+.v2-cal-chip { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 10px; border: 0; background: rgba(250, 247, 238, 0.92); box-shadow: 0 4px 16px rgba(30, 40, 30, 0.18); cursor: pointer; }
+.v2-cal-body { display: grid; gap: 8px; padding: 10px 12px; border-radius: 14px; background: rgba(251, 248, 238, 0.95); box-shadow: 0 8px 28px rgba(30, 40, 30, 0.22); width: min(320px, calc(100vw - 32px)); box-sizing: border-box; }
+.v2-cal-body[hidden] { display: none; }
+.v2-cal-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.v2-cal-row button, .v2-cal-weather button { font: inherit; font-size: 13px; border: 0; border-radius: 9px; background: #efe7d2; padding: 6px 10px; cursor: pointer; }
+.v2-cal-month { font-size: 15px; }
+.v2-cal-hour { display: grid; gap: 2px; font-size: 12px; }
+.v2-cal-hour input { width: 100%; }
+.v2-cal-weather { display: flex; flex-wrap: wrap; gap: 5px; }
+.v2-cal-weather button[aria-pressed="true"] { background: #2f7e86; color: #fff; }
+.v2-cal-weather button:disabled { opacity: 0.35; cursor: default; }
+.v2-cal-small { font-size: 12px; }

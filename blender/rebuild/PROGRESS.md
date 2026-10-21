@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–7 done (activities: fishing, kite, bugs, roast, glean, ice, firecrackers, tricycle); next is Phase 8. Resume from here.
+Saved 21 October 2026: Phases 1–8 done (Phase 8: calendar, weather, wetness, snow, wind, soundscape); next is Phase 9 (performance and deploy). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -236,3 +236,34 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
   - **tricycle**: the electric tricycle with the dog in the cargo bed. The layout stores it inside the gatehouse room (too narrow to drive out), so it waits in the lane east of the courtyard at (−22.5, 108) and the static instance is hidden. The chase camera boom shortens against walls; if it is boxed in, the child turns it toward the longest open run. It parks where you get off, with a collider. Tested.
 - **Checked:** the ice fall (a slide is about 10 m), gleaning visuals (stubble, basket, ears), the phone layout of the walking-activity panel (top), and no console errors.
 - **Next:** Phase 8 (climate and seasons: monthly calendar, weather, wetness, snow cover as a shader, wind, ambient sound), then Phase 9 (performance and deploy).
+
+## Phase 8, climate and seasons — done (21 Oct 2026)
+
+- **`src/v2/climate.js`:**
+  - A monthly calendar for the North China Plain: weather weights per month (fog and some snow in winter, windy springs, July–August thunderstorms, clear autumns).
+  - Base wind per month.
+  - The sun computed for the month and hour at 35° N.
+  - The sky blended from the painted presets by sun height (night → dusk → golden → clear → afternoon, with a winter tint), with a weather overlay (overcast, storm, snow, fog) and cloud sets per weather.
+  - "Auto" weather is seeded by the real date, so it is the same all day.
+  - Effects around the camera: rain streaks (2600 or 1200 by tier), snowflakes, lightning with thunder, and clouds drifting with the wind.
+  - The developer sky presets still override everything (the panel's "calendar" entry returns to the climate).
+- **Calendar card** (top left): month ◀ ▶, an hour slider, weather chips (impossible ones are greyed out: no snow in summer, no storms in winter), "time runs" (one village hour per 40 s), and the sound toggle.
+  - The default month is the real month and the default hour is 15:00.
+  - URL parameters: `month`, `hour`, `weather`, `sky`.
+- **Shader (`toon.js`):**
+  - `uWet`: darker ground and puddles that mirror the sky, with rain drops.
+  - `uSnow`: lying snow on upward faces, patchy when thin. It lingers in January and February.
+  - `uRain`: drop rings on the ponds.
+  - `uWind`: `SV_SWAY` bends trees and crops (`village.kitMatSway`).
+  - Creatures use `kitMatDry`, so the child and animals stay free of snow and puddles.
+  - Wetness rises quickly and dries more slowly; the ground snaps to the new state when the month changes.
+- **`src/v2/ambience.js`:** a synthesised soundscape.
+  - Wind follows the wind strength; rain and thunder.
+  - Cicadas on summer afternoons; sparrows, songbirds and magpies by day; crows in winter.
+  - Crickets on late-summer and autumn nights; frogs on warm nights, louder near the ponds.
+  - A rooster at dawn and a distant dog.
+  - Sound starts on the first touch or key, and the on/off setting is saved in `sv2-sound`.
+- Activities and fishing read `climate.skyName()`, which adds `dawn` and `rain` to the preset names.
+- Empty particle pools are hidden, so they cost no draw calls.
+- **Tested:** rain, storm, snow (lane and roofs), fog, dusk and night views; the calendar card; no console errors. About 500 draw calls in the home courtyard (high tier, shadows included), to be reduced in Phase 9.
+- **Next:** Phase 9: BatchedMesh and a material atlas for the home quarter, draw-call budget, mobile checks, then deploy (ask the owner before switching `index.html` or pushing).

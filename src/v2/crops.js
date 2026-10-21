@@ -83,7 +83,7 @@ export function createCrops(scene, village) {
     const g = village.geometryByName(name);
     if (!g) return null;
     if (m) { root.remove(m); m.dispose(); }
-    m = new THREE.InstancedMesh(g, village.kitMat, Math.ceil(need * 1.3) + 64);
+    m = new THREE.InstancedMesh(g, village.kitMatSway, Math.ceil(need * 1.3) + 64);  // crops ripple in the wind
     m.name = name;
     m.castShadow = false;  // thousands of small casters: shading alone reads well and saves the shadow pass
     m.receiveShadow = true;

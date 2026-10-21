@@ -58,6 +58,8 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   const textures = Object.fromEntries(Object.keys(pal.seasons).map(s => [s, paletteTexture(pal, s)]));
   toonUniforms.uWaterRect.value.copy(slotRect(pal, 'water'));
   const kitMat = makeToon({kind: 'palette', map: textures.summer});
+  const kitMatSway = makeToon({kind: 'palette', map: textures.summer, sway: true});  // trees and crops in the wind
+  const kitMatDry = makeToon({kind: 'palette', map: textures.summer, weather: false});  // creatures and props they carry
 
   // ---- kit geometries by asset name
   const geom = {};
@@ -149,7 +151,8 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   }
 
   function makeMesh(gp, g, name) {
-    const m = new THREE.InstancedMesh(g, kitMat, gp.list.length);
+    const kind = data.assets[gp.key]?.kind;
+    const m = new THREE.InstancedMesh(g, kind === 'tree' || kind === 'crop' ? kitMatSway : kitMat, gp.list.length);
     m.name = `${gp.key} @ ${gp.center.x},${gp.center.z}${name}`;
     m.receiveShadow = true;
     instRoot.add(m);
@@ -225,7 +228,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
   function setMonth(m) {
     month = m;
     const season = data.seasonOfMonth[String(m)];
-    kitMat.map = textures[season];
+    kitMat.map = kitMatSway.map = kitMatDry.map = textures[season];
     for (const [kind, mat] of Object.entries(fieldMats)) {
       const [a, b] = data.crops[kind][String(m)];
       const ca = pal.seasons[season][pal.slots.indexOf(a)], cb = pal.seasons[season][pal.slots.indexOf(b)];
@@ -256,7 +259,7 @@ export async function loadVillage(scene, {onProgress = () => {}} = {}) {
     if (lastCamera) updateLod(lastCamera, true);
   }
 
-  return {data, groups, updateLod, setMonth, setQuality, kitMat, geometryByName: (n) => geom[n],
+  return {data, groups, updateLod, setMonth, setQuality, kitMat, kitMatSway, kitMatDry, geometryByName: (n) => geom[n],
     stats: () => ({groups: groups.length, live: groups.filter(g => g.mesh?.visible).length})};
 }
 
@@ -291,8 +294,9 @@ export function createSky(scene, data) {
   scene.fog = new THREE.FogExp2(0xffffff, 0.0005);
   let sunDir = new THREE.Vector3(0, 1, 0);
 
+  /** a preset by name, or a parameter set of the same shape (the climate model blends them) */
   function apply(name) {
-    const P = data.sky[name];
+    const P = typeof name === 'string' ? data.sky[name] : name;
     const lin = (c) => new THREE.Color().setRGB(c[0], c[1], c[2], THREE.LinearSRGBColorSpace);
     domeMat.uniforms.uH.value.copy(lin(P.horizon));
     domeMat.uniforms.uM.value.copy(lin(P.mid));
@@ -317,13 +321,13 @@ export function createSky(scene, data) {
     sun.target.position.set(c.x, 0, c.z);
     sun.position.copy(sun.target.position).addScaledVector(sunDir, 700);
   }
-  return {apply, follow, dome, sun};
+  return {apply, follow, dome, sun, amb, domeMat};
 }
 
-export function placeClouds(scene, village, presetName, density = 1) {
+export function placeClouds(scene, village, presetName, density = 1, cloudKinds = null) {
   const old = scene.getObjectByName('clouds');
   if (old) scene.remove(old);
-  const P = village.data.sky[presetName];
+  const P = cloudKinds ? {clouds: cloudKinds} : village.data.sky[presetName];
   const grp = new THREE.Group();
   grp.name = 'clouds';
   // deterministic placement: a small seeded generator per preset
@@ -352,4 +356,5 @@ export function placeClouds(scene, village, presetName, density = 1) {
     }
   }
   scene.add(grp);
+  return grp;
 }

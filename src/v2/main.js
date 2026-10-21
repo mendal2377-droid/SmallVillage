@@ -3,7 +3,7 @@
 // quality tiers for phones. The original app (index.html) is unchanged.
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {loadVillage, createSky, placeClouds} from './village.js';
+import {loadVillage, createSky} from './village.js';
 import {createCrops} from './crops.js';
 import {toonUniforms} from './toon.js';
 import {createWalkController} from '../walk.js';
@@ -12,6 +12,10 @@ import {createLanding} from './landing.js';
 import {loadCreatures, createLife, createFollowCamera} from './creatures.js';
 import {createFishing} from './fishing.js';
 import {createActivities} from './activities.js';
+import {createClimate} from './climate.js';
+import {createAmbience} from './ambience.js';
+import {sounds} from './sounds.js';
+import {nearestPond} from './acts/common.js';
 import './v2.css';
 
 // ---------------------------------------------------------------- quality tiers
@@ -140,7 +144,7 @@ personBtn.addEventListener('click', () => setFirstPerson(!life.firstPerson));
 addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled && !fishing?.active && !acts?.ownsCamera) setFirstPerson(!life.firstPerson); });
 
 // ---------------------------------------------------------------- load and UI
-let village, sky, crops, life, fishing, acts;
+let village, sky, crops, life, fishing, acts, climate, ambience;
 const t0 = performance.now();
 status.textContent = 'Opening the village…';
 try {
@@ -151,14 +155,14 @@ try {
 }
 sky = createSky(scene, village.data);
 crops = createCrops(scene, village);
-const templates = await loadCreatures(village.kitMat);
+const templates = await loadCreatures(village.kitMatDry);
 follow = createFollowCamera(camera, walk);
 life = createLife({scene, templates, walk, player, data: village.data, getMonth: () => Number(monthSel.value)});
 setFirstPerson(false);
 fishing = createFishing({scene, camera, walk, player, life, village,
-  getMonth: () => Number(monthSel.value), getSky: () => presetSel.value, busy: () => Boolean(acts?.active)});
+  getMonth: () => Number(monthSel.value), getSky: () => climate.skyName(), busy: () => Boolean(acts?.active)});
 acts = createActivities({scene, camera, walk, player, life, village, crops, fishing,
-  getMonth: () => Number(monthSel.value), getSky: () => presetSel.value,
+  getMonth: () => Number(monthSel.value), getSky: () => climate.skyName(),
   onStop: () => { if (walk.enabled) setFirstPerson(life.firstPerson); }});
 const endFishing = fishing.stop;
 fishing.stop = () => { endFishing(); if (walk.enabled) setFirstPerson(life.firstPerson); };
@@ -168,8 +172,18 @@ const presetSel = document.getElementById('v2-preset');
 const viewSel = document.getElementById('v2-view');
 for (const name of Object.keys(village.data.sky)) presetSel.add(new Option(name, name));
 for (const name of Object.keys(village.data.views)) viewSel.add(new Option(name, name));
-monthSel.value = params.get('month') || '8';
-presetSel.value = params.get('sky') || 'summer afternoon';
+presetSel.add(new Option('（日历 calendar）', ''), 0);
+// the calendar: month, hour and weather (the developer sky presets override it when chosen)
+climate = createClimate({scene, camera, village, sky, quality: () => Q, sounds,
+  onMonth: (m) => { monthSel.value = String(m); applyMonth(); landing?.setSeason(village.data.seasonOfMonth[String(m)]); }});
+monthSel.value = String(climate.month);
+presetSel.value = params.get('sky') || '';
+let pondNear = 999, pondT = 0;
+ambience = createAmbience({button: climate.soundBtn, getState: () => {
+  const st = climate.state;
+  return {month: st.month, hour: st.hour, el: st.sun.el, weather: st.override ? 'clear' : st.weather, wind: st.wind, rain: st.rain,
+    nearWater: pondNear, outdoors: camera.position.y < 60};
+}});
 
 function applyQuality() {
   Q = QUALITY[tierName()];
@@ -190,9 +204,7 @@ function applyMonth() {
   host.dataset.season = village.setMonth(Number(monthSel.value));
 }
 function applySky() {
-  sky.apply(presetSel.value);
-  scene.fog.density *= Q.fog;
-  placeClouds(scene, village, presetSel.value, Q.clouds);
+  climate.applySky();  // the calendar's sky (or the chosen preset), fog for the quality tier, clouds
 }
 function goView(name) {
   const v = village.data.views[name];
@@ -250,8 +262,8 @@ for (const ev of ['keydown', 'pointerdown']) addEventListener(ev, (e) => {
   if (glider.active && !e.target.closest?.('#v2-back')) glider.skip();
 });
 
-monthSel.addEventListener('change', () => { applyMonth(); landing.setSeason(village.data.seasonOfMonth[monthSel.value]); });
-presetSel.addEventListener('change', applySky);
+monthSel.addEventListener('change', () => climate.setMonth(Number(monthSel.value)));
+presetSel.addEventListener('change', () => climate.setOverride(presetSel.value || null));
 qualitySel.addEventListener('change', applyQuality);
 viewSel.addEventListener('change', () => { landing.hideAll(); backBtn.hidden = false; goView(viewSel.value); });
 walkBtn.addEventListener('click', () => {
@@ -279,12 +291,16 @@ function updateCrops() {
 window.__sv2 = {
   renderer, scene, camera, player, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
   life: () => life, setFirstPerson, fishing: () => fishing, acts: () => acts,
-  setMonth: (m) => { monthSel.value = String(m); applyMonth(); },
-  setSky: (n) => { presetSel.value = n; applySky(); },
+  setMonth: (m) => climate.setMonth(m),
+  setSky: (n) => { presetSel.value = n; climate.setOverride(n || null); },
+  setHour: (h) => climate.setHour(h),
+  setWeather: (w) => climate.setWeather(w),
+  climate: () => climate, ambience: () => ambience,
   setQuality: (q) => { qualitySel.value = q; applyQuality(); },
   step(dt = 1 / 60) {
     fishing.update(dt);
     acts.update(dt);
+    climate.update(dt, camera);
     const sdt = dt * fishing.timeScale * acts.timeScale;
     if (glider.active) glider.update(dt); else { walk.update(dt); viewCamera(dt); }
     life.update(sdt, performance.now() / 1000);
@@ -311,6 +327,14 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(timer.getDelta(), 0.1);
   fishing.update(dt);
   acts.update(dt);
+  climate.update(dt, camera);
+  ambience.update(dt);
+  if ((pondT -= dt) <= 0) {
+    pondT = 1;
+    const p = nearestPond(village.data, camera.position.x, camera.position.z);
+    pondNear = p ? p.e.d : 999;
+    presetSel.value = climate.state.override ?? '';
+  }
   const sdt = dt * fishing.timeScale * acts.timeScale;  // slow motion while a fish leaps
   toonUniforms.uTime.value += sdt;
   if (glider.active) glider.update(dt);

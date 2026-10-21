@@ -50,6 +50,7 @@ export function particles(scene, {n = 120, color = 0xffffff, size = 0.08, additi
   pts.frustumCulled = false;
   scene.add(pts);
   for (let i = 0; i < n; i++) pos[i * 3 + 1] = -999;
+  pts.visible = false;
   let next = 0;
   return {
     points: pts,
@@ -58,10 +59,14 @@ export function particles(scene, {n = 120, color = 0xffffff, size = 0.08, additi
       pos.set([x, y, z], i * 3); vel.set([vx, vy, vz], i * 3);
       life[i] = max[i] = secs;
       (tint ? new THREE.Color(tint) : base).toArray(col, i * 3);
+      pts.visible = true;
     },
     update(dt) {
+      if (!pts.visible) return;  // an empty pool costs no draw call
+      let alive = 0;
       for (let i = 0; i < n; i++) {
         if (life[i] <= 0) continue;
+        alive++;
         life[i] -= dt;
         if (life[i] <= 0 && !(stay && pos[i * 3 + 1] <= floor + 0.02)) { pos[i * 3 + 1] = -999; continue; }
         if (life[i] <= 0) { life[i] = stay; continue; }  // settled pieces (paper on the ground) linger
@@ -78,9 +83,9 @@ export function particles(scene, {n = 120, color = 0xffffff, size = 0.08, additi
       }
       g.attributes.position.needsUpdate = true;
       g.attributes.color.needsUpdate = true;
+      if (!alive) pts.visible = false;
     },
-    clear() { life.fill(0); for (let i = 0; i < n; i++) pos[i * 3 + 1] = -999; g.attributes.position.needsUpdate = true; },
-    set visible(v) { pts.visible = v; },
+    clear() { life.fill(0); for (let i = 0; i < n; i++) pos[i * 3 + 1] = -999; g.attributes.position.needsUpdate = true; pts.visible = false; },
   };
 }
 

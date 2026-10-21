@@ -39,7 +39,7 @@ export const BAITS = {
 const SKY_WORDS = {
   'winter haze morning': ['冬日雾晨', 1.1], 'winter sunrise frost': ['霜晨', 1.2], 'spring clear': ['春日晴', 1.0],
   'summer afternoon': ['夏日午后', 0.7], overcast: ['阴天', 1.3], 'golden sunset': ['夕阳', 1.5], 'summer storm': ['雷雨前', 1.4],
-  'snow day': ['雪天', 0.6], dusk: ['黄昏', 1.5], night: ['夜里', 0.9],
+  'snow day': ['雪天', 0.6], dusk: ['黄昏', 1.5], night: ['夜里', 0.9], dawn: ['清晨', 1.5], rain: ['雨里', 1.3],
 };
 const FROZEN = [12, 1, 2];
 
@@ -254,6 +254,7 @@ export function makeSpray(scene, n = 60) {
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const pts = new THREE.Points(g, new THREE.PointsMaterial({color: 0xf4f8f4, size: 0.07, transparent: true, opacity: 0.9, depthWrite: false}));
   pts.frustumCulled = false;
+  pts.visible = false;
   scene.add(pts);
   let water = 0;
   return {
@@ -268,15 +269,20 @@ export function makeSpray(scene, n = 60) {
         life[i] = 1;
         k++;
       }
+      pts.visible = true;
     },
     update(dt) {
+      if (!pts.visible) return;  // nothing in the air: no draw call
+      let alive = 0;
       for (let i = 0; i < n; i++) {
         if (life[i] <= 0) { pos[i * 3 + 1] = -999; continue; }
+        alive++;
         vel[i * 3 + 1] -= 9.8 * dt;
         pos[i * 3] += vel[i * 3] * dt; pos[i * 3 + 1] += vel[i * 3 + 1] * dt; pos[i * 3 + 2] += vel[i * 3 + 2] * dt;
         if (pos[i * 3 + 1] < water) life[i] = 0;
       }
       g.attributes.position.needsUpdate = true;
+      if (!alive) pts.visible = false;
     },
   };
 }
