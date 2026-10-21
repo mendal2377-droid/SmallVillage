@@ -145,7 +145,7 @@ export function createLife({scene, templates, walk, player, data, getMonth}) {
   const dogRig = makeRig(templates.dog);
   dogRig.root.visible = false;
   scene.add(dogRig.root);
-  const dog = {pos: new THREE.Vector3(), yaw: 0, speed: 0, phase: 0, sit: 0, idle: 0, sniff: 0, goal: null, active: false};
+  const dog = {pos: new THREE.Vector3(), yaw: 0, speed: 0, phase: 0, sit: 0, idle: 0, sniff: 0, goal: null, active: false, ride: null};
 
   function clearLine(a, b) {
     const n = Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 0.4);
@@ -173,6 +173,13 @@ export function createLife({scene, templates, walk, player, data, getMonth}) {
 
   function updateDog(dt, t) {
     if (!dog.active) return;
+    if (dog.ride) {  // riding along (the tricycle's cargo bed): sit, wag and look ahead
+      dog.pos.copy(dog.ride.pos);
+      dogRig.root.position.copy(dog.ride.pos);
+      dogRig.root.rotation.y = dog.ride.yaw;
+      POSE.quad(dogRig, t, 0, dog.phase, {sit: 1, wag: 0.9});
+      return;
+    }
     const fw = new THREE.Vector3(-Math.sin(walk.yaw), 0, -Math.cos(walk.yaw));
     const side = new THREE.Vector3(-fw.z, 0, fw.x);
     const heel = kid.pos.clone().addScaledVector(fw, -1.3).addScaledVector(side, 0.8);
@@ -340,7 +347,7 @@ export function createLife({scene, templates, walk, player, data, getMonth}) {
   return {
     /** an activity pose applied on top of the walking pose (fishing), or null */
     setPosture(fn) { posture = fn; },
-    child, dogRig, kid, dog,
+    child, dogRig, kid, dog, placeDog,
     get firstPerson() { return firstPerson; },
     setFirstPerson(v) { firstPerson = v; child.root.visible = enabled && !v; },
     start() {

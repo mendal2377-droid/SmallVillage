@@ -4,6 +4,7 @@
 // quickly; a big grass carp takes patience. Every catch goes into the journal (鱼谱), kept in localStorage.
 import * as THREE from 'three';
 import {makeToon} from './toon.js';
+import {sounds as sharedSounds, buzz} from './sounds.js';
 
 const clamp = THREE.MathUtils.clamp, damp = THREE.MathUtils.damp, lerp = THREE.MathUtils.lerp;
 const rnd = Math.random;
@@ -54,7 +55,7 @@ function pickSpecies(pond, bait, month) {
 
 // ---------------------------------------------------------------- geometry helpers (outline points are three.js [x, z])
 
-function inside([x, z], poly) {
+export function inside([x, z], poly) {
   let c = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
     const [xi, zi] = poly[i], [xj, zj] = poly[j];
@@ -62,7 +63,7 @@ function inside([x, z], poly) {
   }
   return c;
 }
-function closestEdge(x, z, poly) {
+export function closestEdge(x, z, poly) {
   let best = null;
   for (let i = 0; i < poly.length; i++) {
     const [ax, az] = poly[i], [bx, bz] = poly[(i + 1) % poly.length];
@@ -80,49 +81,6 @@ function closestEdge(x, z, poly) {
   return best;
 }
 
-// ---------------------------------------------------------------- little sounds, synthesised (no files to load)
-
-function createSounds() {
-  let ctx = null, noise = null;
-  function ac() {
-    if (!ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return null;
-      ctx = new AC();
-      noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-      const d = noise.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = rnd() * 2 - 1;
-    }
-    if (ctx.state === 'suspended') ctx.resume();
-    return ctx;
-  }
-  function env(g, t, a, peak, decay) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + decay); }
-  function tone(f0, f1, dur, vol = 0.2, type = 'sine') {
-    const c = ac(); if (!c) return;
-    const t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
-    env(g, t, 0.005, vol, dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
-  }
-  function hiss(freq, q, dur, vol = 0.2, sweep = 1) {
-    const c = ac(); if (!c) return;
-    const t = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
-    s.buffer = noise; f.type = 'bandpass'; f.frequency.setValueAtTime(freq, t); f.frequency.exponentialRampToValueAtTime(freq * sweep, t + dur); f.Q.value = q;
-    env(g, t, 0.01, vol, dur); s.connect(f).connect(g).connect(c.destination); s.start(t, rnd() * 0.5); s.stop(t + dur + 0.05);
-  }
-  return {
-    unlock: ac,
-    whoosh: () => hiss(500, 0.8, 0.35, 0.12, 4),
-    plop: () => { tone(520, 140, 0.12, 0.25); hiss(1200, 1.2, 0.12, 0.08); },
-    tick: () => tone(1500, 900, 0.03, 0.05, 'triangle'),
-    splash: (big = 1) => { hiss(900, 0.6, 0.35 + big * 0.25, 0.18 * big + 0.05, 0.4); tone(300, 90, 0.18, 0.12 * big); },
-    creak: () => tone(140 + rnd() * 40, 110, 0.09, 0.035, 'sawtooth'),
-    snap: () => { hiss(3000, 2, 0.12, 0.25); tone(1800, 400, 0.08, 0.1, 'square'); },
-    chime: () => { tone(880, 880, 0.25, 0.12); setTimeout(() => tone(1320, 1320, 0.4, 0.1), 120); },
-    boing: () => tone(300, 700, 0.18, 0.1, 'triangle'),
-  };
-}
-// phones shake on bites, jumps and snaps (browsers allow it only after the visitor has touched the page)
-const buzz = (p) => { try { if (navigator.userActivation?.hasBeenActive ?? true) navigator.vibrate?.(p); } catch { /* not allowed here */ } };
 
 // ---------------------------------------------------------------- models: rod, line, float, fish, rings, spray
 
@@ -260,7 +218,7 @@ function makeFish(sp) {
   return {root, tail: bend, flap(t, amp) { bend.rotation.y = Math.sin(t) * amp; body.rotation.y = -Math.sin(t) * amp * 0.12; }};
 }
 
-function makeRings(scene, n = 12) {
+export function makeRings(scene, n = 12) {
   const geo = new THREE.RingGeometry(0.86, 1, 40).rotateX(-Math.PI / 2);
   const rings = [];
   for (let i = 0; i < n; i++) {
@@ -290,7 +248,7 @@ function makeRings(scene, n = 12) {
   };
 }
 
-function makeSpray(scene, n = 60) {
+export function makeSpray(scene, n = 60) {
   const pos = new Float32Array(n * 3), vel = new Float32Array(n * 3), life = new Float32Array(n);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -344,10 +302,10 @@ function fishSvg(sp, size = 64) {
 
 // ---------------------------------------------------------------- the activity
 
-export function createFishing({scene, camera, walk, player, life, village, getMonth, getSky}) {
+export function createFishing({scene, camera, walk, player, life, village, getMonth, getSky, busy = () => false}) {
   const data = village.data;
   const ponds = Object.entries(data.pondShapes || {});
-  const sounds = createSounds();
+  const sounds = sharedSounds;
   let journal = loadJournal();
 
   // world props
@@ -420,10 +378,11 @@ export function createFishing({scene, camera, walk, player, life, village, getMo
     }
     return best;
   }
-  let nearCache = null, nearT = 0, padWasHidden = true;
+  let nearCache = null, nearT = 0, padWasHidden = true, journalExtra = null;
   const walkPad = document.getElementById('v2-pad');
   function canFishHere() {
-    if (!walk.enabled || !ponds.length) return null;
+    // in winter the ponds are frozen: the ice activities take over the banks
+    if (!walk.enabled || !ponds.length || busy() || FROZEN.includes(getMonth())) return null;
     const b = nearestPond();
     return b && b.e.d < 4.5 && !inside([player.position.x, player.position.z], b.P.outline) ? b : null;
   }
@@ -796,7 +755,8 @@ export function createFishing({scene, camera, walk, player, life, village, getMo
     jPanel.innerHTML = `<header><h3>鱼谱 · Fishing journal</h3><button type="button" class="v2-journal-close" aria-label="Close">✕</button></header>
       <p>${total ? `${total} 条鱼 · ${Object.keys(by).length} / ${Object.keys(SPECIES).length} 种` : '还没有钓到鱼。Walk to a pond edge and press F.'}</p>
       <ul class="v2-journal-grid">${cards}</ul>
-      ${recent ? `<table><caption>最近 Recent catches</caption>${recent}</table>` : ''}`;
+      ${recent ? `<table><caption>最近 Recent catches</caption>${recent}</table>` : ''}
+      ${journalExtra?.() ?? ''}`;
     jPanel.querySelector('.v2-journal-close').addEventListener('click', () => { jPanel.hidden = true; });
   }
   function toggleJournal(on = jPanel.hidden) {
@@ -1153,7 +1113,9 @@ export function createFishing({scene, camera, walk, player, life, village, getMo
     /** slow motion during a jump, for the rest of the scene */
     get timeScale() { return S.slow; },
     state: S, start, stop, press, release, setLean, update, updateCamera, toggleJournal, canFishHere,
-    finishCatch, get journal() { return journal; }, clearJournal() { journal = {entries: []}; saveJournal(journal); },
+    finishCatch, get journal() { return journal; },
+    /** more pages for the journal (the diary of the other activities) */
+    setJournalExtra(fn) { journalExtra = fn; }, clearJournal() { journal = {entries: []}; saveJournal(journal); },
     /** test hooks: make the hooked fish jump now; skip the waiting */
     forceJump() { if (S.phase === 'fight' && fishModel) startJump(); },
     forceBite() { if (S.phase === 'wait' || S.phase === 'nibble') { S.nibblesLeft = 0; S.falseNibble = false; S.nextEvent = 0; setPhase('wait'); } },

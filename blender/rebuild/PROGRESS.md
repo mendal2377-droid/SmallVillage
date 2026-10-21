@@ -1,6 +1,6 @@
 # SmallVillage 2.0 — progress checkpoint
 
-Saved 21 October 2026: Phases 1–6 done and Phase 7 started (pond fishing done; other activities next). Resume from here.
+Saved 21 October 2026: Phases 1–6 done; Phase 7 fishing done, other activities written (tricycle untested). Resume from here.
 
 - **Plan:** `D:/blender/hometown/REBUILD_PLAN.md` (phases, research, decisions)
 - **Repo:** `D:/blender/test0910/SmallVillage`, branch **`rebuild-2027`**. It is local only and not pushed. `main` is untouched, and the live site still runs the old version.
@@ -222,3 +222,20 @@ npm run dev   # then open http://127.0.0.1:4173/village-2027.html  (?view=avenue
 - Phase 7, continued: the other activities in the new village (the old app's toys and adventures: kites, the swing, catching dragonflies, the tricycle ride, harvest work), with seasonal activities (sliding on the frozen pond in winter, wheat harvest in May). Ice fishing could also be added.
 - Phase 8: climate and seasons (monthly calendar, weather, wetness, snow cover as a shader, wind, ambient sound).
 - Phase 9: performance (BatchedMesh, home-quarter material atlas) and deploy. Switch `index.html` to the new page only when the owner agrees.
+
+## Phase 7, other activities — first pass (21 Oct 2026, saved at the usage limit)
+
+- `src/v2/activities.js`: a framework that offers activities by place, month and sky (a row of buttons; E starts the first one). Activities share the fishing panel and record their bests in a diary (`sv2-diary`), shown as "童年小事" in the journal. Sounds live in `src/v2/sounds.js`; helpers in `src/v2/acts/common.js`.
+- `src/v2/acts/`:
+  - **kite**: a swallow kite (沙燕), Mar–May and Sep–Nov on fields or roads. Pull in lulls, let go in gusts; the goal is 80 m of line. Tested.
+  - **bugs**: dragonflies by the ponds on summer days, fireflies at dusk or night; catch with the bamboo net. Tested.
+  - **roast**: sweet potatoes on autumn fields or in the winter courtyard. Tested.
+  - **glean**: May–June. A combine harvester cuts swaths and leaves stubble (`crops.setCut`); pick up ears into a basket. Tested.
+  - **ice**: the ponds freeze Dec–Feb (ice sheets); run-up, slide, steer and fall. Fishing is not offered on frozen ponds. Tested after a slide-length fix; the fall is not re-tested.
+  - **firecrackers**: Jan–Feb near home; a string of crackers, red paper that stays on the ground, and a fountain (B). Tested.
+  - **tricycle**: the electric tricycle at the gate, with the dog in the cargo bed. **Not tested yet.**
+- **Next:**
+  - Test the tricycle (seat and dog heights, steering, parking collider).
+  - Re-check the ice fall and gleaning visuals.
+  - Run a phone layout pass for the walking-activity panel (it sits at the top).
+  - Then Phase 8.

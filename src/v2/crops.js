@@ -74,7 +74,7 @@ export function createCrops(scene, village) {
   root.name = 'crops near the player';
   scene.add(root);
   const pools = new Map();  // asset name -> InstancedMesh
-  let at = null, month = -1, radii = [25, 60];
+  let at = null, month = -1, radii = [25, 60], cut = null;  // cut(x, z): harvested ground shows stubble
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
 
   function pool(name, need) {
@@ -107,7 +107,7 @@ export function createCrops(scene, village) {
         if (d < r0 || d >= r1) continue;
         const kind = fieldAt(x, z);
         if (!kind || onRoad(x, z)) continue;
-        const a = cropAsset(kind, month, lod, hash(i, j, 3) < 0.5 ? 0 : 1);
+        const a = cut?.(x, z) ? {name: `KIT wheat stubble L${lod}`, spacing: [0.5, 0.8]} : cropAsset(kind, month, lod, hash(i, j, 3) < 0.5 ? 0 : 1);
         const keep = (step * step) / (a.spacing[lod] * a.spacing[lod]);  // thin to the crop's own spacing
         if (hash(i, j, 4) > keep) continue;
         if (!buckets.has(a.name)) buckets.set(a.name, []);
@@ -138,6 +138,9 @@ export function createCrops(scene, village) {
       if (force || moved) regenerate(camera.position.x, camera.position.z);
     },
     setRadii(r) { radii = r; at = null; },
+    fieldAt, onRoad,
+    /** mark harvested ground (a predicate on x, z), or null; the crops around the player are rebuilt */
+    setCut(fn) { cut = fn; at = null; },
     count: () => [...pools.values()].reduce((a, m) => a + m.count, 0),
   };
 }

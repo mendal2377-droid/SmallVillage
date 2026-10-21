@@ -63,8 +63,11 @@ body[data-mode="flying"] .v2-panel { display: none; }
 .v2-person[hidden] { display: none; }
 
 /* ---- fishing */
-.v2-fish-go { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 3; font: inherit; font-size: 16px; padding: 10px 18px; border-radius: 14px; border: 0; background: #fbf6e6; box-shadow: 0 6px 20px rgba(30, 40, 30, 0.25); cursor: pointer; animation: v2-bob 1.6s ease-in-out infinite; }
-@keyframes v2-bob { 50% { transform: translate(-50%, -4px); } }
+/* offers: what can be done here (fishing and the other activities), a row of bobbing buttons */
+.v2-offers { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 3; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px); }
+.v2-offers[hidden] { display: none; }
+.v2-fish-go, .v2-offer { font: inherit; font-size: 16px; padding: 10px 18px; border-radius: 14px; border: 0; background: #fbf6e6; box-shadow: 0 6px 20px rgba(30, 40, 30, 0.25); cursor: pointer; animation: v2-bob 1.6s ease-in-out infinite; }
+@keyframes v2-bob { 50% { translate: 0 -4px; } }
 .v2-journal-btn { position: fixed; top: 14px; right: 208px; z-index: 3; font: inherit; font-size: 13px; padding: 8px 12px; border-radius: 10px; border: 0; background: rgba(250, 247, 238, 0.92); box-shadow: 0 4px 16px rgba(30, 40, 30, 0.18); cursor: pointer; }
 .v2-fish-go[hidden], .v2-journal-btn[hidden], .v2-fish[hidden], .v2-catch[hidden], .v2-journal[hidden], .v2-fish-meter[hidden] { display: none; }
 .v2-fish { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 3; width: min(460px, calc(100vw - 32px)); box-sizing: border-box; padding: 10px 12px 12px; border-radius: 16px; background: rgba(251, 248, 238, 0.93); box-shadow: 0 8px 28px rgba(30, 40, 30, 0.22); display: grid; gap: 8px; touch-action: none; user-select: none; }
@@ -108,3 +111,12 @@ body[data-mode="flying"] .v2-panel { display: none; }
 .v2-journal table { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 13px; }
 .v2-journal caption { text-align: left; font-weight: 650; padding-bottom: 4px; }
 .v2-journal td { padding: 4px 6px; border-top: 1px solid #e4dbc3; }
+
+/* ---- the other activities share the fishing panel's look */
+.v2-fish-row button[hidden], .v2-fish-small button[hidden] { display: none; }
+.v2-fish[data-walking] { top: 64px; bottom: auto; }
+.v2-toast { position: fixed; left: 50%; top: 24%; transform: translateX(-50%); z-index: 4; margin: 0; padding: 10px 16px; border-radius: 14px; background: rgba(251, 246, 230, 0.95); box-shadow: 0 8px 24px rgba(40, 30, 10, 0.25); font-size: 15px; text-align: center; max-width: calc(100vw - 32px); animation: v2-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1); }
+.v2-toast[hidden] { display: none; }
+.v2-diary-title { margin: 18px 0 8px; font-size: 18px; }
+.v2-diary-icon { font-size: 30px; line-height: 1.2; }
+.v2-diary .v2-journal-unknown .v2-diary-icon { filter: grayscale(1) opacity(0.45); }

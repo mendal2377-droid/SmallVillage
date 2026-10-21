@@ -11,6 +11,7 @@ import {createGlider} from './glide.js';
 import {createLanding} from './landing.js';
 import {loadCreatures, createLife, createFollowCamera} from './creatures.js';
 import {createFishing} from './fishing.js';
+import {createActivities} from './activities.js';
 import './v2.css';
 
 // ---------------------------------------------------------------- quality tiers
@@ -67,7 +68,7 @@ const pad = document.getElementById('v2-pad');
 const player = new THREE.PerspectiveCamera(64, 1, 0.04, 9000);  // the child's eyes, driven by the walk controller
 const walk = createWalkController(player, renderer.domElement, (on) => {
   controls.enabled = !on;
-  if (on) life?.start(); else { fishing?.stop(); life?.stop(); }
+  if (on) life?.start(); else { fishing?.stop(); acts?.stop(); life?.stop(); }
   personBtn.hidden = !on;
   walkBtn.textContent = on ? 'Orbit' : 'Walk';
   host.dataset.navigationMode = on ? 'walk' : 'orbit';
@@ -122,9 +123,9 @@ function setFirstPerson(on) {
 }
 function viewCamera(dt, snap = false) {
   if (!walk.enabled || !life) return;
-  if (fishing?.active) {  // the activity frames its own shots; the child is always in view
+  if (fishing?.active || acts?.ownsCamera) {  // the activity frames its own shots; the child is always in view
     life.child.root.visible = true;
-    fishing.updateCamera(camera, dt);
+    if (fishing.active) fishing.updateCamera(camera, dt); else acts.updateCamera(camera, dt);
     return;
   }
   if (life.firstPerson) {
@@ -136,10 +137,10 @@ function viewCamera(dt, snap = false) {
   }
 }
 personBtn.addEventListener('click', () => setFirstPerson(!life.firstPerson));
-addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled && !fishing?.active) setFirstPerson(!life.firstPerson); });
+addEventListener('keydown', (e) => { if (e.code === 'KeyV' && walk.enabled && !fishing?.active && !acts?.ownsCamera) setFirstPerson(!life.firstPerson); });
 
 // ---------------------------------------------------------------- load and UI
-let village, sky, crops, life, fishing;
+let village, sky, crops, life, fishing, acts;
 const t0 = performance.now();
 status.textContent = 'Opening the village…';
 try {
@@ -155,7 +156,10 @@ follow = createFollowCamera(camera, walk);
 life = createLife({scene, templates, walk, player, data: village.data, getMonth: () => Number(monthSel.value)});
 setFirstPerson(false);
 fishing = createFishing({scene, camera, walk, player, life, village,
-  getMonth: () => Number(monthSel.value), getSky: () => presetSel.value});
+  getMonth: () => Number(monthSel.value), getSky: () => presetSel.value, busy: () => Boolean(acts?.active)});
+acts = createActivities({scene, camera, walk, player, life, village, crops, fishing,
+  getMonth: () => Number(monthSel.value), getSky: () => presetSel.value,
+  onStop: () => { if (walk.enabled) setFirstPerson(life.firstPerson); }});
 const endFishing = fishing.stop;
 fishing.stop = () => { endFishing(); if (walk.enabled) setFirstPerson(life.firstPerson); };
 
@@ -274,13 +278,14 @@ function updateCrops() {
 // test and debugging hook: render one frame on demand (the loop pauses while the page is hidden)
 window.__sv2 = {
   renderer, scene, camera, player, village, walk, crops, goView, startWalking, QUALITY, glider, landing, land, backToMap,
-  life: () => life, setFirstPerson, fishing: () => fishing,
+  life: () => life, setFirstPerson, fishing: () => fishing, acts: () => acts,
   setMonth: (m) => { monthSel.value = String(m); applyMonth(); },
   setSky: (n) => { presetSel.value = n; applySky(); },
   setQuality: (q) => { qualitySel.value = q; applyQuality(); },
   step(dt = 1 / 60) {
     fishing.update(dt);
-    const sdt = dt * fishing.timeScale;
+    acts.update(dt);
+    const sdt = dt * fishing.timeScale * acts.timeScale;
     if (glider.active) glider.update(dt); else { walk.update(dt); viewCamera(dt); }
     life.update(sdt, performance.now() / 1000);
   },
@@ -305,7 +310,8 @@ renderer.setAnimationLoop(() => {
   timer.update();
   const dt = Math.min(timer.getDelta(), 0.1);
   fishing.update(dt);
-  const sdt = dt * fishing.timeScale;  // slow motion while a fish leaps
+  acts.update(dt);
+  const sdt = dt * fishing.timeScale * acts.timeScale;  // slow motion while a fish leaps
   toonUniforms.uTime.value += sdt;
   if (glider.active) glider.update(dt);
   else if (walk.enabled) { walk.update(dt); viewCamera(dt); }
